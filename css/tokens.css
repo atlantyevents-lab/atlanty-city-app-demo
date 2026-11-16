@@ -1,0 +1,210 @@
+/* Атланты Сити Зима 2027, версия инверсии. Токены в три уровня.
+   1 уровень --raw-*: только значения (цвета, длительности, шрифты).
+   2 уровень роли (--bg, --surface, --ink, --accent-*, --plate, --grad-*, --cover ...): общие имена, значения назначает тема.
+   3 уровень тема: :root[data-theme="winter"] (по умолчанию, светлая: бело-оранжевая) и :root[data-theme="summer"] (тёмная: чёрно-оранжевая, как v1).
+   Компоненты используют только роли. Замеры по эталонам: brand_kit/inversion_ref/PALETTE.md.
+   Зима: образец арт-директора (светлый фон, оранжевые рамки, градиентные карточки). Лето: v1 (чёрный #020202, оранжевый #FD5000). */
+
+/* ---------- шрифты ---------- */
+@font-face { font-family: 'Bebas'; font-weight: 400; font-display: swap; src: url('../assets/fonts/BebasNeue-Regular.woff') format('woff'); }
+@font-face { font-family: 'Bebas'; font-weight: 700; font-display: swap; src: url('../assets/fonts/BebasNeue-Bold.woff') format('woff'); }
+@font-face { font-family: 'Raleway Local'; font-weight: 400; font-display: swap; src: url('../assets/fonts/Raleway-Regular.woff') format('woff'); }
+@font-face { font-family: 'Raleway Local'; font-weight: 600; font-display: swap; src: url('../assets/fonts/Raleway-SemiBold.woff') format('woff'); }
+@font-face { font-family: 'Raleway Local'; font-weight: 700; font-display: swap; src: url('../assets/fonts/Raleway-Bold.woff') format('woff'); }
+
+/* ---------- уровень 1: примитивы ---------- */
+:root {
+  /* общие */
+  --raw-black-000: #000000;
+  --raw-white: #ffffff;
+  --raw-orange-500: #fd5000;          /* бренд */
+  --raw-orange-400: #ff6a22;
+  --raw-orange-300: #ff9255;
+  --raw-orange-edge: #ee4a0c;         /* рамки зимы: замер #E24007 .. #F15518 */
+  --raw-orange-ink: #be3800;          /* мелкий оранжевый текст на светлом, AA */
+  --raw-orange-display: #e24000;      /* крупный оранжевый текст на светлом (от 24 px), 3:1 и выше */
+  --raw-orange-plate: #c93e00;        /* плашки с белым текстом, AA */
+  --raw-orange-deep-1: #c73d04;       /* ПЕРВЫЙ КЛАСС, верх */
+  --raw-orange-deep-2: #8f2600;       /* ПЕРВЫЙ КЛАСС, низ */
+  --raw-orange-deep-3: #8f2900;       /* наведение на светлом */
+  /* зима: светлые */
+  --raw-paper-100: #f4f2ef;
+  --raw-paper-000: #ffffff;
+  --raw-peach-100: #ffefe4;
+  --raw-peach-200: #ffe3d2;
+  --raw-ink-900: #1b1512;
+  --raw-ink-600: #5b4f48;
+  --raw-shade-900: #1a0d06;           /* затемнение фото под белый текст */
+  /* лето: тёмные (v1) */
+  --raw-black-1000: #020202;
+  --raw-ember-900: #0d0602;
+  --raw-ember-800: #160a04;
+  --raw-ember-600: #5a1c00;
+  --raw-orange-200: #ff8a3d;
+  --raw-orange-100: #ffc9a8;
+  --raw-sand-300: #d8c2b2;
+  --raw-spark: 255, 150, 70;
+  --raw-ms-season: 600ms;
+  --raw-ease-out: cubic-bezier(.22, .8, .2, 1);
+  --raw-ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+  --raw-font-display: 'Bebas', 'Arial Narrow', Impact, sans-serif;
+  --raw-font-text: 'Raleway', 'Raleway Local', 'Segoe UI', Arial, sans-serif;
+  --raw-font-accent: 'Noto Serif', Georgia, serif;
+  --raw-radius-card: 20px;
+  --raw-radius-pill: 999px;
+  --raw-grid: 1200px;
+  --raw-gutter: 35px;
+}
+
+/* ---------- уровни 2 и 3: роли и темы ---------- */
+/* Зима: светлая, бело-оранжевая (по умолчанию) */
+:root, :root[data-theme="winter"] {
+  color-scheme: light;
+  --bg: var(--raw-paper-100);
+  --surface: var(--raw-paper-000);
+  --surface-2: var(--raw-peach-100);
+  --card: var(--raw-paper-000);            /* белая карточка */
+  --ink: var(--raw-ink-900);
+  --ink-dim: var(--raw-ink-600);
+  --accent: var(--raw-orange-500);         /* заливки, декор */
+  --accent-solid: var(--raw-orange-500);   /* кнопки, плашки, табы */
+  --accent-ink: var(--raw-black-000);      /* текст на заливке --accent-solid: чёрный, 6,3:1 */
+  --accent-edge: var(--raw-orange-edge);   /* оранжевая рамка карточек */
+  --accent-text: var(--raw-orange-ink);    /* мелкий оранжевый текст */
+  --accent-display: var(--raw-orange-display); /* крупный оранжевый текст */
+  --plate: var(--raw-orange-plate);        /* плашки визуализации с белым текстом */
+  --plate-ink: var(--raw-white);
+  --edge: var(--raw-orange-edge);
+  --topo: var(--raw-orange-500);
+  --topo-alpha: .3;
+  --pict-mul: 1.6;
+  --hover: var(--raw-orange-deep-3);
+  --focus: var(--raw-ink-900);
+  --band: var(--raw-orange-500);
+  --band-ink: var(--raw-ink-900);
+  --glow-a: var(--raw-orange-500);
+  --glow-b: var(--raw-peach-200);
+  --line: rgba(27, 21, 18, .14);
+  --brand: var(--raw-orange-ink);          /* подписи в скобках: Noto Serif, оранжевый, AA */
+  --pict: var(--raw-orange-500);
+  --pict-alpha: .9;
+  --grid-alpha: .12;
+  --grid-filter: invert(1) brightness(.4) sepia(1) hue-rotate(-15deg) saturate(4);
+  /* градиентные карточки тарифов (образец: БИЗНЕС оранжевый, ПЕРВЫЙ КЛАСС тёмнее) */
+  --grad-biz: linear-gradient(180deg, var(--raw-orange-300) 0%, var(--raw-orange-500) 100%);
+  --grad-biz-ink: var(--raw-ink-900);
+  --grad-fc: linear-gradient(180deg, var(--raw-orange-deep-1) 0%, var(--raw-orange-deep-2) 100%);
+  --grad-fc-ink: var(--raw-white);
+  --grad-opt: linear-gradient(180deg, var(--raw-paper-000) 0%, var(--raw-peach-100) 100%);
+  --grad-tile: var(--grad-opt);              /* плитки цифр: белые с контурными формами, как на образце */
+  --grad-tile-ink: var(--raw-ink-900);
+  --grad-tile-val: var(--raw-orange-display);
+  --tile-line: var(--raw-orange-edge);
+  --grad-band: linear-gradient(135deg, var(--raw-orange-300) 0%, var(--raw-orange-500) 70%);
+  --grad-consult: linear-gradient(135deg, var(--raw-orange-500) 0%, var(--raw-orange-400) 100%);
+  --grad-spk: linear-gradient(180deg, var(--raw-paper-000) 0%, var(--raw-peach-200) 100%);
+  /* поверхности, которые остаются тёмными на любой теме: крышка боли, плитки логотипов, затемнение фото */
+  --cover: var(--raw-ink-900);
+  --cover-ink: var(--raw-white);
+  --cover-dim: #dccdc3;
+  --shade: var(--raw-shade-900);
+  --shade-ink: var(--raw-white);
+  --tile-dark: var(--raw-ink-900);
+  --dlg-bg: var(--raw-paper-000);
+  --scrim: rgba(27, 21, 18, .55);
+  --hero-glow: color-mix(in srgb, var(--raw-orange-500) 26%, transparent);
+  --hero-shade: color-mix(in srgb, var(--raw-paper-100) 74%, transparent);
+  --foot-bg: linear-gradient(180deg, var(--raw-paper-100) 0%, var(--raw-peach-200) 100%);
+  --header-bg: color-mix(in srgb, var(--raw-paper-100) 86%, transparent);
+  --logo-url: url('../assets/svg/logo-full-black.svg');
+  --field-bg: var(--raw-paper-000);
+  --err: #b3261e;
+  --particle: var(--raw-spark);
+  --accent-on-dark: #ff7a3d;               /* оранжевый на тёмных поверхностях (затемнение фото, крышка боли), 6,6:1 на #1B1512 */
+  /* цвета внутри градиентных карточек тарифов: БИЗНЕС (оранжевая) и ПЕРВЫЙ КЛАСС (тёмно-оранжевая) */
+  --biz-price: var(--raw-ink-900); --biz-dim: #3a2a22; --biz-star: var(--raw-ink-900); --biz-btn-bg: var(--raw-white); --biz-btn-ink: var(--raw-orange-ink); --biz-line: rgba(27, 21, 18, .35);
+  --fc-price: var(--raw-white); --fc-dim: #f3dccf; --fc-star: #ffd2b8; --fc-btn-bg: var(--raw-white); --fc-btn-ink: var(--raw-orange-deep-2); --fc-line: rgba(255, 255, 255, .4);
+}
+/* Лето: тёмная, чёрно-оранжевая (значения v1) */
+:root[data-theme="summer"] {
+  color-scheme: dark;
+  --bg: var(--raw-black-1000);
+  --surface: var(--raw-ember-900);
+  --surface-2: var(--raw-ember-800);
+  --card: var(--raw-ember-900);
+  --ink: var(--raw-white);
+  --ink-dim: var(--raw-sand-300);
+  --accent: var(--raw-orange-500);
+  --accent-solid: var(--raw-orange-500);
+  --accent-ink: var(--raw-black-000);
+  --accent-edge: var(--raw-orange-400);
+  --accent-text: var(--raw-orange-500);
+  --accent-display: var(--raw-orange-500);
+  --plate: var(--raw-orange-500);
+  --plate-ink: var(--raw-black-000);
+  --edge: var(--raw-orange-400);
+  --topo: var(--raw-orange-200);
+  --topo-alpha: .45;
+  --hover: var(--raw-orange-300);
+  --focus: var(--raw-orange-100);
+  --band: var(--raw-orange-500);
+  --band-ink: var(--raw-black-000);
+  --glow-a: var(--raw-orange-400);
+  --glow-b: var(--raw-ember-600);
+  --line: rgba(255, 255, 255, .16);
+  --brand: var(--raw-orange-500);
+  --pict: var(--raw-orange-500);
+  --pict-mul: 1;
+  --grid-alpha: .26;
+  --grid-filter: none;
+  --grad-biz: linear-gradient(180deg, #2a1204 0%, #0d0602 62%, #020202 100%);
+  --grad-biz-ink: var(--raw-white);
+  --grad-fc: linear-gradient(180deg, #3a1706 0%, #120803 62%, #020202 100%);
+  --grad-fc-ink: var(--raw-white);
+  --grad-opt: linear-gradient(180deg, #2a1204 0%, #0d0602 62%, #020202 100%);
+  --grad-tile: var(--raw-orange-500);
+  --grad-tile-ink: var(--raw-black-000);
+  --grad-tile-val: var(--raw-black-000);
+  --tile-line: rgba(0, 0, 0, .3);
+  --grad-band: var(--raw-orange-500);
+  --grad-consult: var(--raw-orange-500);
+  --grad-spk: #000000;
+  --cover: #000000;
+  --cover-ink: var(--raw-white);
+  --cover-dim: var(--raw-sand-300);
+  --shade: #020202;
+  --shade-ink: var(--raw-white);
+  --tile-dark: var(--raw-ember-900);
+  --dlg-bg: #000000;
+  --scrim: rgba(0, 0, 0, .72);
+  --hero-glow: color-mix(in srgb, var(--raw-orange-400) 46%, transparent);
+  --hero-shade: color-mix(in srgb, var(--raw-black-1000) 62%, transparent);
+  --foot-bg: radial-gradient(120% 90% at 50% 130%, color-mix(in srgb, var(--raw-orange-400) 62%, #000) 0%, transparent 62%), linear-gradient(180deg, var(--raw-black-1000) 0%, #000 100%);
+  --header-bg: color-mix(in srgb, var(--raw-black-1000) 78%, transparent);
+  --logo-url: url('../assets/svg/logo-full-white.svg');
+  --field-bg: var(--raw-ember-900);
+  --err: #ff8f8f;
+  --accent-on-dark: var(--raw-orange-500);
+  --biz-price: var(--raw-orange-500); --biz-dim: var(--raw-sand-300); --biz-star: var(--raw-orange-500); --biz-btn-bg: var(--raw-orange-500); --biz-btn-ink: var(--raw-black-000); --biz-line: var(--line);
+  --fc-price: var(--raw-orange-500); --fc-dim: var(--raw-sand-300); --fc-star: var(--raw-orange-500); --fc-btn-bg: var(--raw-orange-500); --fc-btn-ink: var(--raw-black-000); --fc-line: var(--line);
+}
+
+/* Роли, общие для тем: оранжевый связывает Зиму и Лето */
+:root {
+  --cta: var(--raw-orange-500);
+  --cta-hover: var(--raw-orange-400);
+  --cta-ink: var(--raw-black-000);
+  --font-display: var(--raw-font-display);
+  --font-text: var(--raw-font-text);
+  --font-accent: var(--raw-font-accent);
+  --radius: var(--raw-radius-card);
+  --ease: var(--raw-ease-out);
+  --spring: var(--raw-ease-spring);
+  --stage: var(--raw-grid);
+  --gutter: var(--raw-gutter);
+  --header-h: 64px;
+}
+
+@media (max-width: 640px) {
+  :root { --gutter: 16px; --header-h: 56px; }
+}

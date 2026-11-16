@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="summer">
+<head>
+<meta name=\"robots\" content=\"noindex,nofollow\">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Демо экранов · Атланты Сити. Зима 2027</title>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div id="app"></div>
+<script src="data/fixtures.js"></script>
+<script src="js/core.js"></script>
+<script src="js/screens/A.js"></script>
+<script src="js/screens/B.js"></script>
+<script src="js/screens/C.js"></script>
+<script src="js/screens/D.js"></script>
+<script src="js/screens/E.js"></script>
+<script src="js/screens/F.js"></script>
+<script src="js/screens/G.js"></script>
+<script src="js/screens/H.js"></script>
+<script src="js/screens/I.js"></script>
+<script src="js/screens/J.js"></script>
+<script src="js/screens/K.js"></script>
+<script src="js/screens/L.js"></script>
+<script src="js/screens/M.js"></script>
+<script src="js/screens/N.js"></script>
+<script src="js/screens/O.js"></script>
+<script src="js/screens/P.js"></script>
+<script>
+  /* подгонка рамки рабочего стола под доступное место */
+  function fitDesk() {
+    var f = document.querySelector('.frame.desk');
+    if (!f) return;
+    var stage = f.closest('.stage');
+    if (!stage) return;
+    var s = Math.min(1, (stage.clientWidth - 40) / 1440, (stage.clientHeight - 60) / 900);
+    f.style.transform = 'scale(' + s + ')';
+  }
+  window.addEventListener('resize', fitDesk);
+  new MutationObserver(fitDesk).observe(document.getElementById('app'), { childList: true, subtree: false });
+</script>
+</body>
+</html>
