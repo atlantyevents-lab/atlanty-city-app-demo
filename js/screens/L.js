@@ -1,7 +1,7 @@
 /* Блок L — билет и кабинет. Фаза A: L1 «Билет». */
 (function () {
   const D = window.Demo, F = window.FIX;
-  const { esc, icon, paren, tag, tariffTag } = D;
+  const { esc, icon, paren, tag, tariffTag, avatar } = D;
 
   /* код-нативный узор QR: декоративный, не сканируется */
   function qrSVG(seed, px) {
@@ -55,12 +55,7 @@
       const tkRow = (k, v) => '<div class="tk-row"><span class="k">' + k + '</span><span>' + v + '</span></div>';
 
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<div class="eyebrow">Ваш документ</div>' +
-        '<h1>Билет</h1>' +
-        '<div class="sub">' + esc(ME.edition) + ' · ' + tariffTag(ME.tariff) + '</div>' +
-        '</div><button class="icon-btn' + (standby ? ' on' : '') + '" data-act="l1-stand" aria-label="Показать на стойке" aria-pressed="' + standby + '">' + icon('scan') + '</button></div>' +
-        '</div>' +
+        D.head({back:'B1', eyebrow:'Ваш документ', title:'Билет', sub:esc(ME.edition) + ' · ' + tariffTag(ME.tariff), actions:'<button class="icon-btn' + (standby ? ' on' : '') + '" data-act="l1-stand" aria-label="Показать на стойке" aria-pressed="' + standby + '">' + icon('scan') + '</button>'}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
 
         (standby ? '<div class="banner ok">' + icon('check') + '<div><div class="b-title">Режим «на стойке»</div><div class="cap">Экран не гаснет, яркость максимальная. Покажите QR сотруднику.</div></div></div>' : '') +
@@ -129,12 +124,7 @@
     html(ctx) {
       const ME = F.ME, B = F.BOOKING_PAY;
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="L1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Билет</div><h1>Приглашение</h1>' +
-        '<div class="sub">PDF-документ для печати и пересылки</div></div></div>' +
-        '</div>' +
-        paren('документ формируется из вашего билета') +
+        D.head({back:'L1', eyebrow:'Билет', title:'Приглашение', sub:'PDF-документ для печати и пересылки', paren:paren('документ формируется из вашего билета')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="doc"><div class="doc-kicker">Атланты Сити · Зима 2027</div>' +
         '<div class="doc-title">Приглашение на фестиваль</div>' +
@@ -177,13 +167,7 @@
       const B = F.BOOKING_PAY;
       const line = (l, v, strong) => '<div class="row" style="padding:8px 0"><div class="grow' + (strong ? '' : '') + '"><div class="' + (strong ? 'r-title' : 'r-sub') + '">' + esc(l) + '</div></div><div class="' + (strong ? 'r-title' : 'r-sub') + '">' + esc(v) + '</div></div>';
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="L1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Билет</div><h1>Оплата</h1>' +
-        '<div class="sub">заказ на проживание и участие</div></div>' +
-        tag('оплачено', 'ok') + '</div>' +
-        '</div>' +
-        paren('данные платежа зафиксированы') +
+        D.head({back:'L1', eyebrow:'Билет', title:'Оплата', sub:'заказ на проживание и участие', paren:paren('данные платежа зафиксированы')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card">' +
         line('Даты', B.dates) + line('Ночей', B.nights) + line('Место', B.place) + line('Гости', B.guests) +
@@ -223,12 +207,7 @@
       const h = F.HOTEL_BOOKING;
       const row = (l, v) => '<div class="row"><div class="grow"><div class="r-sub">' + esc(l) + '</div></div><div class="r-sub" style="text-align:right">' + esc(v) + '</div></div>';
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="L1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Билет</div><h1>Проживание</h1>' +
-        '<div class="sub">' + esc(h.hotel) + '</div></div></div>' +
-        '</div>' +
-        paren('изменения — через организатора') +
+        D.head({back:'L1', eyebrow:'Билет', title:'Проживание', sub:esc(h.hotel), paren:paren('изменения — через организатора')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card">' + tag('бронь подтверждена', 'ok') +
         '<div style="margin-top:8px">' + row('Даты', h.dates) + row('Номер', h.room) +
@@ -272,12 +251,7 @@
         '<label class="toggle-row"><div class="tr-title" style="font-weight:500;font-size:14px">' + esc(c) + '</div>' +
         '<span class="toggle"><input type="checkbox" checked><span class="tr"></span></span></label>').join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="L1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Кабинет</div><h1>Семья и команда</h1>' +
-        '<div class="sub">спутник, дети, согласия</div></div></div>' +
-        '</div>' +
-        paren('данные детей — только для программ') +
+        D.head({back:'L1', eyebrow:'Кабинет', title:'Семья и команда', sub:'спутник, дети, согласия', paren:paren('данные детей — только для программ')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card"><div class="cap" style="margin-bottom:6px">Спутник</div>' +
         '<div class="r-title">' + esc(fm.satellite) + ' · ' + esc(fm.satelliteRole) + '</div>' +
@@ -323,12 +297,7 @@
         '<div class="tr-sub">' + esc(v) + '</div></div>' +
         '<span class="toggle"><input type="checkbox" checked><span class="tr"></span></span></label>').join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="L1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Кабинет</div><h1>Приватность</h1>' +
-        '<div class="sub">согласия, данные, удаление</div></div></div>' +
-        '</div>' +
-        paren('выгрузка и удаление — по вашему запросу') +
+        D.head({back:'L1', eyebrow:'Кабинет', title:'Приватность', sub:'согласия, данные, удаление', paren:paren('выгрузка и удаление — по вашему запросу')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card">' + rows + '</div>' +
         '<button class="btn btn-secondary btn-block" data-act="l6-export">' + icon('download') + 'Выгрузить мои данные</button>' +
@@ -376,12 +345,7 @@
           visOpts.map(o => '<option' + (o === v ? ' selected' : '') + '>' + esc(o) + '</option>').join('') + '</select></div>';
       }).join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="L1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Кабинет</div><h1>Профиль</h1>' +
-        '<div class="sub">поля и их видимость</div></div></div>' +
-        '</div>' +
-        paren('видимость решаете вы для каждого поля') +
+        D.head({back:'L1', eyebrow:'Кабинет', title:'Профиль', sub:'поля и их видимость', paren:paren('видимость решаете вы для каждого поля')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card" style="padding:4px 14px">' + rows + '</div>' +
         '<div class="banner">' + icon('info') + '<div class="cap">«Только для подбора» — поле помогает находить совпадения, но не показывается другим участникам.</div></div>' +
@@ -397,4 +361,47 @@
     }
   });
   D.action('l7-save', () => D.toast('Профиль сохранён'));
+
+  /* ---------- L0 Кабинет ---------- */
+  D.register('L0', {
+    tab: null,
+    meta: {
+      title: 'L0 · Кабинет',
+      role: 'Гость, личный раздел',
+      fr: ['FR-TKT-01'],
+      ac: ['AC-TKT-01'],
+      what: [
+        'Профиль участника: имя, компания, тариф, бейдж.',
+        'Меню кабинета: билет, оплата, проживание, семья, приватность, профиль.',
+        'Кабинет доступен из аватара в строке приложения на любом экране.'
+      ],
+      rules: ['Кабинет — не раздел нижней панели: вход через аватар в шапке.',
+        'Данные профиля — вымышленные, как во всех экранах демо.']
+    },
+    html(ctx) {
+      const ME = F.ME;
+      const items = [
+        ['L1', 'Билет', 'Документ, QR и условия тарифа'],
+        ['L2', 'Приглашение PDF', 'Печать и пересылка'],
+        ['L3', 'Оплата', 'Заказы и чеки'],
+        ['L4', 'Проживание', 'Отель и номер'],
+        ['L5', 'Семья и команда', 'Спутник, дети, согласия'],
+        ['L6', 'Приватность', 'Согласия и данные'],
+        ['L7', 'Профиль', 'Поля и их видимость']
+      ];
+      const rows = items.map(it =>
+        '<button class="row clickable" data-go="' + it[0] + '"><div class="grow">' +
+        '<div class="r-title">' + it[1] + '</div><div class="r-sub">' + it[2] + '</div></div>' + icon('chevR') + '</button>').join('');
+      return '<div class="scr">' +
+        D.head({eyebrow:'Кабинет', title:esc(ME.name), sub:esc(ME.company) + ' · тариф ' + esc(ME.tariff) + ' · ' + esc(ME.edition), paren:paren('личный раздел — вход через аватар в шапке')}) +
+        '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
+        '<div class="card" style="display:flex;align-items:center;gap:14px">' + avatar(ME.name, 'l accent') +
+        '<div class="grow"><div class="r-title" style="font-size:16px">' + esc(ME.name) + '</div>' +
+        '<div class="r-sub">' + esc(ME.patronymic) + '</div>' +
+        '<div class="sess-meta" style="margin-top:6px">' + tariffTag(ME.tariff) + '<span class="cap">' + esc(ME.memberSince) + '</span></div></div></div>' +
+        '<div class="card" style="padding:2px 16px"><div class="list">' + rows + '</div></div>' +
+        '<div class="cap" style="text-align:center">кабинет экспонента — в разделе Экспо, после выбора компании</div>' +
+        '<div style="height:16px"></div></div></div>';
+    }
+  });
 })();

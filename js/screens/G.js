@@ -24,7 +24,7 @@
 
   /* ---------- G1 Хаб встреч ---------- */
   D.register('G1', {
-    tab: 'H1',
+    tab: 'F1',
     meta: {
       title: 'G1 · Встречи',
       role: 'Гость / участник',
@@ -51,13 +51,12 @@
         '<div class="r-sub">' + esc(m.time) + ' · ' + esc(m.space) + '</div></div>' +
         '<span class="mc-status ' + (m.status === 'confirmed' ? 'ok' : 'wait') + '">' + (m.status === 'confirmed' ? 'подтверждена' : 'ждёт') + '</span>' + icon('chevR') + '</div>').join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="B1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">' + esc(F.NOW.dateLong) + '</div><h1>Встречи</h1>' +
-        '<div class="sub">Окна, заявки, договорённости</div></div>' +
-        '<button class="icon-btn" data-go="G2" aria-label="Выбрать окно">' + icon('route') + '</button></div>' +
-        '</div>' +
-        paren('окна по 30 минут · 11:30–17:30') +
+        D.head({eyebrow:esc(F.NOW.dateLong), title:'Встречи', sub:'Окна, заявки, договорённости',
+          actions:'<button class="icon-btn" data-go="G2" aria-label="Выбрать окно">' + icon('route') + '</button>' +
+          '<button class="icon-btn" data-go="F7" aria-label="Визитка">' + icon('qr') + '</button>' +
+          '<button class="icon-btn" data-go="F4" aria-label="Заявки">' + icon('inbox') + '<span class="ibadge">' + F.INCOMING_REQS.filter(r => r.status === 'new').length + '</span></button>',
+          paren:paren('окна по 30 минут · 11:30–17:30')}) +
+        D.segbar([['F1', 'Участники'], ['F9', 'Спикеры'], ['G1', 'Встречи']], 'G1') +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
         '<div class="card" style="flex-direction:row;gap:10px">' +
         '<div class="kpi-cell"><div class="k">Встречи</div><div class="v">' + mine.length + '</div></div>' +
@@ -69,7 +68,7 @@
         '<div class="grid-2">' +
         '<button class="card interactive" data-go="G2"><div class="card-row">' + icon('clock') + '<b style="font-size:14px">Окна встреч</b></div><div class="cap">свободное время и места</div></button>' +
         '<button class="card interactive" data-go="F4"><div class="card-row">' + icon('bell') + '<b style="font-size:14px">Заявки</b></div><div class="cap">' + incoming + ' новых входящих</div></button>' +
-        '<button class="card interactive" data-go="G10"><div class="card-row">' + icon('star') + '<b style="font-size:14px">Приглашённый покупатель</b></div><div class="cap"> Hosted Buyer: ранние окна</div></button>' +
+        '<button class="card interactive" data-go="G10"><div class="card-row">' + icon('star') + '<b style="font-size:14px">Приглашённый покупатель</b></div><div class="cap"> Hosted Buyer: обязательство 20 встреч</div></button>' +
         '<button class="card interactive" data-go="G9"><div class="card-row">' + icon('check') + '<b style="font-size:14px">Договорённости</b></div><div class="cap">что договорились после встреч</div></button>' +
         '</div>' +
         '<div style="height:16px"></div></div></div>';
@@ -78,7 +77,7 @@
 
   /* ---------- G2 Выбор окна ---------- */
   D.register('G2', {
-    tab: 'H1',
+    tab: 'F1',
     meta: {
       title: 'G2 · Выбор окна',
       role: 'Гость / участник встречи',
@@ -94,9 +93,10 @@
         'Окна по 30 минут в интервале дня; занятость — демо-раскладка из фикстур.',
         'Удержание выбранного окна — 120 секунд; по истечении окно освобождается.',
         'Лимиты: входящих встреч в день не более 4, исходящих ожидающих — не более 5 (параметры).',
-        'Жёсткий конфликт двух подтверждённых встреч невозможен; мягкий — предупреждение о запасе времени на переход.'
+        'Жёсткий конфликт двух подтверждённых встреч невозможен; мягкий — предупреждение о запасе времени на переход.',
+        'К покупателю с бейджем Hosted Buyer записывается участник со своим продуктом.'
       ],
-      depends: ['D-07', 'параметры MEET', 'матрица переездов']
+      depends: ['D-07', 'D-25', 'параметры MEET', 'матрица переездов']
     },
     html(ctx) {
       const st = ctx.state;
@@ -138,14 +138,7 @@
       }
 
       return '<div class="scr">' +
-        '<div class="scr-head topo-host">' + D.topo() + '<div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="G1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div></div>' +
-        '<div class="eyebrow">' + (p ? 'встреча с ' + esc(p.name) : 'встречи') + '</div>' +
-        '<h1>Выбор окна</h1>' +
-        '<div class="sub">' + esc(F.NOW.dateLong) + ' · ' + esc(space.name) + ' · ' + esc(space.place) + ' · до ' + space.cap + ' человек</div>' +
-        '</div>' +
-        paren('окно удерживается 2 минуты — не откладывайте заявку') +
+        D.head({back:'G1', eyebrow:(p ? 'встреча с ' + esc(p.name) : 'встречи'), title:'Выбор окна', sub:esc(F.NOW.dateLong) + ' · ' + esc(space.name) + ' · ' + esc(space.place) + ' · до ' + space.cap + ' ' + D.plural(space.cap, ['человека', 'человек', 'человек']), paren:paren('окно удерживается 2 минуты — не откладывайте заявку'), topo:1}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
         (p ? '<div class="card" style="flex-direction:row;align-items:center;gap:12px;padding:12px 14px">' + avatar(p.name, 'sm') +
           '<div class="grow"><div class="r-title" style="font-size:14px">' + esc(p.name) + '</div><div class="r-sub">' + esc(p.company) + ' · ' + esc(p.role) + '</div></div>' + tag(p.tariff, 'tariff') + '</div>' : '') +
@@ -199,7 +192,7 @@
 
   /* ---------- G3 Заявка на встречу ---------- */
   D.register('G3', {
-    tab: 'H1',
+    tab: 'F1',
     meta: {
       title: 'G3 · Заявка на встречу',
       role: 'Гость / участник',
@@ -233,30 +226,20 @@
         '<button class="chip' + (i === st.win ? ' on' : '') + '" data-act="g3-win" data-arg="' + i + '">' + esc(s) + '</button>').join('');
 
       if (st.sent) {
-        return '<div class="scr"><div class="scr-head"><div class="head-row"><div>' +
-          '<button class="icon-btn" data-go="G1" aria-label="Назад">' + icon('back') + '</button>' +
-          '<div style="margin-top:10px"><div class="eyebrow">Заявка отправлена</div>' +
-          '<h1>Ждём подтверждения</h1>' +
-          '<div class="sub">' + esc(R.addressee) + ' · ' + esc(R.spaces) + '</div></div>' +
-          '</div></div>' +
-          paren('окно удержано за вами до ответа') +
-          '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
-          '<div class="card"><div class="cap" style="margin-bottom:4px">Детали заявки</div>' +
-          '<div class="r-title">' + esc(R.addressee) + ' · ' + esc(R.rep) + '</div>' +
-          '<div class="cap" style="margin-top:6px">' + winT + '–' + esc(F.fmtTime(toMin(winT) + 30)) + ' · ' + esc(R.spaces) + '</div>' +
-          '<div class="cap" style="margin-top:6px">«' + esc(st.reason) + '»</div></div>' +
-          '<div class="banner">' + icon('clock') + '<div class="cap">Подтверждение обычно занимает до 15 минут. Окно удерживается за вами.</div></div>' +
-          '<button class="btn btn-primary btn-block" data-go="G1">К встречам</button>' +
-          '<div style="height:16px"></div></div></div>';
+        return '<div class="scr">' +
+        D.head({back:'G1', eyebrow:'Заявка отправлена', title:'Ждём подтверждения', sub:esc(R.addressee) + ' · ' + esc(R.spaces), paren:paren('окно удержано за вами до ответа')}) +
+        '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
+        '<div class="card"><div class="cap" style="margin-bottom:4px">Детали заявки</div>' +
+        '<div class="r-title">' + esc(R.addressee) + ' · ' + esc(R.rep) + '</div>' +
+        '<div class="cap" style="margin-top:6px">' + winT + '–' + esc(F.fmtTime(toMin(winT) + 30)) + ' · ' + esc(R.spaces) + '</div>' +
+        '<div class="cap" style="margin-top:6px">«' + esc(st.reason) + '»</div></div>' +
+        '<div class="banner">' + icon('clock') + '<div class="cap">Подтверждение обычно занимает до 15 минут. Окно удерживается за вами.</div></div>' +
+        '<button class="btn btn-primary btn-block" data-go="G1">К встречам</button>' +
+        '<div style="height:16px"></div></div></div>';
       }
 
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="G2" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Новая встреча</div><h1>Заявка на встречу</h1>' +
-        '<div class="sub">' + esc(F.NOW.dateLong) + ' · 30 минут</div></div></div>' +
-        '</div>' +
-        paren('адресат увидит вашу причину и цель') +
+        D.head({back:'G2', eyebrow:'Новая встреча', title:'Заявка на встречу', sub:esc(F.NOW.dateLong) + ' · 30 минут', paren:paren('адресат увидит вашу причину и цель')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card"><div class="cap" style="margin-bottom:4px">С кем и где</div>' +
         '<div class="r-title">' + esc(R.addressee) + ' · ' + esc(R.rep) + '</div>' +
@@ -266,7 +249,7 @@
         '<div class="field"><label for="g3-reason">Причина встречи <span class="cap">· обязательно, до 280 знаков</span></label>' +
         '<textarea class="textarea" id="g3-reason" maxlength="280" placeholder="Что хотите обсудить — адресат увидит это вместе с вашей целью">' + esc(st.reason) + '</textarea>' +
         '<div class="counter"><span>' + len + ' / 280</span></div></div>' +
-        '<div class="banner">' + icon('info') + '<div class="cap">У ' + esc(R.addressee) + ' сегодня свободно 2 из 4 окон на стенде. Ваша цель и польза видны адресату.</div></div>' +
+        '<div class="banner">' + icon('info') + '<div class="cap">У ' + esc(R.addressee) + ' сегодня свободно 2 окна из 4 на стенде. Ваша цель и польза видны адресату.</div></div>' +
         '<button class="btn btn-primary btn-block" data-act="g3-send"' + (ok ? '' : ' disabled') + '>Отправить запрос</button>' +
         '<div class="cap" style="text-align:center">' + (ok ? '' : 'заполните причину, чтобы отправить') + '</div>' +
         '<div style="height:16px"></div></div></div>';
@@ -292,7 +275,7 @@
 
   /* ---------- G4 Подтверждённая встреча ---------- */
   D.register('G4', {
-    tab: 'H1',
+    tab: 'F1',
     meta: {
       title: 'G4 · Подтверждённая встреча',
       role: 'Участник встречи',
@@ -317,13 +300,7 @@
       const p = F.person('p03');
       const added = !!st.added;
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="G1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Подтверждена · ' + esc(m.time) + '</div><h1>Встреча</h1>' +
-        '<div class="sub">' + esc(F.NOW.dateLong) + '</div></div>' +
-        '<span class="mc-status ok">ок</span></div>' +
-        '</div>' +
-        paren('источник: после подбора') +
+        D.head({back:'G1', eyebrow:'Подтверждена · ' + esc(m.time), title:'Встреча', sub:esc(F.NOW.dateLong), paren:paren('источник: после подбора')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="meet-card card"><div class="mc-status ok" style="margin-bottom:8px">подтверждена</div>' +
         '<div class="card-title" style="font-size:17px">' + esc(m.with_) + '</div>' +
@@ -359,7 +336,7 @@
 
   /* ---------- G8 Итог встречи ---------- */
   D.register('G8', {
-    tab: 'H1',
+    tab: 'F1',
     meta: {
       title: 'G8 · Итог встречи',
       role: 'Участник после встречи',
@@ -388,57 +365,39 @@
       st.saved = !!st.saved;
 
       if (!st.arrived && !st.saved) {
-        return '<div class="scr"><div class="scr-head"><div class="head-row"><div>' +
-          '<button class="icon-btn" data-go="G1" aria-label="Назад">' + icon('back') + '</button>' +
-          '<div style="margin-top:10px"><div class="eyebrow">Встреча · ' + esc(m.time) + '</div>' +
-          '<h1>Отметьте приход</h1>' +
-          '<div class="sub">' + esc(m.with_) + ' · ' + esc(m.space) + '</div></div>' +
-          '</div></div>' +
-          paren('отметка фиксирует ваше участие') +
-          '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
-          '<div class="card" style="text-align:center;padding:26px 16px">' +
-          '<div style="font-family:var(--font-display);font-size:34px">' + esc(m.time) + '</div>' +
-          '<div class="cap" style="margin-top:6px">' + esc(m.with_) + '</div></div>' +
-          '<button class="btn btn-primary btn-block" data-act="g8-arrive">' + icon('check') + 'Я пришёл на встречу</button>' +
-          '<button class="btn btn-ghost btn-block" data-act="g8-noshow">Не смогу прийти</button>' +
-          '<div style="height:16px"></div></div></div>';
+        return '<div class="scr">' +
+        D.head({back:'G1', eyebrow:'Встреча · ' + esc(m.time), title:'Отметьте приход', sub:esc(m.with_) + ' · ' + esc(m.space), paren:paren('отметка фиксирует ваше участие')}) +
+        '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
+        '<div class="card" style="text-align:center;padding:26px 16px">' +
+        '<div style="font-family:var(--font-display);font-size:34px">' + esc(m.time) + '</div>' +
+        '<div class="cap" style="margin-top:6px">' + esc(m.with_) + '</div></div>' +
+        '<button class="btn btn-primary btn-block" data-act="g8-arrive">' + icon('check') + 'Я пришёл на встречу</button>' +
+        '<button class="btn btn-ghost btn-block" data-act="g8-noshow">Не смогу прийти</button>' +
+        '<div style="height:16px"></div></div></div>';
       }
       if (st.outcome == null) {
-        return '<div class="scr"><div class="scr-head"><div class="head-row"><div>' +
-          '<button class="icon-btn" data-go="G1" aria-label="Назад">' + icon('back') + '</button>' +
-          '<div style="margin-top:10px"><div class="eyebrow">' + esc(m.with_) + '</div>' +
-          '<h1>' + esc(O.q) + '</h1>' +
-          '<div class="sub">' + esc(m.time) + ' · ' + esc(m.space) + '</div></div>' +
-          '</div></div>' +
-          '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
-          '<div class="grid-2">' + O.options.map((o, i) =>
-            '<button class="card interactive" data-act="g8-outcome" data-arg="' + i + '"><div style="font-weight:600;font-size:14.5px;text-align:center">' + esc(o) + '</div></button>').join('') + '</div>' +
-          '<div style="height:16px"></div></div></div>';
+        return '<div class="scr">' +
+        D.head({back:'G1', eyebrow:esc(m.with_), title:esc(O.q), sub:esc(m.time) + ' · ' + esc(m.space)}) +
+        '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
+        '<div class="grid-2">' + O.options.map((o, i) =>
+          '<button class="card interactive" data-act="g8-outcome" data-arg="' + i + '"><div style="font-weight:600;font-size:14.5px;text-align:center">' + esc(o) + '</div></button>').join('') + '</div>' +
+        '<div style="height:16px"></div></div></div>';
       }
       if (st.step == null) {
-        return '<div class="scr"><div class="scr-head"><div class="head-row"><div>' +
-          '<button class="icon-btn" data-act="g8-back" aria-label="Назад">' + icon('back') + '</button>' +
-          '<div style="margin-top:10px"><div class="eyebrow">Следующий шаг</div>' +
-          '<h1>Что дальше?</h1>' +
-          '<div class="sub">Срок: ' + O.dueInDays + ' дня на выполнение</div></div>' +
-          '</div></div>' +
-          '<div style="padding:0 20px;display:flex;flex-direction:column;gap:10px">' +
-          O.nextSteps.map((s, i) =>
-            '<button class="card interactive" data-act="g8-step" data-arg="' + i + '"><div class="card-row">' + icon('chevR') + '<span style="font-weight:600;font-size:14px">' + esc(s) + '</span></div></button>').join('') +
-          '<div style="height:16px"></div></div></div>';
+        return '<div class="scr">' +
+        D.head({backAct:'g8-back', eyebrow:'Следующий шаг', title:'Что дальше?', sub:'Срок: ' + O.dueInDays + ' ' + D.plural(O.dueInDays, ['день', 'дня', 'дней']) + ' на выполнение'}) +
+        '<div style="padding:0 20px;display:flex;flex-direction:column;gap:10px">' +
+        O.nextSteps.map((s, i) =>
+          '<button class="card interactive" data-act="g8-step" data-arg="' + i + '"><div class="card-row">' + icon('chevR') + '<span style="font-weight:600;font-size:14px">' + esc(s) + '</span></div></button>').join('') +
+        '<div style="height:16px"></div></div></div>';
       }
       /* финальная форма */
-      return '<div class="scr"><div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-act="g8-reset" aria-label="Назад">' + icon('back') + '</button>' +
-        '<div style="margin-top:10px"><div class="eyebrow">Итог встречи</div>' +
-        '<h1>Сохранить?</h1>' +
-        '<div class="sub">' + esc(m.with_) + ' · ' + esc(m.time) + '</div></div>' +
-        '</div></div>' +
-        paren('итог увидит вторая сторона') +
+      return '<div class="scr">' +
+        D.head({backAct:'g8-reset', eyebrow:'Итог встречи', title:'Сохранить?', sub:esc(m.with_) + ' · ' + esc(m.time), paren:paren('итог увидит вторая сторона')}) +
         (st.saved ? '<div class="banner ok">' + icon('check') + '<div><div class="b-title">Итог сохранён</div><div class="cap">Вторая сторона увидит его в карточке встречи.</div></div></div>' : '') +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card"><div class="r-title" style="font-size:14.5px">' + esc(O.options[st.outcome]) + '</div>' +
-        '<div class="cap" style="margin-top:4px">Следующий шаг: ' + esc(O.nextSteps[st.step]) + ' · срок ' + O.dueInDays + ' дня</div></div>' +
+        '<div class="cap" style="margin-top:4px">Следующий шаг: ' + esc(O.nextSteps[st.step]) + ' · срок ' + O.dueInDays + ' ' + D.plural(O.dueInDays, ['день', 'дня', 'дней']) + '</div></div>' +
         '<div class="field"><label for="g8-note">Заметка <span class="cap">· необязательно</span></label>' +
         '<textarea class="textarea" id="g8-note" maxlength="280" placeholder="О чём договорились, что прислать, к кому обратиться">' + esc(st.note) + '</textarea>' +
         '<div class="counter"><span>' + st.note.length + ' / 280</span></div></div>' +
@@ -495,7 +454,7 @@
 
   /* ---------- G9 Договорённости ---------- */
   D.register('G9', {
-    tab: 'H1',
+    tab: 'F1',
     meta: {
       title: 'G9 · Договорённости',
       role: 'Участник встреч',
@@ -519,17 +478,12 @@
       const O = F.MEET_OUTCOME;
       const who = st.confirmed ? 'согласовано обеими сторонами' : 'ждёт подтверждения';
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="G1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">После встреч</div><h1>Договорённости</h1>' +
-        '<div class="sub">Следующие шаги и их статусы</div></div></div>' +
-        '</div>' +
-        paren('статус меняется согласием обеих сторон') +
+        D.head({back:'G1', eyebrow:'После встреч', title:'Договорённости', sub:'Следующие шаги и их статусы', paren:paren('статус меняется согласием обеих сторон')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
         '<div class="meet-card card"><div class="card-title" style="font-size:15px">' + esc(O.nextSteps[1]) + '</div>' +
         '<div class="cap" style="margin-top:4px">Елена Сорока · менторская гостиная · вы инициатор</div>' +
         '<div class="sess-meta" style="margin-top:8px"><span class="mc-status ' + (st.confirmed ? 'ok' : 'wait') + '">' + who + '</span>' +
-        tag('срок: ' + O.dueInDays + ' дня', 'tariff') + '</div>' +
+        tag('срок: ' + O.dueInDays + ' ' + D.plural(O.dueInDays, ['день', 'дня', 'дней']), 'tariff') + '</div>' +
         '<div class="card-foot"><span class="cap">заметка: «пришлю деку до вечера»</span>' +
         (st.confirmed ? '' : '<button class="btn btn-secondary btn-sm" data-act="g9-ok">Согласовать</button>') + '</div></div>' +
         '<div class="meet-card card" style="opacity:.75"><div class="card-title" style="font-size:15px">' + esc(O.nextSteps[2]) + '</div>' +
@@ -553,45 +507,39 @@
 
   /* ---------- G10 Hosted Buyer ---------- */
   D.register('G10', {
-    tab: 'H1',
+    tab: 'F1',
     meta: {
       title: 'G10 · Приглашённый покупатель',
       role: 'Hosted Buyer',
-      fr: ['FR-MEET-06', 'FR-MEET-04'],
-      ac: ['AC-MEET-07'],
+      fr: ['FR-MEET-07', 'FR-ACC-07'],
+      ac: ['AC-MEET-04'],
       what: [
         'Вид приглашённого покупателя: метка, квалификация и цель закупок.',
-        'Раннее окно записи и обязательные окна: «осталось N из M».',
-        'Автопринятие заявок у экспонентов — статус виден сразу.'
+        'Обязательство по встречам: проведено 8, осталось 12 из 20.',
+        'Кто может записаться и как работает автопринятие у экспонентов.'
       ],
       rules: [
-        'Приглашённые покупатели получают ранний доступ к окнам и обязательный объём встреч.',
-        'Заявки к экспонентам принимаются автоматически в рамках квоты.',
-        'Квота обязательных окон — параметр (6 на демо-день).'
+        'Приглашённый покупатель берёт обязательство провести 20 встреч за билет (D-25).',
+        'Записаться к покупателю может участник со своим продуктом.',
+        'Заявки к экспонентам принимаются автоматически; раннее окно записи — параметр, по умолчанию выключено.'
       ],
-      depends: ['параметры HB', 'D-07']
+      depends: ['D-25', 'D-07']
     },
     html(ctx) {
       const st = ctx.state;
       const hb = F.HB;
-      const left = hb.quota.left;
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="G1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Приглашённый покупатель</div><h1>' + esc(hb.name) + '</h1>' +
-        '<div class="sub">' + esc(hb.company) + ' · ' + esc(hb.role) + '</div></div>' +
-        '<span class="hb-badge">' + esc(hb.badge) + '</span></div>' +
-        '</div>' +
-        paren('раннее окно записи с ' + esc(hb.earlyWindow)) +
+        D.head({back:'G1', eyebrow:'Приглашённый покупатель', title:esc(hb.name), sub:esc(hb.company) + ' · ' + esc(hb.role), actions:'<span class="hb-badge">' + esc(hb.badge) + '</span>'}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card"><div class="cap" style="margin-bottom:4px">Ваша квалификация</div>' +
         '<div class="r-title">' + esc(hb.seeks) + '</div>' +
-        '<div class="cap" style="margin-top:4px">цель: покупаю · тариф ' + esc(F.ME.tariff) + '</div></div>' +
+        '<div class="cap" style="margin-top:4px">цель: покупаю · тариф ' + esc(F.ME.tariff) + '</div>' +
+        '<div class="cap" style="margin-top:8px">Записаться к вам может участник со своим продуктом.</div></div>' +
         '<div class="card" style="flex-direction:row;gap:10px">' +
-        '<div class="kpi-cell"><div class="k">Обязательные окна</div><div class="v">' + left + '<span class="k"> из ' + hb.quota.total + '</span></div></div>' +
-        '<div class="kpi-cell"><div class="k">Раннее окно</div><div class="v" style="font-size:20px">' + esc(hb.earlyWindow) + '</div></div></div>' +
+        '<div class="kpi-cell"><div class="k">Обязательство</div><div class="v">' + hb.quota.total + '<span class="k"> встреч</span></div></div>' +
+        '<div class="kpi-cell"><div class="k">Проведено</div><div class="v">' + hb.quota.done + '<span class="k"> · осталось ' + hb.quota.left + '</span></div></div></div>' +
         '<div class="banner ok">' + icon('check') + '<div><div class="b-title">Автопринятие у экспонентов</div>' +
-        '<div class="cap">Ваши заявки на стенды подтверждаются сразу — до ' + hb.quota.total + ' встреч в день.</div></div></div>' +
+        '<div class="cap">Ваши заявки на стенды подтверждаются сразу.</div></div></div>' +
         '<div class="sec-title" style="margin-top:4px">Записи на сегодня<button class="more" data-go="H1">Экспоненты</button></div>' +
         '<div class="card" style="padding:2px 16px"><div class="list">' +
         F.MY_MEETINGS.map(m => '<div class="row"><div class="grow"><div class="r-title" style="font-size:14px">' + esc(m.with_) + '</div><div class="r-sub">' + esc(m.time) + ' · ' + esc(m.space) + '</div></div><span class="mc-status ok">ок</span></div>').join('') +
@@ -603,7 +551,7 @@
 
   /* ---------- G5 Другое время ---------- */
   D.register('G5', {
-    tab: 'G1',
+    tab: 'F1',
     meta: {
       title: 'G5 · Другое время',
       role: 'Гость, встреча',
@@ -629,12 +577,7 @@
         '<div class="r-sub" style="margin-top:2px">' + esc(p.space) + '</div></div>' + icon('chevR') + '</div>' +
         '<div class="cap" style="margin-top:6px">' + esc(p.note) + '</div></button>').join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="G1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Встреча</div><h1>Другое время</h1>' +
-        '<div class="sub">' + esc(c.orig.who) + ' предлагает варианты</div></div></div>' +
-        '</div>' +
-        paren('выберите удобный вариант') +
+        D.head({back:'G1', eyebrow:'Встреча', title:'Другое время', sub:esc(c.orig.who) + ' предлагает варианты', paren:paren('выберите удобный вариант')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
         '<div class="card"><div class="cap" style="margin-bottom:4px">Вы просили</div>' +
         '<div class="r-title">' + esc(c.orig.time) + '</div>' +
@@ -649,7 +592,7 @@
 
   /* ---------- G6 Напоминание ---------- */
   D.register('G6', {
-    tab: 'G1',
+    tab: 'F1',
     meta: {
       title: 'G6 · Напоминание о встрече',
       role: 'Гость, уведомление',
@@ -670,12 +613,7 @@
     html(ctx) {
       const m = F.MY_MEETINGS[0];
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="G1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Напоминание</div><h1>Через 15 минут</h1>' +
-        '<div class="sub">встреча ждёт вас</div></div></div>' +
-        '</div>' +
-        paren('окно удерживается за вами') +
+        D.head({back:'G1', eyebrow:'Напоминание', title:'Через 15 минут', sub:'встреча ждёт вас', paren:paren('окно удерживается за вами')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="banner warn">' + icon('clock') + '<div style="flex:1"><div class="b-title">' + esc(m.with_) + '</div>' +
         '<div class="cap">' + esc(m.time) + ' · ' + esc(m.space) + '</div></div></div>' +
@@ -692,7 +630,7 @@
 
   /* ---------- G7 Отметка прихода ---------- */
   D.register('G7', {
-    tab: 'G1',
+    tab: 'F1',
     meta: {
       title: 'G7 · Отметка прихода',
       role: 'Гость, встреча',
@@ -713,12 +651,7 @@
     html(ctx) {
       const cp = F.CHECKIN_POINT;
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="G1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Отметка прихода</div><h1>Я на месте</h1>' +
-        '<div class="sub">' + esc(F.MY_MEETINGS[0].space) + '</div></div></div>' +
-        '</div>' +
-        paren('покажите QR пространства или подтвердите вручную') +
+        D.head({back:'G1', eyebrow:'Отметка прихода', title:'Я на месте', sub:esc(F.MY_MEETINGS[0].space), paren:paren('покажите QR пространства или подтвердите вручную')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="scan-stage" style="min-height:220px">' +
         '<div class="scan-frame"><i class="c"></i></div><div class="scan-line"></div>' +
@@ -733,7 +666,7 @@
 
   /* ---------- G11 Нет окон ---------- */
   D.register('G11', {
-    tab: 'G1',
+    tab: 'F1',
     meta: {
       title: 'G11 · Нет окон',
       role: 'Гость, встреча',
@@ -759,15 +692,10 @@
         '<div class="r-sub" style="margin-top:2px">' + esc(a.time) + ' · ' + esc(a.hall) + ' · ' + esc(a.move) + '</div></div>' + icon('chevR') + '</div>' +
         '<div class="cap" style="margin-top:6px">' + esc(a.note) + '</div></button>').join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="G2" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Встречи</div><h1>Окон нет</h1>' +
-        '<div class="sub">' + esc(F.SECRETARY_ALT.cancelled.slice(0, 34)) + '…</div></div></div>' +
-        '</div>' +
-        paren('секретарь подобрал три варианта') +
+        D.head({back:'G2', eyebrow:'Встречи', title:'Окон нет', sub:esc(F.SECRETARY_ALT.cancelled.slice(0, 34)) + '…', paren:paren('секретарь подобрал три варианта')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="banner info">' + icon('clock') + '<div style="flex:1"><div class="b-title">Лист ожидания</div>' +
-        '<div class="cap">Позиция ' + w.pos + ' · при освобождении места у вас будет ' + w.confirmMin + ' минут на подтверждение.</div></div></div>' +
+        '<div class="cap">Позиция ' + w.pos + ' · при освобождении места у вас будет ' + w.confirmMin + ' ' + D.plural(w.confirmMin, ['минута', 'минуты', 'минут']) + ' на подтверждение.</div></div></div>' +
         '<button class="btn btn-primary btn-block" data-act="g11-join">Встать в лист ожидания</button>' +
         '<div class="sec-title">Альтернативы Секретаря</div>' + alts +
         '<div style="height:16px"></div></div></div>';

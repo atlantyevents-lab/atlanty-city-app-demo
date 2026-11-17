@@ -25,75 +25,74 @@
       rules: [
         'Окна по 30 минут, шаг сетки — из фикстур; занятость — детерминированная демо-раскладка.',
         'Запись мгновенная при свободном окне; пересечения с подтверждёнными событиями блокируются.',
-        'Квоты записи зависят от тарифа (параметр, по умолчанию для Оптимума — 0).'
+        'Запись на менторские и экспертные гостиные закрыта для Оптимума — доступна Бизнесу и Первому классу (параметр).'
       ],
-      depends: ['D-07', 'O-04']
+      depends: ['D-07', 'D-26']
     },
     html(ctx) {
       const st = ctx.state;
       const sel = st.sel || {};
-      const mentorId = sel.mentor || 'm1';
-      const winIdx = sel.win != null ? sel.win : null;
+      const mentorId = sel.mentor || null;
       const booked = st.booked || null;
-      const wins = F.spaceWindows('ms-mentor');
       const mentorSpaces = F.MEETING_SPACES.find(s => s.id === 'ms-mentor');
+      const optClosed = F.ME.tariff === 'Оптимум';
 
-      const mentorCards = F.MENTORS.map(m =>
-        '<button class="card interactive' + (m.id === mentorId ? ' accent-edge' : '') + '" data-act="d1-mentor" data-arg="' + m.id + '">' +
-        '<div class="card-row">' + avatar(m.name, 'sm') + '<div class="grow"><div class="card-title" style="font-size:14px">' + esc(m.name) + '</div>' +
-        '<div class="card-sub">' + esc(m.topic) + '</div></div>' + (m.id === mentorId ? icon('check') : '') + '</div>' +
-        '<div class="card-foot"><span class="rating-line">' + stars(m.rating) + ' ' + m.rating + '</span><span class="cap">' + m.done + ' бесед</span></div>' +
-        '</button>').join('');
-
-      const winCells = wins.map((w, i) => {
-        const stt = w.status;
-        const cls = stt === 'taken' ? 'taken' : (i === winIdx ? 'mine' : 'free');
-        const lbl = stt === 'taken' ? 'занято' : (i === winIdx ? 'выбрано' : 'свободно');
-        return '<button class="win-cell ' + cls + '" data-act="d1-win" data-arg="' + i + '"' + (stt === 'taken' ? ' disabled' : '') + '>' +
-          '<span class="t">' + esc(w.label) + '</span><span class="s">' + lbl + '</span></button>';
+      /* менторские — только через спикеров: у каждого свои окна по дням и столам */
+      const mentorCards = F.MENTORS.map(m => {
+        const wins = F.mentorWindows(m.id);
+        const winRows = wins.map((w, i) =>
+          '<button class="chip' + (sel.mentor === m.id && sel.win === i ? ' on' : '') + '" data-act="d1-win" data-arg="' + m.id + ':' + i + '"' + (optClosed ? ' disabled' : '') + '>' +
+          esc(w.day) + ' ' + esc(w.time) + ' · ст.' + w.table + '</button>').join('');
+        return '<div class="card' + (sel.mentor === m.id ? ' accent-edge' : '') + '" style="padding:12px 14px">' +
+          '<div class="card-row" data-go="C5/' + m.id + '" style="cursor:pointer">' + avatar(m.name, 'sm') +
+          '<div class="grow"><div class="card-title" style="font-size:14px">' + esc(m.name) + '</div>' +
+          '<div class="card-sub">' + esc(m.topic) + ' · ' + esc(F.hall('magnolia').name) + '</div></div>' +
+          '<span class="rating-line">' + stars(m.rating) + '</span>' + icon('chevR') + '</div>' +
+          '<div class="cap" style="margin:8px 0 6px">' + m.done + ' ' + D.plural(m.done, ['беседа', 'беседы', 'бесед']) + ' · ' + wins.length + ' ' + D.plural(wins.length, ['окно', 'окна', 'окон']) + '</div>' +
+          '<div class="chips" style="flex-wrap:wrap">' + winRows + '</div></div>';
       }).join('');
 
       let confirm;
       if (booked) {
-        const m = F.mentor(booked.mentor), w = wins[booked.win];
+        const m = F.mentor(booked.mentor);
+        const w = F.mentorWindows(booked.mentor)[booked.win] || {};
         confirm = '<div class="banner ok">' + icon('check') + '<div style="flex:1">' +
           '<div class="b-title">Окно забронировано</div>' +
-          '<div class="cap">' + esc(m.name) + ' · ' + esc(w.label) + ' · ' + esc(mentorSpaces.place) + '</div>' +
+          '<div class="cap">' + esc(m.name) + ' · ' + esc(w.day || '') + ' ' + esc(w.time || '') + ' · стол ' + (w.table || '') + ' · ' + esc(mentorSpaces.place) + '</div>' +
           '</div></div>' +
           '<div class="card"><div class="cap">Детали записи</div>' +
-          '<div class="row" style="padding:8px 0"><div class="grow"><div class="r-title" style="font-size:14px">Менторская гостиная · 30 минут</div>' +
-          '<div class="r-sub">' + esc(F.NOW.dateLong) + ' · ' + esc(w.label) + '–' + esc(F.fmtTime(w.t + 30)) + '</div></div>' + icon('pin') + '</div>' +
+          '<div class="row" style="padding:8px 0"><div class="grow"><div class="r-title" style="font-size:14px">Менторская встреча · 30 минут</div>' +
+          '<div class="r-sub">' + esc(F.NOW.dateLong) + ' · ' + esc(w.day || '') + ' ' + esc(w.time || '') + '–' + esc(F.fmtTime((parseInt((w.time || '0:00').slice(0, 2)) * 60 + parseInt((w.time || '0:00').slice(3)) + 30) || '')) + '</div></div>' + icon('pin') + '</div>' +
           '<div style="display:flex;gap:8px;margin-top:6px">' +
           '<button class="btn btn-secondary btn-sm" data-go="D2">Подтверждение</button>' +
           '<button class="btn btn-ghost btn-sm" data-go="C1">К программе</button></div></div>';
       } else {
-        const ready = winIdx != null;
+        const ready = sel.mentor != null && sel.win != null && !optClosed;
+        const m = ready ? F.mentor(sel.mentor) : null;
+        const w = ready ? F.mentorWindows(sel.mentor)[sel.win] : null;
         confirm = '<div class="card"><div class="cap">Выбранное окно</div>' +
-          '<div class="card-title" style="font-size:16px">' + (ready ? esc(wins[winIdx].label) + ' · ' + esc(F.mentor(mentorId).name) : 'пока не выбрано') + '</div>' +
+          '<div class="card-title" style="font-size:16px">' + (ready ? esc(m.name) + ' · ' + esc(w.day) + ' ' + esc(w.time) + ' · ст.' + w.table : 'пока не выбрано') + '</div>' +
           '<button class="btn btn-primary btn-block" data-act="d1-book"' + (ready ? '' : ' disabled') + '>Забронировать окно</button>' +
-          '<div class="cap" style="text-align:center">' + (ready ? 'удерживается 2 минуты после выбора' : 'выберите ментора и окно выше') + '</div></div>';
+          '<div class="cap" style="text-align:center">' + (optClosed ? 'запись закрыта для вашего тарифа — доступна Бизнесу и Первому классу' : (ready ? 'удерживается 2 минуты после выбора' : 'выберите ментора и окно выше')) + '</div></div>';
       }
 
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="C1" aria-label="Назад">' + icon('back') + '</button>' +
-        '<div style="margin-top:10px"><div class="eyebrow">Запись 1:1 · 30 минут</div>' +
-        '<h1>Менторская гостиная</h1>' +
-        '<div class="sub">Менторские столы — ' + esc(mentorSpaces.place) + ' · окна по 30 минут</div></div>' +
-        '</div></div>' +
-        paren('беседа один на один с ментором фестиваля') +
-        '</div>' +
+        D.head({eyebrow:'Запись 1:1 · 30 минут', title:'Программа', sub:'менторские · ' + esc(mentorSpaces.place) + ' · столы 1–8', paren:paren('беседа один на один с ментором фестиваля')}) +
+        D.segbar([['C1', 'Список'], ['C7', 'Сетка'], ['D1', 'Менторские'], ['C4', 'Мой день']], 'D1') +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
-        '<div><div class="sec-title" style="margin-top:0">Ментор</div><div style="display:flex;flex-direction:column;gap:10px">' + mentorCards + '</div></div>' +
-        '<div><div class="sec-title">Окна на сегодня</div>' +
-        '<div class="card" style="padding:14px"><div class="win-grid">' + winCells + '</div>' +
-        '<div class="cap" style="margin-top:10px">' + esc(F.NOW.dateLong) + ' · ' + esc(F.hall('magnolia').name) + ' · шаг 30 минут</div></div></div>' +
+        (optClosed ? '<div class="banner warn">' + icon('lock') + '<div><div class="b-title">Запись закрыта для Оптимума</div><div class="cap">Менторские и экспертные гостиные доступны тарифам Бизнес и Первый класс.</div></div></div>' : '') +
+        '<div><div class="sec-title" style="margin-top:0">Менторы · ' + F.MENTORS.length + '</div><div style="display:flex;flex-direction:column;gap:10px">' + mentorCards + '</div></div>' +
         confirm +
         '<div style="height:16px"></div></div></div>';
     }
   });
   D.action('d1-mentor', el => { const s = D.st('D1'); s.sel = s.sel || {}; s.sel.mentor = el.dataset.arg; D.rerender(); });
-  D.action('d1-win', el => { const s = D.st('D1'); s.sel = s.sel || {}; s.sel.win = parseInt(el.dataset.arg, 10); D.rerender(); });
+  D.action('d1-win', el => {
+    const [m, i] = el.dataset.arg.split(':');
+    const s = D.st('D1'); s.sel = s.sel || {};
+    s.sel.mentor = m; s.sel.win = parseInt(i, 10);
+    D.rerender();
+  });
   D.action('d1-book', () => {
     const s = D.st('D1');
     s.booked = { mentor: (s.sel && s.sel.mentor) || 'm1', win: s.sel ? s.sel.win : 0 };
@@ -135,7 +134,7 @@
         const m = F.mentor(last.mentor), wins = F.spaceWindows('ms-mentor'), w = wins[last.win];
         title = 'Менторская гостиная · 30 минут';
         sub = esc(m.name) + ' · ' + esc(w.label) + '–' + esc(F.fmtTime(w.t + 30)) + ' · ' + esc(F.hall('magnolia').name);
-        rows = [['Ментор', m.name + ' — ' + m.topic], ['Стол', 'Менторский стол · Магнолия, 9 этаж'], ['Дата', F.NOW.dateLong + ' · ' + w.label + '–' + F.fmtTime(w.t + 30)]];
+        rows = [['Ментор', m.name + ' — ' + m.topic], ['Стол', 'Менторский стол · Магнолия, 9-й этаж'], ['Дата', F.NOW.dateLong + ' · ' + w.label + '–' + F.fmtTime(w.t + 30)]];
         reminders = ['за 60 минут', 'за 10 минут'];
       } else {
         const s = F.session('s2704');
@@ -149,11 +148,7 @@
       const row = (k, v) => '<div class="tk-row"><span class="k">' + k + '</span><span>' + v + '</span></div>';
 
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="D1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">' + (confirmed ? 'Запись' : 'Подтверждение') + '</div><h1>' + (confirmed ? 'Вы записаны' : 'Проверьте запись') + '</h1>' +
-        '<div class="sub">' + sub + '</div></div></div>' +
-        '</div>' +
+        D.head({back:'D1', eyebrow:(confirmed ? 'Запись' : 'Подтверждение'), title:(confirmed ? 'Вы записаны' : 'Проверьте запись'), sub:sub}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         (confirmed
           ? '<div class="banner ok">' + icon('check') + '<div><div class="b-title">Место подтверждено</div>' +
@@ -210,10 +205,10 @@
       ],
       rules: [
         'Сессии «Бизнес и Первый класс» видны всем тарифам с пометкой (D-07), запись — по тарифу.',
-        'Квота записи — параметр; для Оптимума форматы с квотой 0 закрыты.',
+        'Запись на менторские и экспертные гостиные закрыта для Оптимума — доступна Бизнесу и Первому классу (D-26).',
         'Экран не блокирует и не стыдит: доступно объяснение и связь с организатором.'
       ],
-      depends: ['тарифная сетка', 'D-07', 'O-04']
+      depends: ['тарифная сетка', 'D-07', 'D-26']
     },
     html(ctx) {
       const s = F.session('s2707'); // Бизнес-разбор, доступ biz_fc
@@ -221,13 +216,7 @@
       const toMin = t => parseInt(t.slice(0, 2)) * 60 + parseInt(t.slice(3));
       const end = F.fmtTime(toMin(s.time) + s.dur);
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="C1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">' + esc(F.NOW.dateLong) + ' · вид тарифа Оптимум</div><h1>' + esc(s.title) + '</h1>' +
-        '<div class="sub">' + esc(s.time) + '–' + esc(end) + ' · ' + esc(h.name) + ' · ' + esc(s.format) + '</div></div>' +
-        '<span class="hb-badge">Оптимум</span></div>' +
-        '</div>' +
-        paren('демо-вид: как экран выглядит у гостя тарифа Оптимум') +
+        D.head({back:'C1', eyebrow:esc(F.NOW.dateLong) + ' · вид тарифа Оптимум', title:esc(s.title), sub:esc(s.time) + '–' + esc(end) + ' · ' + esc(h.name) + ' · ' + esc(s.format), actions:'<span class="hb-badge">Оптимум</span>', paren:paren('демо-вид: как экран выглядит у гостя тарифа Оптимум')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card"><div class="sess-meta">' + tag(s.format, 'accent') + tag(s.track) + (s.changed ? '<span class="mark-changed">' + icon('refresh') + 'изменено</span>' : '') + '</div>' +
         '<div style="font-size:14px;line-height:1.55;margin-top:6px">' + esc(s.desc) + '</div></div>' +
@@ -272,19 +261,14 @@
     html(ctx) {
       const w = F.WAITLIST;
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="C3/' + w.session + '" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Лист ожидания</div><h1>Вы в очереди</h1>' +
-        '<div class="sub">' + esc(w.hall) + ' · ' + esc(w.was) + '</div></div></div>' +
-        '</div>' +
-        paren('место подтвердится автоматически') +
+        D.head({back:'C3/' + w.session, eyebrow:'Лист ожидания', title:'Вы в очереди', sub:esc(w.hall) + ' · ' + esc(w.was), paren:paren('место подтвердится автоматически')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card accent-edge" style="text-align:center;padding:26px 16px">' +
         '<div class="cap">ваша позиция</div>' +
         '<div style="font-family:var(--font-display);font-size:64px;line-height:1;color:var(--accent-display)">' + w.pos + '</div>' +
         '<div class="cap" style="margin-top:6px">из ожидающих · ' + esc(w.title) + '</div></div>' +
         '<div class="banner info">' + icon('clock') + '<div style="flex:1"><div class="b-title">Как это работает</div>' +
-        '<div class="cap">Освободится место — система предложит его вам первой. У вас будет ' + w.confirmMin + ' минут на подтверждение, затем предложение уйдёт дальше.</div></div></div>' +
+        '<div class="cap">Освободится место — система предложит его вам первой. У вас будет ' + w.confirmMin + ' ' + D.plural(w.confirmMin, ['минута', 'минуты', 'минут']) + ' на подтверждение, затем предложение уйдёт дальше.</div></div></div>' +
         '<div class="card"><div class="row"><div class="grow"><div class="r-title">' + esc(w.title) + '</div>' +
         '<div class="r-sub">' + esc(w.hall) + ' · ' + esc(w.was) + ' · запрошено сегодня</div></div>' +
         '<button class="btn btn-ghost btn-sm" data-go="C3/' + w.session + '">Карточка</button></div></div>' +
@@ -330,12 +314,7 @@
           '<button class="btn btn-ghost btn-sm" data-act="d5-cancel" data-arg="' + s.id + '">Отменить</button></div></div>';
       }).join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="B1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Программа</div><h1>Мои записи</h1>' +
-        '<div class="sub">' + esc(F.NOW.dateLong) + ' · ' + F.MY_DAY.length + ' события</div></div></div>' +
-        '</div>' +
-        paren('отмена за 2 часа до начала') +
+        D.head({back:'B1', eyebrow:'Программа', title:'Мои записи', sub:esc(F.NOW.dateLong) + ' · ' + F.MY_DAY.length + ' ' + D.plural(F.MY_DAY.length, ['событие', 'события', 'событий']), paren:paren('отмена за 2 часа до начала')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
         '<div class="card" style="padding:2px 16px"><div class="list">' + rows + '</div></div>' +
         '<div class="banner">' + icon('info') + '<div class="cap">Отменённое место сразу уходит в лист ожидания — система предложит его первым в очереди.</div></div>' +
@@ -369,18 +348,13 @@
       st.deadline = st.deadline || 900;
       const s = F.session(F.FREED_SEAT.session);
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="C3/' + F.FREED_SEAT.session + '" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Лист ожидания</div><h1>Место для вас</h1>' +
-        '<div class="sub">' + esc(F.FREED_SEAT.hall) + ' · ' + esc(F.FREED_SEAT.time) + '</div></div></div>' +
-        '</div>' +
-        paren('подтвердите, пока место за вами') +
+        D.head({back:'C3/' + F.FREED_SEAT.session, eyebrow:'Лист ожидания', title:'Место для вас', sub:esc(F.FREED_SEAT.hall) + ' · ' + esc(F.FREED_SEAT.time), paren:paren('подтвердите, пока место за вами')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="banner ok">' + icon('check') + '<div style="flex:1"><div class="b-title">Освободилось место</div>' +
         '<div class="cap">«' + esc(F.FREED_SEAT.title) + '» · ' + esc(F.FREED_SEAT.time) + ' · ' + esc(F.FREED_SEAT.hall) + '</div></div></div>' +
         '<div class="card" style="text-align:center;padding:20px 16px"><div class="cap">на подтверждение осталось</div>' +
         '<div style="font-family:var(--font-display);font-size:44px;color:var(--warn)">' + Math.floor(st.deadline / 60) + ':' + String(st.deadline % 60).padStart(2, '0') + '</div>' +
-        '<div class="cap" style="margin-top:4px">' + F.WAITLIST.pos + ' место в очереди · предложение ваше</div></div>' +
+        '<div class="cap" style="margin-top:4px">' + F.WAITLIST.pos + ' ' + D.plural(F.WAITLIST.pos, ['место', 'места', 'мест']) + ' в очереди · предложение ваше</div></div>' +
         '<button class="btn btn-primary btn-block" data-act="d6-confirm">Подтвердить запись</button>' +
         '<button class="btn btn-ghost btn-block" data-act="d6-decline">Отказаться</button>' +
         '<div style="height:16px"></div></div></div>';

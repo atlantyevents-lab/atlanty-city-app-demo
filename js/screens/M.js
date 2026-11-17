@@ -54,12 +54,7 @@
       }).join('');
 
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="B1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">' + esc(F.NOW.dateLong) + '</div><h1>Оцените день</h1>' +
-        '<div class="sub">Сессии, где вы были или записаны</div></div></div>' +
-        '</div>' +
-        paren('оценки уходят в итоги фестиваля анонимно') +
+        D.head({back:'B1', eyebrow:esc(F.NOW.dateLong), title:'Оцените день', sub:'Сессии, где вы были или записаны', paren:paren('оценки уходят в итоги фестиваля анонимно')}) +
         (st.sent ? '<div class="banner ok">' + icon('check') + '<div><div class="b-title">Оценки отправлены</div><div class="cap">Спасибо — они попадут в итоги фестиваля.</div></div></div>' : '') +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card" style="flex-direction:row;align-items:center;gap:12px"><div class="grow"><div class="cap">Прогресс</div>' +
@@ -141,12 +136,7 @@
           '<div class="note-tags" style="margin-top:6px">' + n.tags.map(t => '<span class="tag">' + esc(t) + '</span>').join('') + '</div></div>' + icon('chevR') + '</button>';
       }).join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="B1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Заметки</div><h1>Мои заметки</h1>' +
-        '<div class="sub">' + F.NOTES.length + ' записей · поиск и метки</div></div></div>' +
-        '</div>' +
-        paren('заметки видны только вам') +
+        D.head({back:'B1', eyebrow:'Заметки', title:'Мои заметки', sub:F.NOTES.length + ' ' + D.plural(F.NOTES.length, ['запись', 'записи', 'записей']) + ' · поиск и метки', paren:paren('заметки видны только вам')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
         '<input class="input" placeholder="Поиск по тексту и меткам" value="' + esc(st.q) + '" data-m1q>' +
         '<div class="card" style="padding:2px 16px"><div class="list">' + rows + '</div></div>' +
@@ -192,12 +182,7 @@
         return '<button class="chip' + (on ? ' on' : '') + '" data-act="m2-tag" data-arg="' + t + '">' + esc(t) + '</button>';
       }).join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="M1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Заметки</div><h1>' + (n ? 'Заметка' : 'Новая заметка') + '</h1>' +
-        '<div class="sub">' + (n ? esc(n.time) : 'сейчас') + '</div></div></div>' +
-        '</div>' +
-        paren('заметка привяжется к сессии') +
+        D.head({back:'M1', eyebrow:'Заметки', title:(n ? 'Заметка' : 'Новая заметка'), sub:(n ? esc(n.time) : 'сейчас'), paren:paren('заметка привяжется к сессии')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="map-plate" style="min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">' +
         '<div class="ic">' + icon('eye') + '</div><div class="cap">Фото сессии — в демо заглушка</div></div>' +
@@ -245,7 +230,7 @@
     html(ctx) {
       const tiles = [
         ['Встреч', F.MY_MEETINGS.length + ' · 3 состоялось'],
-        ['Контакты', F.MY_CONTACTS.length + ' человека'],
+        ['Контакты', F.MY_CONTACTS.length + ' ' + D.plural(F.MY_CONTACTS.length, ['человек', 'человека', 'человек'])],
         ['Заметки', F.NOTES.length],
         ['Оценки', F.DAY_RATINGS.length + ' из ' + F.DAY_RATINGS.length]
       ];
@@ -255,12 +240,7 @@
         ['Познакомить с КлиентПоток — Марина Крылова', 'Студия Кедр · контакты']
       ];
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="B1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Итоги</div><h1>Мои итоги</h1>' +
-        '<div class="sub">' + esc(F.NOW.dateLong) + ' · ваша статистика</div></div></div>' +
-        '</div>' +
-        paren('только подтверждённые события') +
+        D.head({back:'B1', eyebrow:'Итоги', title:'Мои итоги', sub:esc(F.NOW.dateLong) + ' · ваша статистика', paren:paren('только подтверждённые события')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="stat-tiles two">' + tiles.map(([l, v]) => '<div class="stat-tile"><span class="num" style="font-size:24px">' + esc(v) + '</span><span class="lbl">' + esc(l) + '</span></div>').join('') + '</div>' +
         '<div class="card"><div class="cap" style="margin-bottom:8px">Договорённости и следующие шаги</div>' +

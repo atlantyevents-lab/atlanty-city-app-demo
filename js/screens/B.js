@@ -22,7 +22,7 @@
         '«Сейчас идёт» показывается только для сессии в моменте; остальные — по расписанию.',
         'Все цифры и время — из фикстур: демо-день 27.02, текущее время 11:10.'
       ],
-      depends: ['D-09', 'матрица переездов', 'O-04']
+      depends: ['D-09', 'матрица переездов']
     },
     html(ctx) {
       const ME = F.ME;
@@ -42,13 +42,7 @@
       };
 
       return '<div class="scr">' +
-        '<div class="scr-head topo-host">' + D.topo() + '<div class="head-row"><div>' +
-        '<div class="eyebrow">' + esc(F.NOW.dateLong) + '</div>' +
-        '<h1>Доброе утро, ' + esc(ME.first) + '</h1>' +
-        '<div class="sub">' + esc(ME.company) + ' · ' + tariffTag(ME.tariff) + ' ' + tag('Зима 2027', 'accent') + '</div>' +
-        '</div><button class="icon-btn" data-go="B3" aria-label="Уведомления">' + icon('bell') + '</button></div>' +
-        paren(F.SECRETARY_TODAY) +
-        '</div>' +
+        D.head({eyebrow:esc(F.NOW.dateLong), title:'Доброе утро, ' + esc(ME.first), sub:esc(ME.company) + ' · ' + tariffTag(ME.tariff) + ' ' + tag('Зима 2027', 'accent'), paren:paren(F.SECRETARY_TODAY), topo:1}) +
 
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
 
@@ -72,13 +66,13 @@
         '<div class="sec-title">Быстрое</div>' +
         '<div class="grid-2">' +
         '<button class="card interactive" data-go="L1"><div class="card-row">' + icon('ticket') + '<b style="font-size:14px">Билет</b></div><div class="cap">QR и детали</div></button>' +
-        '<button class="card interactive" data-go="C4"><div class="card-row">' + icon('bookmark') + '<b style="font-size:14px">Моя программа</b></div><div class="cap">' + F.MY_BOOKINGS.length + ' записи на сегодня</div></button>' +
+        '<button class="card interactive" data-go="C4"><div class="card-row">' + icon('bookmark') + '<b style="font-size:14px">Моя программа</b></div><div class="cap">' + F.MY_BOOKINGS.length + ' ' + D.plural(F.MY_BOOKINGS.length, ['запись', 'записи', 'записей']) + ' на сегодня</div></button>' +
         '<button class="card interactive" data-go="E4"><div class="card-row">' + icon('route') + '<b style="font-size:14px">Маршрут</b></div><div class="cap">между точками</div></button>' +
         '<button class="card interactive" data-go="B2"><div class="card-row">' + icon('bell') + '<b style="font-size:14px">Лента</b></div><div class="cap">' + F.FEED.length + ' новых</div></button>' +
         '</div>' +
 
         '<div class="banner">' + icon('spark') + '<div><div class="b-title">Подсказка подбора</div>' +
-        '<div class="cap">По цели «ищу партнёра» сегодня: ' + F.sessionsOf('27.02').length + ' событий программы и ' + F.EXHIBITORS.length + ' экспонентов.</div>' +
+        '<div class="cap">По цели «ищу партнёра» сегодня: ' + F.sessionsOf('27.02').length + ' ' + D.plural(F.sessionsOf('27.02').length, ['событие', 'события', 'событий']) + ' программы и ' + F.EXHIBITORS.length + ' ' + D.plural(F.EXHIBITORS.length, ['экспонент', 'экспонента', 'экспонентов']) + '.</div>' +
         '<button class="feed-link" data-go="N5" style="margin-top:4px">Открыть подбор ' + icon('chevR') + '</button></div></div>' +
 
         '<div class="banner">' + icon('star') + '<div style="flex:1"><div class="b-title">Оценка дня</div>' +
@@ -134,12 +128,7 @@
       }).join('');
 
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="B1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Кабинет</div><h1>Уведомления</h1>' +
-        '<div class="sub">Каналы и типы · тихие часы ' + esc(F.QUIET_HOURS.from) + '–' + esc(F.QUIET_HOURS.to) + '</div></div></div>' +
-        '</div>' +
-        paren('срочные уведомления приходят всегда') +
+        D.head({back:'B1', eyebrow:'Кабинет', title:'Уведомления', sub:'Каналы и типы · тихие часы ' + esc(F.QUIET_HOURS.from) + '–' + esc(F.QUIET_HOURS.to), paren:paren('срочные уведомления приходят всегда')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card" style="padding:8px 14px;overflow-x:auto"><table class="ntf-table"><thead>' + head + '</thead><tbody>' + rows + '</tbody></table></div>' +
         '<div class="banner">' + icon('clock') + '<div><div class="b-title">Тихие часы ' + esc(F.QUIET_HOURS.from) + '–' + esc(F.QUIET_HOURS.to) + '</div>' +
@@ -194,12 +183,7 @@
         '<div class="feed-time">' + esc(i.time) + '</div></div>' +
         (i.link ? '<button class="icon-btn" data-go="' + i.link + '" aria-label="Открыть">' + icon('chevR') + '</button>' : '') + '</div>').join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="B1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Сообщения организаторов</div><h1>Лента</h1>' +
-        '<div class="sub">Новости, изменения и срочное</div></div></div>' +
-        '</div>' +
-        paren('срочные приходят всегда, даже в тихие часы') +
+        D.head({back:'B1', eyebrow:'Сообщения организаторов', title:'Лента', sub:'Новости, изменения и срочное', paren:paren('срочные приходят всегда, даже в тихие часы')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
         '<div class="chips">' + chips + '</div>' +
         '<div class="card" style="padding:4px 16px"><div class="list">' + rows + '</div></div>' +

@@ -28,13 +28,7 @@
       st.offline = st.offline || false;
       const queue = st.queue || 0;
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="B1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Обмен контактами</div><h1>Сканер</h1>' +
-        '<div class="sub">Визитка участника или метка стенда</div></div>' +
-        '<button class="icon-btn' + (st.offline ? ' on' : '') + '" data-act="j1-offline" aria-label="Офлайн-режим">' + icon('wifi') + '</button></div>' +
-        '</div>' +
-        paren('QR открывает карточку, прав не даёт') +
+        D.head({back:'B1', eyebrow:'Обмен контактами', title:'Сканер', sub:'Визитка участника или метка стенда', actions:'<button class="icon-btn' + (st.offline ? ' on' : '') + '" data-act="j1-offline" aria-label="Офлайн-режим">' + icon('wifi') + '</button>', paren:paren('QR открывает карточку, прав не даёт')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="scan-stage">' +
         '<div class="scan-frame"><span class="c"></span><div class="scan-line"></div></div>' +
@@ -81,13 +75,7 @@
     html(ctx) {
       const c = F.SCAN_RESULTS.consent;
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="J1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Сканирование · ' + esc(F.NOW.time) + '</div><h1>Контакт получен</h1>' +
-        '<div class="sub">' + esc(c.company) + '</div></div>' +
-        '<span class="mc-status ok">согласие</span></div>' +
-        '</div>' +
-        paren('человек разрешил передать контакты') +
+        D.head({back:'J1', eyebrow:'Сканирование · ' + esc(F.NOW.time), title:'Контакт получен', sub:esc(c.company), paren:paren('человек разрешил передать контакты')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="scan-result scan-ok"><div style="display:flex;gap:12px;align-items:center">' +
         avatar(c.name, 'lg accent') +
@@ -130,13 +118,7 @@
       const st = ctx.state;
       st.asked = !!st.asked;
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="J1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Сканирование · ' + esc(F.NOW.time) + '</div><h1>Без согласия</h1>' +
-        '<div class="sub">' + esc(c.company) + '</div></div>' +
-        '<span class="mc-status wait">закрыто</span></div>' +
-        '</div>' +
-        paren('человек не разрешил передачу контактов') +
+        D.head({back:'J1', eyebrow:'Сканирование · ' + esc(F.NOW.time), title:'Без согласия', sub:esc(c.company), paren:paren('человек не разрешил передачу контактов')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="scan-result scan-warn"><div style="display:flex;gap:12px;align-items:center">' +
         avatar(c.name, 'lg') +
@@ -192,12 +174,7 @@
       }).join('');
       const c = F.SCAN_RESULTS.consent;
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="J2" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Контакт</div><h1>' + esc(c.name) + '</h1>' +
-        '<div class="sub">' + esc(c.company) + ' · ' + esc(c.role) + '</div></div></div>' +
-        '</div>' +
-        paren('метки видны только вам') +
+        D.head({back:'J2', eyebrow:'Контакт', title:esc(c.name), sub:esc(c.company) + ' · ' + esc(c.role), paren:paren('метки видны только вам')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card"><div class="cap" style="margin-bottom:6px">Температура</div><div class="chips">' + heat + '</div></div>' +
         '<div class="card"><div class="cap" style="margin-bottom:6px">Интересы</div><div class="chips" style="flex-wrap:wrap">' + ints + '</div></div>' +
@@ -250,12 +227,7 @@
         '<div class="r-sub">' + esc(p.company) + ' · ' + esc(p.time) + '</div></div>' +
         tag('ждёт отправки', 'wait') + '</div>').join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="J1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Сканер</div><h1>Офлайн-очередь</h1>' +
-        '<div class="sub">без сети · ' + F.PENDING_SCANS.length + ' скана ждут</div></div></div>' +
-        '</div>' +
-        paren('отправятся при появлении сети') +
+        D.head({back:'J1', eyebrow:'Сканер', title:'Офлайн-очередь', sub:'без сети · ' + F.PENDING_SCANS.length + ' скана ждут', paren:paren('отправятся при появлении сети')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="banner warn">' + icon('wifi') + '<div style="flex:1"><div class="b-title">Сеть недоступна</div>' +
         '<div class="cap">Сканы сохраняются на устройстве и уйдут автоматически.</div></div></div>' +
@@ -291,12 +263,7 @@
         '<div class="row"><div class="grow"><div class="r-title" style="font-size:14px">' + esc(s.name) + ' ' + tag('по согласию', 'ok') + '</div>' +
         '<div class="r-sub">' + esc(s.company) + ' · ' + esc(s.place) + ' · ' + esc(s.time) + '</div></div>' + icon('chevR') + '</div>').join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="J1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Контакты</div><h1>Кто меня сканировал</h1>' +
-        '<div class="sub">' + F.SCANNED_BY.length + ' человека за фестиваль</div></div></div>' +
-        '</div>' +
-        paren('контакт нельзя передать третьим лицам') +
+        D.head({back:'J1', eyebrow:'Контакты', title:'Кто меня сканировал', sub:F.SCANNED_BY.length + ' человека за фестиваль', paren:paren('контакт нельзя передать третьим лицам')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card" style="padding:2px 16px"><div class="list">' + rows + '</div></div>' +
         '<div class="banner">' + icon('lock') + '<div class="cap">Ваш контакт виден только тем, кому вы дали согласие. Передача данных третьим лицам запрещена.</div></div>' +

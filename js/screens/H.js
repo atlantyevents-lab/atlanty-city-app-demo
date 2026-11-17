@@ -32,12 +32,9 @@
       const isStudied = !!studied[e.id];
 
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="H1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div class="actions">' +
-        '<button class="icon-btn' + (isStudied ? ' on' : '') + '" data-act="h2-study" data-arg="' + e.id + '" aria-label="Изучить">' + icon('bookmark') + '</button>' +
-        '<button class="icon-btn" data-go="H7/' + e.id + '" aria-label="Отметка стенда">' + icon('scan') + '</button></div></div>' +
-        '</div>' +
+        D.head({back:'H1', eyebrow:'Экспо', title:esc(e.name), sub:esc(e.what),
+          actions:'<button class="icon-btn' + (isStudied ? ' on' : '') + '" data-act="h2-study" data-arg="' + e.id + '" aria-label="Изучить">' + icon('bookmark') + '</button>' +
+          '<button class="icon-btn" data-go="H7/' + e.id + '" aria-label="Отметка стенда">' + icon('scan') + '</button>'}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
 
         '<div class="card"><div class="card-row">' +
@@ -61,7 +58,7 @@
         '<br><span style="font-family:var(--font-text);font-size:12.5px">карточка стенда на плане — в блоке «Карта»</span></div>' +
 
         '<div style="display:flex;flex-direction:column;gap:10px">' +
-        (e.workshop ? '<button class="btn btn-primary btn-block" data-go="I6/' + e.id + '">' + icon('play') + 'Записаться на воркшоп</button>' : '') +
+        (e.workshop ? '<button class="btn btn-primary btn-block" data-go="H5">' + icon('play') + 'Записаться на воркшоп</button>' : '') +
         '<button class="btn btn-secondary btn-block" data-go="G2">' + icon('route') + 'Встреча на стенде</button>' +
         '<div style="display:flex;gap:8px">' +
         '<button class="btn btn-ghost btn-block" data-act="h2-study" data-arg="' + e.id + '">' + (isStudied ? 'В изученном' : 'Изучить') + '</button>' +
@@ -121,13 +118,9 @@
         '<button class="btn btn-primary btn-sm" data-go="G2">Встреча</button></div></div>').join('');
 
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="B1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">' + esc(F.NOW.dateLong) + '</div><h1>Экспо</h1>' +
-        '<div class="sub">Решения по задачам бизнеса · ' + list.length + ' из ' + F.EXHIBITORS.length + '</div></div>' +
-        '<button class="icon-btn" data-go="H3" aria-label="Изучить">' + icon('bookmark') + '</button></div>' +
-        '<input class="input" type="search" id="h1-q" placeholder="Решение, задача, компания" value="' + esc(st.q) + '" aria-label="Поиск по экспонентам" style="margin-top:10px">' +
-        '</div>' +
+        D.head({eyebrow:esc(F.NOW.dateLong), title:'Экспо', sub:'Решения по задачам бизнеса · ' + list.length + ' ' + D.plural(list.length, ['решение', 'решения', 'решений']) + ' из ' + F.EXHIBITORS.length, actions:'<button class="icon-btn" data-go="H3" aria-label="Мой список">' + icon('bookmark') + '</button>'}) +
+        D.segbar([['H1', 'Решения'], ['H5', 'КипяTALK'], ['K1', 'Партнёры'], ['H3', 'Мой список']], 'H1') +
+        '<div style="padding:0 20px"><input class="input" type="search" id="h1-q" placeholder="Решение, задача, компания" value="' + esc(st.q) + '" aria-label="Поиск по экспонентам"></div>' +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
         '<div class="chips" style="padding-top:0">' + chips + '</div>' +
         '<div class="cap">Найдено решений: ' + list.length + '</div>' +
@@ -207,12 +200,8 @@
         '<button class="btn btn-ghost btn-sm" data-act="h3-unsave" data-arg="' + s.id + '">Убрать</button></div>').join('');
 
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="H1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Экспо</div><h1>Изучить</h1>' +
-        '<div class="sub">Ваш список решений и статусы</div></div></div>' +
-        '</div>' +
-        paren('список попадает в маршрут по Экспо') +
+        D.head({eyebrow:'Экспо', title:'Мой список', sub:'изученные решения и статусы', paren:paren('список попадает в маршрут по Экспо')}) +
+        D.segbar([['H1', 'Решения'], ['H5', 'КипяTALK'], ['K1', 'Партнёры'], ['H3', 'Мой список']], 'H3') +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
         '<div class="chips"><button class="chip' + (st.tab === 'study' ? ' on' : '') + '" data-act="h3-tab" data-arg="study">Изучить · ' + list.length + '</button>' +
         '<button class="chip' + (st.tab === 'saved' ? ' on' : '') + '" data-act="h3-tab" data-arg="saved">Сохранено · ' + savedCount + '</button></div>' +
@@ -313,13 +302,7 @@
         '<text x="240" y="22" font-size="11" fill="var(--ink-dim)">Зона 3</text>' +
         '</svg>';
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="H3" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">' + esc(F.NOW.dateLong) + '</div><h1>Маршрут по Экспо</h1>' +
-        '<div class="sub">' + R.length + ' стендов · около ' + total + ' минут</div></div>' +
-        '<span class="sess-time">' + total + ' мин</span></div>' +
-        '</div>' +
-        paren('время обхода с переходами между зонами') +
+        D.head({back:'H3', eyebrow:esc(F.NOW.dateLong), title:'Маршрут по Экспо', sub:R.length + ' ' + D.plural(R.length, ['стенд', 'стенда', 'стендов']) + ' · около ' + total + ' ' + D.plural(total, ['минута', 'минуты', 'минут']), paren:paren('время обхода с переходами между зонами')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
         '<div class="map-wrap">' + svg + '</div>' +
         '<div class="card" style="padding:4px 16px"><div class="sec-title" style="margin:10px 0 4px">Порядок обхода</div>' + steps + '</div>' +
@@ -328,60 +311,76 @@
     }
   });
 
-  /* ---------- H5 Экспо-расписание ---------- */
+  /* ---------- H5 КипяTALK: расписание круглых столов и воркшопов ---------- */
   D.register('H5', {
     tab: 'H1',
     meta: {
-      title: 'H5 · Экспо-расписание',
+      title: 'H5 · КипяTALK',
       role: 'Гость, выставка',
       fr: ['FR-EXPO-06'],
       ac: ['AC-EXPO-06'],
       what: [
-        'Воркшопы экспонентов на сегодня: время, зал, остаток мест, ваша запись.',
-        'Запись на воркшоп — кнопкой, отмена из списка.',
-        'Переход в карточку экспонента из строки.'
+        'КипяTALK: круглые столы и воркшопы экспонентов по дням фестиваля.',
+        'У каждого стола — ведущий-экспонент (карточка H2), время, ёмкость 8–10, остаток мест.',
+        'Запись кнопкой, отмена из списка; одна запись на событие одновременно.'
       ],
       rules: [
+        'КипяTALK — только у «Экспо Премиум»: 30 минут, круглые столы экспо-зоны, группы 8–10.',
         'Место резервируется при записи; за 10 минут до начала бронь сгорает при неявке.',
-        'Воркшопы идут в залах 2 этажа и Конгресс-центре — переход по матрице.',
-        'Один человек — одна запись на воркшоп одновременно.'
+        'Менторских встреч в расписании нет — они в разделе «Программа» у спикеров.'
       ],
-      depends: ['программа экспо', 'места']
+      depends: ['программа экспо', 'места', 'D-27']
     },
     html(ctx) {
       const st = ctx.state;
+      st.day = st.day || F.NOW.day;
       st.booked = st.booked || {};
-      const rows = F.WORKSHOPS.map(w => {
-        const ex = F.exhibitor(w.ex);
-        const booked = st.booked[w.ex] !== undefined ? st.booked[w.ex] : w.booked;
-        return '<div class="row"><div class="grow"><div class="r-title">' + esc(w.title) + '</div>' +
-          '<div class="r-sub">' + esc(ex ? ex.name : '') + ' · ' + esc(w.time) + ' · ' + esc(F.hall(w.hall).name) + '</div>' +
-          '<div class="cap" style="margin-top:2px">осталось мест: ' + w.left + (booked ? ' · вы записаны' : '') + '</div></div>' +
-          '<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">' +
-          (ex ? '<button class="btn btn-ghost btn-sm" data-go="H2/' + w.ex + '">Экспонент</button>' : '') +
-          '<button class="btn btn-' + (booked ? 'ghost' : 'primary') + ' btn-sm" data-act="h5-book" data-arg="' + w.ex + '">' + (booked ? 'Отменить' : 'Записаться') + '</button></div></div>';
+      const endT = (t, dur) => {
+        const p = t.split(':').map(Number);
+        const m = p[0] * 60 + p[1] + dur;
+        return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+      };
+      const items = F.KIPATALK.filter(k => k.day === st.day);
+      const dayChips = F.DAYS.map(d => {
+        const n = F.KIPATALK.filter(k => k.day === d.id).length;
+        return '<button class="chip' + (d.id === st.day ? ' on' : '') + '" data-act="h5-day" data-arg="' + d.id + '">' + esc(d.label) + (n > 0 ? ' · ' + n : '') + '</button>';
+      }).join('');
+      const rows = items.slice().sort((a, b) => a.time.localeCompare(b.time)).map(k => {
+        const ex = F.exhibitor(k.ex);
+        const key = k.day + '|' + k.ex + '|' + k.time;
+        const booked = !!st.booked[key];
+        const full = k.signed >= k.cap;
+        const kind = k.title.indexOf('Воркшоп') === 0 ? 'Воркшоп' : 'Круглый стол';
+        const name = k.title.replace(/^(Круглый стол|Воркшоп):\s*/, '');
+        const pct = Math.min(100, Math.round(k.signed / k.cap * 100));
+        return '<div class="kt-card"><div class="kt-time"><div class="kt-t">' + esc(k.time) + '</div>' +
+          '<div class="kt-till">до ' + esc(endT(k.time, k.dur)) + '</div></div>' +
+          '<div class="kt-main"><div class="kt-kind">' + kind + '</div>' +
+          '<div class="kt-title">' + esc(name) + '</div>' +
+          (ex ? '<button class="kt-host" data-go="H2/' + k.ex + '">Ведёт: ' + esc(ex.name) + '</button>' : '') +
+          '<div class="kt-seats"><div class="kt-bar"><i style="width:' + pct + '%"></i></div>' +
+          '<span class="kt-seat-txt">мест ' + k.cap + ' · записано ' + k.signed + (booked ? ' · вы записаны' : (full ? ' · мест нет' : '')) + '</span></div>' +
+          '<button class="btn btn-' + (booked ? 'ghost' : 'primary') + ' kt-book" data-act="h5-book" data-arg="' + esc(key) + '"' + (full && !booked ? ' disabled' : '') + '>' + (booked ? 'Отменить запись' : 'Записаться') + '</button></div></div>';
       }).join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="H1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Экспо</div><h1>Расписание</h1>' +
-        '<div class="sub">воркшопы сегодня · ' + F.WORKSHOPS.length + ' событий</div></div></div>' +
-        '</div>' +
-        paren('запись держит место за вами') +
+        D.head({eyebrow:esc(F.NOW.dateLong), title:'КипяTALK', sub:'Круглые столы и воркшопы экспо-зоны · Конгресс-центр', paren:paren('группы 8–10 · запись держит место за вами')}) +
+        D.segbar([['H1', 'Решения'], ['H5', 'КипяTALK'], ['K1', 'Партнёры'], ['H3', 'Мой список']], 'H5') +
+        '<div class="chip-rail">' + dayChips + '</div>' +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
-        '<div class="card" style="padding:2px 16px"><div class="list">' + rows + '</div></div>' +
+        '<div class="card" style="padding:2px 16px"><div class="list">' +
+        (rows || '<div class="empty"><div class="e-title">На этот день событий нет</div><div class="e-text">Выберите другой день.</div></div>') +
+        '</div></div>' +
         '<div class="banner">' + icon('info') + '<div class="cap">Время перехода до зала посчитано по матрице — успевайте к началу.</div></div>' +
         '<div style="height:16px"></div></div></div>';
     }
   });
+  D.action('h5-day', el => { D.st('H5').day = el.dataset.arg; D.rerender(); });
   D.action('h5-book', el => {
     const st = D.st('H5');
     st.booked = st.booked || {};
-    const ex = el.dataset.arg;
-    const w = F.WORKSHOPS.find(x => x.ex === ex);
-    const now = st.booked[ex] === undefined ? w.booked : st.booked[ex];
-    st.booked[ex] = !now;
-    D.toast(now ? 'Запись отменена' : 'Вы записаны — место удерживается');
+    const key = el.dataset.arg;
+    if (st.booked[key]) { delete st.booked[key]; D.toast('Запись отменена'); }
+    else { st.booked[key] = true; D.toast('Вы записаны — место закреплено'); }
     D.rerender();
   });
 
@@ -416,12 +415,7 @@
         '<button class="feed-link" data-go="H1">К экспонентам ' + icon('chevR') + '</button>' +
         '<button class="feed-link" data-act="h6-save" data-arg="' + o.id + '">Сохранить</button></div></div></div>').join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="H1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Экспо</div><h1>Предложения</h1>' +
-        '<div class="sub">адресные офферы на сегодня</div></div></div>' +
-        '</div>' +
-        paren('только проверенные предложения') +
+        D.head({back:'H1', eyebrow:'Экспо', title:'Предложения', sub:'адресные офферы на сегодня', paren:paren('только проверенные предложения')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
         '<div class="card" style="padding:4px 16px"><div class="list">' + rows + '</div></div>' +
         '<div style="height:16px"></div></div></div>';
@@ -452,12 +446,7 @@
     html(ctx) {
       const sc = F.STAND_CHECK;
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="H1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Экспо · Зона 1</div><h1>Стенд ' + esc(sc.stand) + '</h1>' +
-        '<div class="sub">' + esc(sc.name) + '</div></div></div>' +
-        '</div>' +
-        paren('метка привязана к стенду') +
+        D.head({back:'H1', eyebrow:'Экспо · Зона 1', title:'Стенд ' + esc(sc.stand), sub:esc(sc.name), paren:paren('метка привязана к стенду')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="scan-stage" style="min-height:180px">' +
         '<div class="scan-frame"><i class="c"></i></div>' +

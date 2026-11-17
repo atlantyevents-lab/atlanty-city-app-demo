@@ -30,12 +30,7 @@
       const chips = F.SCAN_STATES.map(s =>
         '<button class="chip' + (s.id === st.scan ? ' on' : '') + '" data-act="o1-scan" data-arg="' + s.id + '">' + esc(s.label) + '</button>').join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="P1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Команда · ' + esc(F.NOW.time) + '</div><h1>Допуск</h1>' +
-        '<div class="sub">Скан бейджа на входе</div></div></div>' +
-        '</div>' +
-        paren('три исхода: список, отказ, повтор') +
+        D.head({back:'P1', eyebrow:'Команда · ' + esc(F.NOW.time), title:'Допуск', sub:'Скан бейджа на входе', paren:paren('три исхода: список, отказ, повтор')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="scan-stage">' +
         '<div class="scan-frame"><span class="c"></span><div class="scan-line"></div></div>' +
@@ -88,12 +83,7 @@
           '<button class="btn btn-primary btn-block" style="margin-top:10px" data-act="o2-issued">Код выдан</button></div>'
         : '';
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="O1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Стойка</div><h1>Найти гостя</h1>' +
-        '<div class="sub">поиск по имени, e-mail или билету</div></div></div>' +
-        '</div>' +
-        paren('код входа — на 5 минут') +
+        D.head({back:'O1', eyebrow:'Стойка', title:'Найти гостя', sub:'поиск по имени, e-mail или билету', paren:paren('код входа — на 5 минут')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="row"><input class="input" style="flex:1" placeholder="Имя, e-mail или № билета" data-o2q>' +
         '<button class="btn btn-primary btn-sm" data-act="o2-find">Найти</button></div>' +
@@ -137,12 +127,7 @@
           '<div class="cap">вошло</div></div></div>';
       }).join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="O1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Контроль зала</div><h1>Закрытые сессии</h1>' +
-        '<div class="sub">' + closed.length + ' сессий с ограниченным входом</div></div></div>' +
-        '</div>' +
-        paren('вход по записи или тарифу') +
+        D.head({back:'O1', eyebrow:'Контроль зала', title:'Закрытые сессии', sub:closed.length + ' сессий с ограниченным входом', paren:paren('вход по записи или тарифу')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
         '<div class="card" style="padding:2px 16px"><div class="list">' + rows + '</div></div>' +
         '<button class="btn btn-primary btn-block" data-go="O1">Сканировать гостя</button>' +
@@ -181,12 +166,7 @@
         return '<div class="funnel-row"><span class="fr-label">' + esc(h.name) + '</span><span class="fr-bar"><i style="width:' + pct + '%"></i></span><span class="fr-val">' + h.v + '</span></div>';
       }).join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="O1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Аналитика</div><h1>Допуск</h1>' +
-        '<div class="sub">по дням и точкам входа</div></div></div>' +
-        '</div>' +
-        paren('обновляется по мере сканирования') +
+        D.head({back:'O1', eyebrow:'Аналитика', title:'Допуск', sub:'по дням и точкам входа', paren:paren('обновляется по мере сканирования')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="stat-tiles four">' + d.days.filter(x => !x.future).map(x =>
           '<div class="stat-tile"><span class="num">' + x.entered + '</span><span class="lbl">' + esc(x.day) + ' · из ' + x.expected + '</span></div>').join('') + '</div>' +

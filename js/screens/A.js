@@ -86,14 +86,7 @@
       ).join('');
 
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="A1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div></div>' +
-        '<div style="margin-top:10px"><div class="eyebrow">Шаг 2 из 3</div>' +
-        '<h1>Согласия</h1>' +
-        '<div class="sub">Что приложение может делать с вашими данными</div></div>' +
-        '</div>' +
-        paren('отозвать любое согласие можно в разделе приватности') +
+        D.head({back:'A1', eyebrow:'Шаг 2 из 3', title:'Согласия', sub:'Что приложение может делать с вашими данными', paren:paren('отозвать любое согласие можно в разделе приватности')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card" style="padding:4px 16px">' + rows + '</div>' +
         '<button class="btn btn-primary btn-block" data-go="A6"' + (st.val.pd ? '' : ' disabled') + '>Продолжить</button>' +
@@ -165,14 +158,7 @@
       }
 
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="A4" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div></div>' +
-        '<div style="margin-top:10px"><div class="eyebrow">Шаг 3 из 3</div>' +
-        '<h1>Цели и польза</h1>' +
-        '<div class="sub">По ним подбираем людей и решения</div></div>' +
-        '</div>' +
-        paren('можно изменить в профиле в любой момент') +
+        D.head({back:'A4', eyebrow:'Шаг 3 из 3', title:'Цели и польза', sub:'По ним подбираем людей и решения', paren:paren('можно изменить в профиле в любой момент')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div><div class="sec-title" style="margin-top:0">Мои цели</div>' +
         '<div class="chips" style="flex-wrap:wrap">' + goalChips + '</div></div>' +
@@ -236,14 +222,7 @@
       st.value = st.value != null ? st.value : '';
       const ph = st.mode === 'phone' ? '+7 ___ ___-__-__' : 'name@example.ru';
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="A1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div></div>' +
-        '<div style="margin-top:10px"><div class="eyebrow">Вход</div>' +
-        '<h1>Ваш контакт</h1>' +
-        '<div class="sub">Пришлём код — вход без пароля</div></div>' +
-        '</div>' +
-        paren('код действует 5 минут') +
+        D.head({back:'A1', eyebrow:'Вход', title:'Ваш контакт', sub:'Пришлём код — вход без пароля', paren:paren('код действует 5 минут')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="chips">' +
         '<button class="chip' + (st.mode === 'phone' ? ' on' : '') + '" data-act="a2-mode" data-arg="phone">Телефон</button>' +
@@ -296,14 +275,7 @@
       const boxes = st.digits.map((d, i) =>
         '<input class="code-box' + (st.err ? ' err' : '') + '" inputmode="numeric" maxlength="1" data-code="' + i + '" value="' + esc(d) + '" aria-label="Цифра ' + (i + 1) + '">').join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="A2" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div></div>' +
-        '<div style="margin-top:10px"><div class="eyebrow">Вход</div>' +
-        '<h1>Введите код</h1>' +
-        '<div class="sub">Отправили на контакт из прошлого шага</div></div>' +
-        '</div>' +
-        paren('код действует 5 минут') +
+        D.head({back:'A2', eyebrow:'Вход', title:'Введите код', sub:'Отправили на контакт из прошлого шага', paren:paren('код действует 5 минут')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="code-row">' + boxes + '</div>' +
         (st.err ? '<div class="banner warn">' + icon('info') + '<div class="b-title">Код не подошёл</div><div class="cap">Проверьте цифры и попробуйте ещё раз. Осталось 4 попытки.</div></div>' : '') +
@@ -386,14 +358,7 @@
         '<div class="row" style="align-items:flex-start;padding:10px 0"><span class="a1-num" style="font-size:15px;min-width:34px;color:var(--accent-text)">' + String(i + 1).padStart(2, '0') + '</span>' +
         '<div class="grow"><div style="font-size:14px;line-height:1.45">' + esc(s) + '</div></div></div>').join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="A4" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div></div>' +
-        '<div style="margin-top:10px"><div class="eyebrow">Шаг 4 · необязательно</div>' +
-        '<h1>На экран</h1>' +
-        '<div class="sub">Уведомления и быстрый вход в один тап</div></div>' +
-        '</div>' +
-        paren('можно пропустить и вернуться позже') +
+        D.head({back:'A4', eyebrow:'Шаг 4 · необязательно', title:'На экран', sub:'Уведомления и быстрый вход в один тап', paren:paren('можно пропустить и вернуться позже')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="chips">' +
         '<button class="chip' + (st.os === 'ios' ? ' on' : '') + '" data-act="a5-os" data-arg="ios">iPhone</button>' +
@@ -431,14 +396,7 @@
       const st = ctx.state;
       const linked = !!st.linked;
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="A6" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div></div>' +
-        '<div style="margin-top:10px"><div class="eyebrow">Канал уведомлений</div>' +
-        '<h1>Telegram</h1>' +
-        '<div class="sub">Важные новости и быстрые ответы</div></div>' +
-        '</div>' +
-        paren('можно привязать позже в настройках') +
+        D.head({back:'A6', eyebrow:'Канал уведомлений', title:'Telegram', sub:'Важные новости и быстрые ответы', paren:paren('можно привязать позже в настройках')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card" style="text-align:center;padding:26px 16px">' +
         '<div class="logo-img" style="width:64px;height:64px;border-radius:18px;margin:0 auto 10px;background-size:28px"></div>' +

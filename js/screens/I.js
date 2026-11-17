@@ -32,13 +32,7 @@
         '<div class="toggle-row"><div style="flex:1;min-width:0"><div class="tr-title" style="font-weight:500">' + esc(t) + '</div></div>' +
         '<label class="toggle"><input type="checkbox" data-task="' + i + '"' + (st.taskDone[i] ? ' checked' : '') + '><span class="tr"></span></label></div>').join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="B1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Кабинет · ' + esc(F.NOW.dateLong) + '</div><h1>' + esc(F.EXH.company) + '</h1>' +
-        '<div class="sub">' + esc(F.EXH.what) + ' · пакет ' + esc(F.EXH.pack) + '</div></div>' +
-        '<span class="hb-badge">экспонент</span></div>' +
-        '</div>' +
-        paren('показатели за сегодня, демо-данные') +
+        D.head({back:'B1', eyebrow:'Кабинет · ' + esc(F.NOW.dateLong), title:esc(F.EXH.company), sub:esc(F.EXH.what) + ' · пакет ' + esc(F.EXH.pack), actions:'<span class="hb-badge">экспонент</span>', paren:paren('показатели за сегодня, демо-данные')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="kpi-row">' + kpi.slice(0, 2).map(k =>
           '<div class="kpi-cell"><div class="k">' + esc(k.label) + '</div><div class="v">' + esc(k.value) + '</div><div class="cap">' + esc(k.delta) + '</div></div>').join('') + '</div>' +
@@ -111,13 +105,7 @@
         '<div class="cap" style="margin-top:2px">шаг: ' + esc(c.step) + '</div></div>' +
         '<span class="heat ' + c.heat + '">' + heats[c.heat].toLowerCase().replace(/ые$/, 'ий').replace('холодний', 'холодный') + '</span></div></button>').join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="I1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">' + esc(F.EXH.company) + '</div><h1>Контакты</h1>' +
-        '<div class="sub">' + list.length + ' из ' + F.EXH.contacts.length + ' · получены на фестивале</div></div>' +
-        '<button class="icon-btn" data-act="i2-export" aria-label="Экспорт">' + icon('download') + '</button></div>' +
-        '</div>' +
-        paren('контакты — только с согласием человека') +
+        D.head({back:'I1', eyebrow:esc(F.EXH.company), title:'Контакты', sub:list.length + ' из ' + F.EXH.contacts.length + ' · получены на фестивале', actions:'<button class="icon-btn" data-act="i2-export" aria-label="Экспорт">' + icon('download') + '</button>', paren:paren('контакты — только с согласием человека')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
         '<div class="chips">' + chips + '</div>' +
         rows +
@@ -180,17 +168,12 @@
       }).join('');
 
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="I1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">' + esc(F.EXH.company) + '</div><h1>Аналитика</h1>' +
-        '<div class="sub">Воронка и контакты по часам</div></div></div>' +
-        '</div>' +
-        paren('демо-данные · медиана анонимна') +
+        D.head({back:'I1', eyebrow:esc(F.EXH.company), title:'Аналитика', sub:'Воронка и контакты по часам', paren:paren('демо-данные · медиана анонимна')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="chips">' + chips + '</div>' +
         '<div class="card"><div class="cap" style="margin-bottom:8px">Воронка дня</div>' + funnel + '</div>' +
         '<div class="card"><div class="cap" style="margin-bottom:8px">Контакты по часам</div>' + chart +
-        '<div class="cap" style="margin-top:6px">пик — ' + E.hourly.reduce((a, b) => a.v > b.v ? a : b).h + ':00, ' + E.hourly.reduce((a, b) => a.v > b.v ? a : b).v + ' контактов</div></div>' +
+        '<div class="cap" style="margin-top:6px">пик — ' + E.hourly.reduce((a, b) => a.v > b.v ? a : b).h + ':00, ' + E.hourly.reduce((a, b) => a.v > b.v ? a : b).v + ' ' + D.plural(E.hourly.reduce((a, b) => a.v > b.v ? a : b).v, ['контакт', 'контакта', 'контактов']) + '</div></div>' +
         '<div class="card"><div class="cap" style="margin-bottom:8px">К медиане по экспонентам</div>' + cmp +
         '<div class="cap" style="margin-top:8px">' + esc(E.median.note) + '</div></div>' +
         '<div class="banner">' + icon('info') + '<div class="cap">Сравнение без названий компаний — только агрегированная медиана.</div></div>' +
@@ -228,13 +211,7 @@
       const stageBtns = stages.map(s =>
         '<button class="chip' + (st.stage === s ? ' on' : '') + '" data-act="i3-stage" data-arg="' + s + '">' + esc(s) + '</button>').join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="I2" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Контакт</div><h1>' + esc(c.name) + '</h1>' +
-        '<div class="sub">' + esc(c.company) + ' · ' + esc(c.role) + '</div></div>' +
-        tag(c.heat === 'hot' ? 'горячий' : c.heat === 'warm' ? 'тёплый' : 'холодный', heatTag[c.heat] || '') + '</div>' +
-        '</div>' +
-        paren('этап воронки выбираете вы') +
+        D.head({back:'I2', eyebrow:'Контакт', title:esc(c.name), sub:esc(c.company) + ' · ' + esc(c.role), paren:paren('этап воронки выбираете вы')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card"><div class="cap" style="margin-bottom:6px">Заметка</div>' +
         '<div style="font-size:14px;line-height:1.55">' + esc(c.note) + '</div>' +
@@ -263,7 +240,7 @@
       fr: ['FR-ACC-05'],
       ac: ['AC-ACC-05'],
       what: [
-        'Состав команды экспонента и занятые места квоты: «3 из 5».',
+        'Состав команды экспонента и занятые места квоты: «1 из 2».',
         'Приглашение нового представителя по e-mail.',
         'Статусы: в команде, приглашение отправлено, истекло.'
       ],
@@ -275,18 +252,14 @@
       depends: ['пакеты участия', 'права ролей']
     },
     html(ctx) {
-      const used = 3, total = 5;
+      const used = F.EXH_TEAM.filter(m => m.status === 'в команде').length;
+      const total = F.EXH.pack === 'Экспо Премиум' ? 2 : 1;
       const rows = F.EXH_TEAM.map(m =>
         '<div class="row"><div class="grow"><div class="r-title">' + esc(m.name) + '</div>' +
         '<div class="r-sub">' + esc(m.role) + '</div></div>' +
         '<span class="mc-status ' + (m.status === 'в команде' ? 'ok' : 'wait') + '">' + esc(m.status) + '</span></div>').join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="I1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Кабинет экспонента</div><h1>Команда</h1>' +
-        '<div class="sub">' + esc(F.EXH.company) + ' · пакет ' + esc(F.EXH.pack) + '</div></div></div>' +
-        '</div>' +
-        paren('места квоты — по пакету участия') +
+        D.head({back:'I1', eyebrow:'Кабинет экспонента', title:'Команда', sub:esc(F.EXH.company) + ' · пакет ' + esc(F.EXH.pack), paren:paren('места квоты — по пакету участия')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card accent-edge" style="text-align:center;padding:20px 16px"><div class="cap">представителей в команде</div>' +
         '<div style="font-family:var(--font-display);font-size:44px;color:var(--accent-display)">' + used + ' <span style="font-size:22px;color:var(--ink-dim)">из ' + total + '</span></div>' +
@@ -335,18 +308,13 @@
       const chips = wins.map(w =>
         '<span class="chip' + (w.status === 'taken' ? ' on' : '') + '" style="' + (w.status === 'taken' ? '' : 'opacity:.45') + '">' + esc(w.label) + '</span>').join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="I1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Кабинет экспонента</div><h1>Доступность</h1>' +
-        '<div class="sub">' + esc(F.EXH.company) + ' · стенд А-12</div></div></div>' +
-        '</div>' +
-        paren('окна сегодня и завтра') +
+        D.head({back:'I1', eyebrow:'Кабинет экспонента', title:'Доступность', sub:esc(F.EXH.company) + ' · стенд А-12', paren:paren('окна сегодня и завтра')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card"><div class="cap" style="margin-bottom:8px">Сегодня · свободные и занятые окна</div>' +
         '<div class="chips" style="flex-wrap:wrap">' + chips + '</div></div>' +
         '<div class="banner ok">' + icon('check') + '<div style="flex:1"><div class="b-title">Автопринятие Hosted Buyer</div>' +
         '<div class="cap">' + esc(hb.name) + ' (' + esc(hb.company) + ') — заявки подтверждаются сразу, ' +
-        'обязательных окон: осталось ' + hb.quota.left + ' из ' + hb.quota.total + '.</div></div></div>' +
+        'обязательство: проведено ' + hb.quota.done + ', осталось ' + hb.quota.left + ' из ' + hb.quota.total + '.</div></div></div>' +
         '<div class="toggle-row"><div style="flex:1"><div class="tr-title">Автопринимать приглашённых покупателей</div>' +
         '<div class="tr-sub">только для гостей с бейджем Hosted Buyer</div></div>' +
         '<label class="toggle"><input type="checkbox" checked data-i5auto><span class="tr"></span></label></div>' +
@@ -369,41 +337,51 @@
       fr: ['FR-EXH-04'],
       ac: ['AC-EXH-04'],
       what: [
-        'Создание воркшопа: название, время, зал, лимит мест.',
-        'Список записавшихся участников и их контакты по согласию.',
-        'Статус модерации карточки воркшопа.'
+        'Три окна по 30 минут в роли спикера круглого стола — только пакет «Экспо Премиум».',
+        'Окна распределены поровну между проданными пакетами «Премиум».',
+        'Список записавшихся и перенос окна через менеджера.'
       ],
       rules: [
-        'Лимит мест задаёт экспонент; запись сверх лимита закрыта.',
-        'Список участников виден экспоненту; публично — только число записавшихся.',
-        'Воркшоп публикуется после модерации организатором.'
+        'Воркшопы входят в «Экспо Премиум»: 3 окна по 30 минут, малые группы 8–10.',
+        'Окна делятся между проданными «Премиум» поровну по доступному времени круглых столов.',
+        'Менеджер подтверждает заявку и может переставить окно; записавшиеся видны экспоненту.'
       ],
-      depends: ['модерация программы', 'места']
+      depends: ['D-27', 'пакет «Экспо Премиум»']
     },
     html(ctx) {
       const w = F.EXH_WORKSHOP;
-      const rows = w.signedUp.map((n, i) =>
-        '<div class="row"><div class="grow"><div class="r-title" style="font-size:14px">' + (i + 1) + '. ' + esc(n) + '</div></div>' +
-        '<span class="mc-status ok">записан</span></div>').join('');
-      return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="I1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Кабинет экспонента</div><h1>Воркшоп</h1>' +
-        '<div class="sub">' + esc(F.EXH.company) + '</div></div></div>' +
-        '</div>' +
-        paren('список виден только вам') +
+      const head = parenText => '<div class="scr">' +
+        D.head({back:'I1', eyebrow:'Кабинет экспонента · ' + esc(F.EXH.pack), title:'Воркшоп', sub:esc(F.EXH.company), paren:paren(parenText)});
+      if (F.EXH.pack !== 'Экспо Премиум') {
+        return head('только пакет «Экспо Премиум»') +
+          '<div class="empty topo-host" style="flex:1">' + D.topo() +
+          '<div class="e-title">Воркшопы входят в «Экспо Премиум»</div>' +
+          '<div class="e-text">Три окна по 30 минут в роли спикера круглого стола назначаются только пакетам «Экспо Премиум».</div></div>' +
+          '<div style="height:16px"></div></div>';
+      }
+      const winCards = w.windows.map((win, i) => {
+        const roster = win.list.map(n => '<span class="chip" style="opacity:.85">' + esc(n) + '</span>').join('');
+        return '<div class="card"><div class="card-row"><div class="grow">' +
+          '<div class="r-title" style="font-size:15px">' + esc(win.when) + ' · 30 минут</div>' +
+          '<div class="r-sub">' + esc(w.place) + ' · ' + esc(w.title) + '</div></div>' +
+          '<span class="mc-status ok">' + win.signed + ' из ' + win.cap + '</span></div>' +
+          '<div class="cap" style="margin-top:8px">Записавшиеся: ' + win.signed + ' · в списке ' + win.list.length + '</div>' +
+          '<div class="tags-row" style="margin-top:4px">' + roster + '</div>' +
+          '<div style="margin-top:10px"><button class="btn btn-ghost btn-sm" data-act="i6-move" data-arg="' + i + '">Попросить перенос окна</button></div></div>';
+      }).join('');
+      return head('3 окна по 30 минут · малые группы 8–10') +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
-        '<div class="card"><div class="cap" style="margin-bottom:6px">Ваша заявка на модерации</div>' +
-        '<div class="r-title" style="font-size:15px">' + esc(w.title) + '</div>' +
-        '<div class="r-sub" style="margin-top:4px">' + esc(w.time) + ' · ' + esc(w.hall) + ' · мест: ' + w.signed + ' из ' + w.cap + '</div>' +
-        '<div style="margin-top:8px">' + tag('на модерации', 'wait') + '</div></div>' +
-        '<div class="card"><div class="cap" style="margin-bottom:6px">Записавшиеся · ' + w.signedUp.length + ' показаны</div>' +
-        '<div class="list" style="padding:0">' + rows + '</div></div>' +
-        '<button class="btn btn-secondary btn-block" data-act="i6-new">Создать ещё воркшоп</button>' +
+        '<div class="banner">' + icon('info') + '<div class="cap">Окна распределены поровну между проданными пакетами «Премиум» по доступному времени круглых столов. Тему и описание вы задали в заявке; менеджер подтверждает.</div></div>' +
+        '<div class="sec-title" style="margin-top:4px">Ваши окна</div>' +
+        winCards +
+        '<div class="cap" style="text-align:center">Воркшопы входят в пакет «Экспо Премиум» — без него окна не назначаются.</div>' +
         '<div style="height:16px"></div></div></div>';
     }
   });
-  D.action('i6-new', () => D.toast('Форма создания: название, время, зал, лимит'));
+  D.action('i6-move', el => {
+    const w = F.EXH_WORKSHOP.windows[parseInt(el.dataset.arg, 10)];
+    D.toast(w ? 'Заявка на перенос окна ' + w.when + ' отправлена менеджеру' : 'Окно не найдено');
+  });
 
   /* ---------- I7 Заявки ---------- */
   D.register('I7', {
@@ -443,12 +421,7 @@
           '</div></div>';
       }).join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="I1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Кабинет экспонента</div><h1>Заявки</h1>' +
-        '<div class="sub">входящие запросы на встречу</div></div></div>' +
-        '</div>' +
-        paren('приглашённые покупатели — автоприём') +
+        D.head({back:'I1', eyebrow:'Кабинет экспонента', title:'Заявки', sub:'входящие запросы на встречу', paren:paren('приглашённые покупатели — автоприём')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
         '<div class="banner info">' + icon('info') + '<div class="cap">Сегодня подтверждено встреч: 2 · ожидают решения: 2.</div></div>' +
         '<div class="card" style="padding:2px 16px"><div class="list">' + rows + '</div></div>' +
@@ -485,13 +458,7 @@
     html(ctx) {
       const ex = F.exhibitor('ex01');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="I1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Кабинет экспонента</div><h1>Карточка решения</h1>' +
-        '<div class="sub">' + esc(F.EXH.company) + '</div></div>' +
-        tag('на модерации', 'wait') + '</div>' +
-        '</div>' +
-        paren('правки уходят на повторную проверку') +
+        D.head({back:'I1', eyebrow:'Кабинет экспонента', title:'Карточка решения', sub:esc(F.EXH.company) + ' · ' + esc(F.EXH.pack), paren:paren('правки уходят на повторную проверку')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card"><div class="cap" style="margin-bottom:6px">Название</div>' +
         '<input class="input" value="' + esc(ex.name) + ' — ' + esc(ex.what) + '"></div>' +

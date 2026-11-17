@@ -35,12 +35,9 @@
       const locked = '<span class="lock-note">' + icon('lock') + 'по запросу</span>';
 
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="F1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div class="actions">' +
-        '<button class="icon-btn' + (isSaved ? ' on' : '') + '" data-act="f2-save" data-arg="' + p.id + '" aria-label="Сохранить">' + icon('bookmark') + '</button>' +
-        '<button class="icon-btn" data-go="F7/' + p.id + '" aria-label="QR-визитка">' + icon('qr') + '</button></div></div>' +
-        '</div>' +
+        D.head({back:'F1', eyebrow:'Люди', title:esc(p.name), sub:esc(p.role) + ' · ' + esc(p.company),
+          actions:'<button class="icon-btn' + (isSaved ? ' on' : '') + '" data-act="f2-save" data-arg="' + p.id + '" aria-label="Сохранить">' + icon('bookmark') + '</button>' +
+          '<button class="icon-btn" data-go="F7/' + p.id + '" aria-label="QR-визитка">' + icon('qr') + '</button>'}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
 
         '<div class="card" style="align-items:center;text-align:center;padding:22px 16px">' +
@@ -57,7 +54,7 @@
         '<div class="card"><div class="sec-title" style="margin:0 0 8px">Профиль</div><div class="fgrid">' +
         field('Компания', p.company) + field('Должность', p.role) +
         field('Отрасль', p.industry) + field('Образование', p.edu) +
-        field('Свободные окна', p.free) + field('Telegram', locked, true) +
+        field(p.hb ? 'Встречи по обязательству' : 'Свободные окна', p.hb ? 'осталось ' + p.free : p.free) + field('Telegram', locked, true) +
         field('Телефон', locked, true) +
         '</div></div>' +
 
@@ -86,13 +83,6 @@
 
   /* ---------- F1 Каталог людей ---------- */
   const EXPO_COMPANIES = new Set(F.EXH.contacts.map(c => c.company));
-  function peopleOf(tab) {
-    if (tab === 'speakers') return F.PEOPLE.filter(p => p.tariff === 'Первый класс');
-    if (tab === 'expo') return F.PEOPLE.filter(p => EXPO_COMPANIES.has(p.company));
-    if (tab === 'partners') return F.PEOPLE.filter(p => p.hb || p.goal === 'покупаю' || p.goal === 'инвестирую');
-    return F.PEOPLE;
-  }
-
   D.register('F1', {
     tab: 'F1',
     meta: {
@@ -117,35 +107,32 @@
       st.tab = st.tab || 'all';
       st.q = st.q || '';
       const q = st.q.trim().toLowerCase();
-      let list = peopleOf(st.tab);
+      let list = F.PEOPLE;
       if (q) list = list.filter(p => (p.name + ' ' + p.company + ' ' + p.role + ' ' + p.goal + ' ' + p.industry).toLowerCase().includes(q));
 
       const rows = list.map(p =>
-        '<button class="row clickable" data-go="F2/' + p.id + '">' +
+        '<button class="f1-row" data-go="F2/' + p.id + '">' +
         avatar(p.name, 'sm') +
-        '<div class="grow"><div class="r-title">' + esc(p.name) + (p.hb ? ' <span class="hb-badge">HB</span>' : '') + '</div>' +
-        '<div class="r-sub">' + esc(p.company) + ' · ' + esc(p.role) + '</div>' +
-        '<div class="r-sub">' + esc(p.goal) + ' · свободно ' + esc(p.free) + '</div></div>' +
-        tariffTag(p.tariff) + icon('chevR') + '</button>').join('');
+        '<div class="f1-main"><div class="f1-name">' + esc(p.name) + '</div>' +
+        '<div class="f1-sub">' + esc(p.role) + ' · ' + esc(p.company) + '</div>' +
+        '<div class="f1-tags">' + tariffTag(p.tariff) +
+        (p.hb ? '<span class="f1-tag hb">НВ</span>' : '') +
+        '<span class="f1-tag">' + esc(p.goal) + '</span></div></div>' +
+        '<span class="f1-chev">' + icon('chevR') + '</span></button>').join('');
 
-      const tabs = F.CATALOG_TABS.map(t =>
-        '<button class="chip' + (st.tab === t.id ? ' on' : '') + '" data-act="f1-tab" data-arg="' + t.id + '">' + esc(t.label) + '</button>').join('');
+      const incoming = F.INCOMING_REQS.filter(r => r.status === 'new').length;
 
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="B1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">' + esc(F.NOW.dateLong) + '</div><h1>Люди</h1>' +
-        '<div class="sub">Участники, спикеры, экспоненты и партнёры</div></div>' +
-        '<button class="icon-btn" data-go="F4" aria-label="Входящие заявки">' + icon('bell') + '</button></div>' +
-        '<input class="input" type="search" id="f1-q" placeholder="Имя, компания, цель" value="' + esc(st.q) + '" aria-label="Поиск по людям" style="margin-top:10px">' +
-        '</div>' +
-        '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
-        '<div class="chips">' + tabs + '</div>' +
-        '<div class="cap" style="margin-top:-4px">Найдено: ' + list.length + '</div>' +
-        '<div class="card" style="padding:2px 16px"><div class="list">' +
+        D.head({eyebrow:esc(F.NOW.dateLong), title:'Люди', sub:'Участники, спикеры, встречи',
+          actions:'<button class="icon-btn" data-go="F7" aria-label="Визитка">' + icon('qr') + '</button>' +
+          '<button class="icon-btn" data-go="F4" aria-label="Заявки">' + icon('inbox') + (incoming ? '<span class="ibadge">' + incoming + '</span>' : '') + '</button>'}) +
+        D.segbar([['F1', 'Участники'], ['F9', 'Спикеры'], ['G1', 'Встречи']], 'F1') +
+        '<div style="padding:0 20px"><input class="input" type="search" id="f1-q" placeholder="Имя, компания, цель" value="' + esc(st.q) + '" aria-label="Поиск по людям"></div>' +
+        '<div class="cap" style="margin:10px 20px 0">Найдено: ' + list.length + '</div>' +
+        '<div style="padding:12px 20px 0"><div class="card" style="padding:2px 16px"><div class="list">' +
         (rows || '<div class="empty"><div class="e-title">Никого не нашли</div><div class="e-text">Попробуйте другой запрос или снимите фильтр.</div></div>') +
-        '</div></div>' +
-        '<div style="height:16px"></div></div></div>';
+        '</div></div></div>' +
+        '<div style="height:16px"></div></div>';
     },
     mount(host) {
       const inp = host.querySelector('#f1-q');
@@ -158,8 +145,6 @@
       });
     }
   });
-  D.action('f1-tab', el => { D.st('F1').tab = el.dataset.arg; D.rerender(); });
-
   /* ---------- F3 Заявка на знакомство ---------- */
   D.register('F3', {
     tab: 'F1',
@@ -191,32 +176,22 @@
       const ok = len >= 10 && len <= 280;
 
       if (st.sent) {
-        return '<div class="scr"><div class="scr-head"><div class="head-row"><div>' +
-          '<button class="icon-btn" data-go="F1" aria-label="Назад">' + icon('back') + '</button>' +
-          '<div style="margin-top:10px"><div class="eyebrow">Заявка отправлена</div>' +
-          '<h1>Ждём ответа</h1>' +
-          '<div class="sub">' + esc(p.name) + ' · ' + esc(p.company) + '</div></div>' +
-          '</div></div>' +
-          paren('ответ придёт уведомлением и в раздел заявок') +
-          '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
-          '<div class="banner ok">' + icon('check') + '<div><div class="b-title">Заявка у ' + esc(p.name) + '</div>' +
-          '<div class="cap">«' + esc(st.reason.slice(0, 90)) + (st.reason.length > 90 ? '…' : '') + '»</div></div></div>' +
-          '<div class="banner">' + icon('clock') + '<div class="cap">Обычно отвечают в течение часа. Если окна закончатся — предложим другие.</div></div>' +
-          '<button class="btn btn-primary btn-block" data-go="F1">К каталогу людей</button>' +
-          '<div style="height:16px"></div></div></div>';
+        return '<div class="scr">' +
+        D.head({back:'F1', eyebrow:'Заявка отправлена', title:'Ждём ответа', sub:esc(p.name) + ' · ' + esc(p.company), paren:paren('ответ придёт уведомлением и в раздел заявок')}) +
+        '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
+        '<div class="banner ok">' + icon('check') + '<div><div class="b-title">Заявка у ' + esc(p.name) + '</div>' +
+        '<div class="cap">«' + esc(st.reason.slice(0, 90)) + (st.reason.length > 90 ? '…' : '') + '»</div></div></div>' +
+        '<div class="banner">' + icon('clock') + '<div class="cap">Обычно отвечают в течение часа. Если окна закончатся — предложим другие.</div></div>' +
+        '<button class="btn btn-primary btn-block" data-go="F1">К каталогу людей</button>' +
+        '<div style="height:16px"></div></div></div>';
       }
 
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="F2/' + p.id + '" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Заявка на знакомство</div><h1>Почему вы?</h1>' +
-        '<div class="sub">' + esc(p.name) + ' · ' + esc(p.company) + ' · ' + esc(p.role) + '</div></div></div>' +
-        '</div>' +
-        paren('адресат увидит вашу причину и цель') +
+        D.head({back:'F2/' + p.id, eyebrow:'Заявка на знакомство', title:'Почему вы?', sub:esc(p.name) + ' · ' + esc(p.company) + ' · ' + esc(p.role), paren:paren('адресат увидит вашу причину и цель')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card" style="flex-direction:row;align-items:center;gap:12px;padding:12px 14px">' +
         avatar(p.name, 'sm') + '<div class="grow"><div class="r-title" style="font-size:14px">' + esc(p.name) + '</div>' +
-        '<div class="r-sub">' + esc(p.company) + ' · свободно ' + esc(p.free) + '</div></div></div>' +
+        '<div class="r-sub">' + esc(p.company) + ' · ' + esc(F.freeText(p)) + '</div></div></div>' +
         '<div class="field"><label for="f3-reason">Причина знакомства <span class="cap">· обязательно, до 280 знаков</span></label>' +
         '<textarea class="textarea" id="f3-reason" maxlength="280" placeholder="Что объединяет, что хотите обсудить, какую пользу можете принести">' + esc(st.reason) + '</textarea>' +
         '<div class="counter"><span>' + len + ' / 280</span>' + (len < 10 && len > 0 ? '<span class="cap">· минимум 10 знаков</span>' : '') + '</div></div>' +
@@ -291,19 +266,14 @@
           avatar(p ? p.name : '?', 'sm') +
           '<div class="grow" style="min-width:0"><div class="r-title" style="font-size:14.5px">' + esc(p ? p.name : '') + ' · ' + esc(p ? p.company : '') + '</div>' +
           '<div class="r-sub" style="margin-top:2px">«' + esc(r.reason) + '»</div>' +
-          '<div class="r-sub" style="margin-top:4px">цель: ' + esc(p ? p.goal : '') + ' · свободно ' + esc(p ? p.free : '') + '</div>' + btns + '</div></div></div>';
+          '<div class="r-sub" style="margin-top:4px">цель: ' + esc(p ? p.goal : '') + ' · ' + esc(F.freeText(p)) + '</div>' + btns + '</div></div></div>';
       };
 
       const pending = F.INCOMING_REQS.filter(r => (st.dec[r.id] || r.status) === 'new');
       const rest = F.INCOMING_REQS.filter(r => (st.dec[r.id] || r.status) !== 'new');
 
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="F1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Заявки</div><h1>Входящие</h1>' +
-        '<div class="sub">Знакомства с участниками</div></div></div>' +
-        '</div>' +
-        paren('сегодня принято ' + (accepted + done) + ' из ' + lim.day) +
+        D.head({back:'F1', eyebrow:'Заявки', title:'Входящие', sub:'Знакомства с участниками', paren:paren('сегодня принято ' + (accepted + done) + ' из ' + lim.day)}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
         (pending.length ? pending.map(card).join('') : '<div class="banner ok">' + icon('check') + '<div><div class="b-title">Очередь пуста</div><div class="cap">Новых заявок нет — ответим, когда появятся.</div></div></div>') +
         (rest.length ? '<div class="sec-title">Ранее</div>' + rest.map(card).join('') : '') +
@@ -356,12 +326,7 @@
         '<div class="r-sub">' + esc(F.person('p15').company) + ' · заявка не получила ответа</div></div>' +
         '<span class="mc-status">истекла</span></div>';
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="F1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Знакомства</div><h1>Мои заявки</h1>' +
-        '<div class="sub">отправленные запросы на контакт</div></div></div>' +
-        '</div>' +
-        paren('заявка живёт сутки') +
+        D.head({back:'F1', eyebrow:'Знакомства', title:'Мои заявки', sub:'отправленные запросы на контакт', paren:paren('заявка живёт сутки')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
         '<div class="card" style="padding:2px 16px"><div class="list">' + rows + expired + '</div></div>' +
         '<div class="banner">' + icon('info') + '<div class="cap">Новая заявка доступна из каталога F1 — лимит на количество отправленных проверяется системой.</div></div>' +
@@ -397,17 +362,12 @@
         '<div class="cap" style="margin-top:2px">' + esc(p.company) + '</div>' +
         '<div class="cap" style="margin-top:6px">' + esc(p.goal || 'цель рядом') + '</div></div>' : '';
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="F1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Знакомства</div><h1>Пара дня</h1>' +
-        '<div class="sub">короткий кофе · ' + esc(c.time) + '</div></div></div>' +
-        '</div>' +
-        paren('почему именно эта пара — ниже') +
+        D.head({back:'F1', eyebrow:'Знакомства', title:'Пара дня', sub:'короткий кофе · ' + esc(c.time), paren:paren('почему именно эта пара — ниже')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="grid-2" style="gap:10px">' + card(pa) + card(pb) + '</div>' +
         '<div class="card"><div class="cap" style="margin-bottom:8px">Почему вы можете быть полезны друг другу</div>' +
         c.reasons.map(r => '<div class="row" style="padding:6px 0"><span class="feed-kind"></span><div class="r-sub">' + esc(r) + '</div></div>').join('') + '</div>' +
-        '<div class="banner">' + icon('pin') + '<div class="cap">Точка: ' + esc(c.point) + ' · переход от вашего зала — ' + (F.travelMin('magnolia','magnolia') || '—') + ' мин</div></div>' +
+        '<div class="banner">' + icon('pin') + '<div class="cap">Точка: ' + esc(c.point) + ' · короткий переход от вашего зала</div></div>' +
         '<button class="btn btn-primary btn-block" data-act="f6-send">' + icon('chat') + 'Предложить кофе</button>' +
         '<button class="btn btn-ghost btn-block" data-act="f6-skip">Пропустить сегодня</button>' +
         '<div style="height:16px"></div></div></div>';
@@ -444,12 +404,7 @@
         '<label class="toggle-row" style="cursor:pointer"><div class="tr-title" style="font-weight:500;font-size:14px">' + l + '</div>' +
         '<span class="toggle"><input type="checkbox" data-f7f="' + k + '"' + (f[k] ? ' checked' : '') + '><span class="tr"></span></span></label>').join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="F1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Контакты</div><h1>QR-визитка</h1>' +
-        '<div class="sub">обмен без поиска в каталоге</div></div></div>' +
-        '</div>' +
-        paren('показывайте код — или сканируйте чужой') +
+        D.head({back:'F1', eyebrow:'Контакты', title:'QR-визитка', sub:'обмен без поиска в каталоге', paren:paren('показывайте код — или сканируйте чужой')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="qr-box"><div class="qr" data-qr="f7" style="width:150px;height:150px"></div>' +
         '<div class="qr-caption">' + esc(F.ME.name) + ' · ' + esc(F.ME.company) + '</div>' +
@@ -517,14 +472,9 @@
         '<div class="row"><div class="grow" style="display:flex;gap:10px;align-items:center">' + avatar(c.name, 'sm accent') +
         '<div><div class="r-title">' + esc(c.name) + ' ' + tag(c.tag, c.tag === 'горячий' ? 'urgent' : (c.tag === 'тёплый' ? 'accent' : '')) + '</div>' +
         '<div class="r-sub">' + esc(c.company) + ' · ' + esc(c.note) + '</div>' +
-        '<div class="cap" style="margin-top:2px">' + esc(c.when) + '</div></div></div>' + icon('chevR') + '</div></div>').join('');
+        '<div class="cap" style="margin-top:2px">' + esc(c.when) + '</div></div></div>' + icon('chevR') + '</div>').join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="F1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Контакты</div><h1>Мои контакты</h1>' +
-        '<div class="sub">' + F.MY_CONTACTS.length + ' человека · по согласию</div></div></div>' +
-        '</div>' +
-        paren('заметки видны только вам') +
+        D.head({back:'F1', eyebrow:'Контакты', title:'Мои контакты', sub:F.MY_CONTACTS.length + ' ' + D.plural(F.MY_CONTACTS.length, ['человек', 'человека', 'человек']) + ' · по согласию', paren:paren('заметки видны только вам')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
         '<div class="chips">' + chips + '</div>' +
         '<div class="card" style="padding:2px 16px"><div class="list">' + rows + '</div></div>' +
@@ -534,4 +484,63 @@
   });
   D.action('f8-filter', el => { D.st('F8').f = el.dataset.arg; D.rerender(); });
   D.action('f8-export', () => D.toast('Файл контактов сформирован — в демо загрузка не выполняется'));
+
+  /* ---------- F9 Спикеры ---------- */
+  D.register('F9', {
+    tab: 'F1',
+    meta: {
+      title: 'F9 · Спикеры',
+      role: 'Гость, каталог спикеров',
+      fr: ['FR-PROG-07'],
+      ac: ['AC-PROG-07'],
+      what: [
+        'Все спикеры фестиваля: имя, роль, компания, рычаг, число сессий.',
+        'Менторы отмечены бейджем; окна менторских встреч — в карточке C5 и виде «Менторские».',
+        'Фильтр по рычагу и поиск по имени или компании.'
+      ],
+      rules: ['Спикер без сессий не показывается — каталог строится по связям с программой.',
+        'Все люди и компании вымышленные.']
+    },
+    html(ctx) {
+      const st = ctx.state;
+      const f = st.f || (st.f = { lever: 'all', q: '' });
+      const q = (f.q || '').toLowerCase();
+      let keys = Object.keys(F.SPEAKERS);
+      if (f.lever !== 'all') keys = keys.filter(k => F.SPEAKERS[k].lever === f.lever);
+      if (q) keys = keys.filter(k => {
+        const p = F.SPEAKERS[k];
+        return (p.name + ' ' + p.company + ' ' + p.role).toLowerCase().indexOf(q) >= 0;
+      });
+      keys.sort((a, b) => F.SPEAKERS[a].name.localeCompare(F.SPEAKERS[b].name, 'ru'));
+      const rows = keys.map(k => {
+        const p = F.SPEAKERS[k];
+        const ns = F.speakerSessions(k).length;
+        const mw = F.mentorWindows(k).length;
+        return '<button class="row clickable" data-go="C5/' + k + '"><div class="grow">' +
+          '<div class="r-title">' + esc(p.name) + (mw ? ' <span class="tag" style="font-size:10px">ментор</span>' : '') + '</div>' +
+          '<div class="r-sub">' + esc(p.role) + ' · ' + esc(p.company) + '</div>' +
+          '<div class="sess-meta" style="margin-top:4px"><span class="tag accent">' + esc(p.lever || '') + '</span>' +
+          '<span class="cap">' + ns + ' ' + D.plural(ns, ['сессия', 'сессии', 'сессий']) + ' · ' + (mw ? mw + ' ' + D.plural(mw, ['окно', 'окна', 'окон']) + ' менторства' : 'без менторства') + '</span></div></div>' + icon('chevR') + '</button>';
+      }).join('');
+      const chips = ['all'].concat(F.LEVERS).map(l =>
+        '<button class="chip' + (f.lever === l ? ' on' : '') + '" data-act="f9-lever" data-arg="' + esc(l) + '">' + (l === 'all' ? 'Все рычаги' : esc(l)) + '</button>').join('');
+      const incoming = F.INCOMING_REQS.filter(r => r.status === 'new').length;
+      const secActions = '<button class="icon-btn" data-go="F7" aria-label="Визитка">' + icon('qr') + '</button>' +
+        '<button class="icon-btn" data-go="F4" aria-label="Заявки">' + icon('inbox') + (incoming ? '<span class="ibadge">' + incoming + '</span>' : '') + '</button>';
+      return '<div class="scr">' +
+        D.head({eyebrow:'Люди', title:'Спикеры', sub:keys.length + ' ' + D.plural(keys.length, ['человек', 'человека', 'человек']) + ' · ' + F.MENTORS.length + ' ' + D.plural(F.MENTORS.length, ['окно', 'окна', 'окон']) + ' менторства', actions:secActions, paren:paren('менторские встречи — только через карточки спикеров')}) +
+        D.segbar([['F1', 'Участники'], ['F9', 'Спикеры'], ['G1', 'Встречи']], 'F9') +
+        '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
+        '<input class="input" type="search" id="f9-q" placeholder="Имя, компания, роль" value="' + esc(f.q || '') + '" aria-label="Поиск спикера">' +
+        '<div class="chip-rail" style="margin:0 -20px;padding:0 20px 2px"><div class="chips" style="padding-top:0">' + chips + '</div></div>' +
+        '<div class="card" style="padding:2px 16px"><div class="list">' +
+        (rows || '<div class="empty"><div class="e-title">Никого не нашли</div><div class="e-text">Измените запрос или снимите фильтр рычага.</div></div>') +
+        '</div></div><div style="height:16px"></div></div></div>';
+    },
+    mount(host) {
+      const inp = host.querySelector('#f9-q');
+      if (inp) inp.addEventListener('input', () => { D.st('F9').f.q = inp.value; D.rerender(); });
+    }
+  });
+  D.action('f9-lever', el => { D.st('F9').f.lever = el.dataset.arg; D.rerender(); });
 })();

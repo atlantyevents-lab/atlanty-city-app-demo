@@ -124,6 +124,15 @@
   /* цвета внутри градиентных карточек тарифов: БИЗНЕС (оранжевая) и ПЕРВЫЙ КЛАСС (тёмно-оранжевая) */
   --biz-price: var(--raw-ink-900); --biz-dim: #3a2a22; --biz-star: var(--raw-ink-900); --biz-btn-bg: var(--raw-white); --biz-btn-ink: var(--raw-orange-ink); --biz-line: rgba(27, 21, 18, .35);
   --fc-price: var(--raw-white); --fc-dim: #f3dccf; --fc-star: #ffd2b8; --fc-btn-bg: var(--raw-white); --fc-btn-ink: var(--raw-orange-deep-2); --fc-line: rgba(255, 255, 255, .4);
+  /* палитра карты (светлая) */
+  --map-bg: #f2efe9;
+  --map-water: #cfdae1;
+  --map-building: #ddd8d0;
+  --map-bstroke: #b3aa9c;
+  --map-parking: #e7e3da;
+  --map-trail: #e24000;
+  --map-trail-op: .7;
+  --map-route: #e24000;
 }
 /* Лето: тёмная, чёрно-оранжевая (значения v1) */
 :root[data-theme="summer"] {
@@ -187,6 +196,15 @@
   --accent-on-dark: var(--raw-orange-500);
   --biz-price: var(--raw-orange-500); --biz-dim: var(--raw-sand-300); --biz-star: var(--raw-orange-500); --biz-btn-bg: var(--raw-orange-500); --biz-btn-ink: var(--raw-black-000); --biz-line: var(--line);
   --fc-price: var(--raw-orange-500); --fc-dim: var(--raw-sand-300); --fc-star: var(--raw-orange-500); --fc-btn-bg: var(--raw-orange-500); --fc-btn-ink: var(--raw-black-000); --fc-line: var(--line);
+  /* палитра карты (тёмная) */
+  --map-bg: #171310;
+  --map-water: #16314d;
+  --map-building: #3a322b;
+  --map-bstroke: #5a4d42;
+  --map-parking: #201a15;
+  --map-trail: #fd5000;
+  --map-trail-op: .5;
+  --map-route: #fd5000;
 }
 
 /* Роли, общие для тем: оранжевый связывает Зиму и Лето */

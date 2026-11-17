@@ -1,159 +1,450 @@
-/* Блок E — карта. Фаза B: E1 «План Завидово», E4 «Маршрут». */
+/* Блок E — карта Завидово: E1 векторная карта, E6 бухта, E7 аэрофото,
+   E2 план этажа, E3 точка, E4/E5 маршруты. Данные: assets/map/*. */
 (function () {
-  const D = window.Demo, F = window.FIX;
+  const D = window.Demo, F = window.FIX, MAP = window.MAP;
   const { esc, icon, paren, tag } = D;
+  const PUBLIC = !!window.DEMO_PUBLIC;
 
-  /* демонстрационная SVG-схема: обводы зданий, зоны, топография фоном */
-  function mapSVG(opts) {
-    const zones = F.MAP_ZONES;
-    const layer = opts.layer || 'halls';
-    let zonesHtml = zones.map(z => {
-      const on = layer === 'all' || layer === 'halls' || layer === z.id || (layer === 'stands' && z.id === 'expo');
-      const stroke = on ? 'var(--accent-edge)' : 'var(--line)';
-      const fill = on ? 'var(--surface-2)' : 'var(--card)';
-      return '<g>' +
-        '<rect x="' + z.x + '" y="' + z.y + '" width="' + z.w + '" height="' + z.h + '" rx="14" fill="' + fill + '" stroke="' + stroke + '" stroke-width="1.5"/>' +
-        '<text x="' + (z.x + 14) + '" y="' + (z.y + 30) + '" font-family="Bebas, sans-serif" font-size="21" letter-spacing="2" fill="var(--ink)">' + esc(z.name.toUpperCase()) + '</text>' +
-        '<text x="' + (z.x + 14) + '" y="' + (z.y + 52) + '" font-family="Raleway, sans-serif" font-size="12.5" fill="var(--ink-dim)">' + esc(z.note) + '</text>' +
-        '</g>';
-    }).join('');
+  const GEO = { w: 36.48777, s: 56.5775, e: 36.56723, n: 56.6125 };
+  const BAY_WIN = { w: 36.511, s: 56.5835, e: 36.529, n: 56.5995 };
 
-    /* дорожки графа (демо) */
-    const paths = [
-      'M170 210 V250', 'M290 135 H330', 'M450 230 V270', 'M570 135 H620',
-      'M290 320 H330', 'M760 210 V330', 'M450 320 H620'
-    ].map(d => '<path d="' + d + '" stroke="var(--line)" stroke-width="2" stroke-dasharray="5 5" fill="none"/>').join('');
+  function segMap(active) {
+    const segs = [['E1', 'Курорт'], ['E6', 'Бухта']];
+    if (!PUBLIC) segs.push(['E7', 'Вид сверху']);
+    return D.segbar(segs, active);
+  }
 
-    /* точки интереса по слоям */
-    let dots = '';
-    if (layer === 'food' || layer === 'all') {
-      dots += '<circle cx="170" cy="300" r="7" fill="var(--accent-solid)"/><text x="186" y="305" font-size="12" fill="var(--ink)">кафе у Эдельвейса</text>';
-      dots += '<circle cx="760" cy="120" r="7" fill="var(--accent-solid)"/><text x="776" y="125" font-size="12" fill="var(--ink)">столовая Конгресс-центра</text>';
-    }
-    if (layer === 'svc' || layer === 'all') {
-      dots += '<circle cx="170" cy="110" r="7" fill="var(--accent-solid)"/><text x="186" y="115" font-size="12" fill="var(--ink)">стойка регистрации</text>';
-      dots += '<circle cx="450" cy="120" r="7" fill="var(--accent-solid)"/><text x="466" y="125" font-size="12" fill="var(--ink)">медпункт</text>';
-      dots += '<circle cx="620" cy="380" r="7" fill="var(--accent-solid)"/><text x="520" y="404" font-size="12" fill="var(--ink)">гардероб Экспо</text>';
-    }
-    if (layer === 'stands' || layer === 'all') {
-      for (let i = 0; i < 12; i++) {
-        const x = 645 + (i % 4) * 62, y = 95 + Math.floor(i / 4) * 62;
-        dots += '<rect x="' + x + '" y="' + y + '" width="40" height="30" rx="4" fill="var(--surface-2)" stroke="var(--line)"/>' +
-          '<text x="' + (x + 20) + '" y="' + (y + 19) + '" font-size="10" text-anchor="middle" fill="var(--ink-dim)">' + (i + 1) + '</text>';
+  /* метки точек для листа: id метки -> что здесь и какие залы программы рядом */
+  const PIN_INFO = {
+    pin_bay: { what: 'Главная бухта: набережная, яхт-клуб и основной отель. Здесь Конгресс-центр, Рэдиссон и зал основного отеля — программа фестиваля.', halls: ['congress', 'ballroomB', 'ballroomS', 'doybitsa', 'sobol', 'edelveis', 'magnolia'] },
+    pin_yacht: { what: 'Яхт-клуб и причалы. В программе фестиваля залы не привязаны — активности и сервисы курорта.', halls: [] },
+    pin_park: { what: 'Семейный парк. В программе фестиваля залы не привязаны — активности и сервисы курорта.', halls: [] },
+    pin_banya: { what: 'Бани и причал. В программе фестиваля залы не привязаны — активности и сервисы курорта.', halls: [] },
+    pin_yamskaya: { what: 'Ямская слобода — историческая зона курорта. В программе фестиваля залы не привязаны.', halls: [] },
+    pin_aqua: { what: 'Мультиспорт «Акватория лета». В программе фестиваля залы не привязаны — активности и сервисы курорта.', halls: [] },
+    pin_ski: { what: 'Горка — зимняя трасса. В программе фестиваля залы не привязаны — активности и сервисы курорта.', halls: [] },
+    pin_river: { what: 'Речной вокзал (строится). В программе фестиваля залы не привязаны.', halls: [] },
+    pin_golf: { what: 'Гольф-клуб. В программе фестиваля залы не привязаны — активности и сервисы курорта.', halls: [] },
+    pin_yamles: { what: 'Ямской лес. В программе фестиваля залы не привязаны — активности и сервисы курорта.', halls: [] }
+  };
+
+  function todayHallsHtml(hallIds) {
+    if (!hallIds.length) return '';
+    const rows = F.sessionsOf('27.02').filter(s => hallIds.includes(s.hall));
+    if (!rows.length) return '';
+    return '<div class="cap" style="margin-top:6px">Сегодня в программе:</div>' +
+      rows.slice(0, 6).map(s =>
+        '<button class="row clickable" data-go="C3/' + s.id + '"><div class="grow"><div class="r-sub">' + esc(s.time) + ' · ' + esc(s.title) + '</div></div>' + icon('chevR') + '</button>').join('');
+  }
+
+  function pointSheet(pin) {
+    const info = PIN_INFO[pin.id] || { what: 'Точка курорта Завидово.', halls: [] };
+    const you = pin.coords; // [lon,lat] метки
+    const bay = [36.520199, 56.590251];
+    const km = MAP.distKm(bay, you);
+    const mins = MAP.walkMin(km);
+    const halls = (info.halls || []).map(id => F.hall(id)).filter(Boolean);
+    D.openSheet(
+      '<div class="sheet-title">' + esc(pin.label || pin.id) + '</div>' +
+      '<div class="cap" style="margin:4px 0 10px">' + esc(info.what) + '</div>' +
+      (halls.length ? '<div class="cap" style="margin-bottom:4px">Залы программы:</div>' +
+        halls.map(h => '<button class="row clickable" data-go="E3/' + h.id + '"><div class="grow"><div class="r-title" style="font-size:14px">' + esc(h.name) + '</div><div class="r-sub">' + esc(h.place) + '</div></div>' + icon('chevR') + '</button>').join('') : '') +
+      todayHallsHtml(info.halls || []) +
+      '<div class="cap" style="margin-top:10px">Пешком от «Вы здесь»: около ' + mins + ' ' + D.plural(mins, ['минуты', 'минут', 'минут']) + ' · демо-расчёт по расстоянию (4,5 км/ч)</div>' +
+      '<div style="display:flex;gap:8px;margin-top:14px">' +
+      '<button class="btn btn-primary" style="flex:1" data-act="e-route-to" data-arg="' + esc(pin.id) + '">' + icon('route') + 'Маршрут</button>' +
+      (halls.length ? '<button class="btn btn-ghost" style="flex:1" data-go="C1">В программу</button>' : '') +
+      '</div>');
+  }
+  D.action('e-route-to', el => { location.hash = '#/E4/' + el.dataset.arg; });
+
+  /* Общий монтаж карты: html() отдаёт контейнер, mount() догружает данные */
+  function mountMap(host, sel, build) {
+    MAP.load().then(({ g, lw }) => {
+      const el = host.querySelector(sel);
+      if (!el) return;
+      build(el, g, lw);
+    });
+  }
+
+  function pinsFromGeo(g, win) {
+    const { P } = MAP.proj(win);
+    const out = [];
+    g.features.forEach(f => {
+      if (f.properties && f.properties.kind === 'map_pin') {
+        const c = f.geometry.coordinates, p = P(c[0], c[1]);
+        out.push({ id: f.properties.id, num: f.properties.pin_number, label: f.properties.label_public, x: p[0], y: p[1], coords: c });
       }
-      dots += '<text x="645" y="330" font-size="12" fill="var(--ink-dim)">стенды Экспо, зоны 1–3</text>';
-    }
-
-    const route = opts.route ?
-      '<path class="route-line" d="M80 420 C 200 420 260 300 330 240 S 500 160 620 140"/>' +
-      '<circle class="route-dot" cx="80" cy="420" r="8"/>' +
-      '<circle class="route-dot" cx="620" cy="140" r="8"/>' +
-      '<text x="80" y="440" font-size="12" font-weight="700" fill="var(--accent-text)">Вы здесь</text>' +
-      '<text x="560" y="128" font-size="12" font-weight="700" fill="var(--accent-text)">Цель</text>' : '';
-
-    /* топография фоном: тот же mask-слой внутри svg через foreignObject нельзя — кладём отдельным div поверх */
-    return zonesHtml + paths + dots + route;
+    });
+    return out.sort((a, b) => a.num - b.num);
   }
 
-  function mapBlock(layer, route) {
-    return '<div class="map-wrap topo-host">' + D.topo() +
-      '<svg viewBox="0 0 900 470" role="img" aria-label="Демонстрационная схема площадки Завидово">' +
-      '<rect width="900" height="470" fill="var(--card)"/>' +
-      mapSVG({ layer, route }) +
-      '<text x="24" y="452" font-size="11" fill="var(--ink-dim)">схема демонстрационная · не к масштабу</text>' +
-      '</svg></div>';
+  function mapFrame(id, height) {
+    return '<div class="mapview" id="' + id + '" style="height:' + (height || 380) + 'px"><div class="mv-loading">Загружаю карту…</div></div>' +
+      '<div class="map-tools">' +
+      '<button class="icon-btn" data-act="map-zoom" data-arg="1.4" data-map="' + id + '" aria-label="Приблизить">+</button>' +
+      '<button class="icon-btn" data-act="map-zoom" data-arg="0.7" data-map="' + id + '" aria-label="Отдалить">−</button>' +
+      '<button class="icon-btn" data-act="map-reset" data-map="' + id + '" aria-label="Сбросить вид">' + icon('pin') + '</button>' +
+      '</div>' +
+      '<div class="cap" style="padding:0 20px">© OpenStreetMap contributors (ODbL)</div>';
   }
+  D.action('map-zoom', el => {
+    const m = document.querySelector('#' + el.dataset.map);
+    if (m && m._map) m._map.zoomBy(+el.dataset.arg);
+  });
+  D.action('map-reset', el => {
+    const m = document.querySelector('#' + el.dataset.map);
+    if (m && m._map) m._map.fit();
+  });
 
-  /* ---------- E1 План Завидово ---------- */
+  /* ---------- E1 Курорт ---------- */
   D.register('E1', {
-    tab: 'MORE',
+    tab: 'E1',
     meta: {
-      title: 'E1 · План Завидово',
+      title: 'E1 · Карта',
       role: 'Гость / участник',
       fr: ['FR-MAP-01', 'FR-MAP-02', 'FR-MAP-03'],
       ac: ['AC-MAP-01', 'AC-MAP-03'],
       what: [
-        'Схема площадки: обводы зданий с реальными названиями (Основной отель с Эдельвейсом и Магнолией, Конгресс-центр, Рэдиссон с Баллрумом, Экспо).',
-        'Слой топографии слабым фоном; чипы слоёв: залы, питание, сервисы, стенды.',
-        'Подпись «схема демонстрационная» — планов в проекте нет.'
+        'Векторная карта курорта Завидово из OpenStreetMap: тропы, вода, здания, парковки.',
+        'Десять нумерованных площадок; тап по метке открывает карточку точки.',
+        'Слои «Площадки / Парковки / Тропы», масштаб, перемещение, сброс вида.'
       ],
       rules: [
-        'Привязка объектов к залам и стендам — по идентификаторам hall_id, stand_id, space_id.',
-        'Карта и граф кэшируются для работы без сети.',
-        'Схема демонстрационная: обводы условные, названия и ёмкости настоящие.'
-      ],
-      depends: ['O-06', 'планы корпусов от команды']
-    },
-    html(ctx) {
-      const st = ctx.state;
-      st.layer = st.layer || 'halls';
-      const chips = F.MAP_LAYERS.map(l =>
-        '<button class="chip map-chip' + (st.layer === l.id ? ' on' : '') + '" data-act="e1-layer" data-arg="' + l.id + '">' + esc(l.label) + '</button>').join('');
-      const legend = F.HALLS.slice(0, 5).map(h => tag(h.name + ' · ' + h.place.split(',')[0])).join(' ');
-      return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="B1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">' + esc(F.NOW.dateLong) + '</div><h1>План Завидово</h1>' +
-        '<div class="sub">Корпуса и зоны площадки</div></div>' +
-        '<button class="icon-btn" data-act="e1-search" aria-label="Поиск на плане">' + icon('search') + '</button></div>' +
-        '</div>' +
-        paren('схема демонстрационная, планы даст команда') +
-        '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
-        '<div class="chips" style="padding-top:0">' + chips + '</div>' +
-        mapBlock(st.layer, false) +
-        '<div class="map-legend">' + legend + '</div>' +
-        '<div class="card"><div class="sec-title" style="margin:0 0 4px">Быстрые переходы</div><div class="list">' +
-        F.HALLS.slice(0, 4).map(h =>
-          '<button class="row clickable" data-go="E4">' + icon('pin') + '<div class="grow"><div class="r-title" style="font-size:14px">' + esc(h.name) + '</div><div class="r-sub">' + esc(h.place) + ' · до ' + h.cap + '</div></div>' + icon('chevR') + '</button>').join('') +
-        '</div></div>' +
-        '<div style="height:16px"></div></div></div>';
-    }
-  });
-  D.action('e1-layer', el => { D.st('E1').layer = el.dataset.arg; D.rerender(); });
-  D.action('e1-search', () => D.toast('Поиск по плану — в следующей фазе'));
-
-  /* ---------- E4 Маршрут ---------- */
-  D.register('E4', {
-    tab: 'MORE',
-    meta: {
-      title: 'E4 · Маршрут',
-      role: 'Гость / участник',
-      fr: ['FR-MAP-04', 'FR-MAP-02'],
-      ac: ['AC-MAP-02'],
-      what: [
-        'Построенный маршрут между двумя точками: «Вы здесь» и «Цель» на схеме.',
-        'Время пешком и описание пути по дорожкам и входам.',
-        'Лист с деталями маршрута и альтернативой.'
-      ],
-      rules: [
-        'Маршрут строится по графу дорожек и входов; время — из матрицы переездов.',
-        'Точка «я здесь» — по геопозиции или выбору на плане (в демо — задана).',
-        'Схема демонстрационная.'
+        'Данные карты — OpenStreetMap (ODbL), атрибуция на экране.',
+        'Положения меток — по данным проекта; расстояния «пешком» — демо-расчёт 4,5 км/ч.',
+        'Планы корпусов (O-06) будут позже — это карта территории, не план зданий.'
       ],
       depends: ['O-06']
     },
     html(ctx) {
-      const R = F.ROUTE_DEMO;
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="E1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">' + esc(F.NOW.dateLong) + '</div><h1>Маршрут</h1>' +
-        '<div class="sub">' + esc(R.from) + ' › ' + esc(R.to) + '</div></div>' +
-        '<span class="sess-time">' + R.min + ' мин</span></div>' +
-        '</div>' +
-        paren('время пешком по графу дорожек') +
-        '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
-        mapBlock('halls', true) +
-        '<div class="card"><div class="card-title" style="font-size:15px">' + esc(R.from) + ' › ' + esc(R.to) + '</div>' +
-        '<div class="cap">' + esc(R.path) + ' · около ' + R.min + ' минут пешком</div>' +
-        '<div class="card-foot"><span class="cap">обновлено по текущей точке</span>' +
-        '<button class="btn btn-ghost btn-sm" data-act="e4-alt">Другой вход</button></div></div>' +
-        '<div class="card"><div class="sec-title" style="margin:0 0 4px">Следующая точка</div>' +
-        '<div class="row" data-go="E1"><div class="grow"><div class="r-title" style="font-size:14px">Эдельвейс · сессия в 11:35</div><div class="r-sub">Магнолия › Эдельвейс: 4 мин по матрице</div></div>' + icon('chevR') + '</div></div>' +
-        '<div style="height:16px"></div></div></div>';
+        D.head({eyebrow:'Карта · ' + esc(F.NOW.dateLong), title:'Карта', sub:'Курорт Завидово · векторная карта', paren:paren('данные OpenStreetMap · демо-расчёт расстояний')}) +
+        segMap('E1') +
+        '<div class="mapview" id="mv-e1"><div class="mv-loading">Загружаю карту…</div></div>' +
+        '<div class="mv-layers chip-rail">' +
+        '<button class="chip on" data-layer="trail"><i class="ck"></i>Тропы</button>' +
+        '<button class="chip on" data-layer="parking"><i class="ck"></i>Парковки</button>' +
+        '<button class="chip on" data-layer="water"><i class="ck"></i>Вода</button>' +
+        '<button class="chip on" data-layer="building"><i class="ck"></i>Здания</button></div>' +
+        '<div class="card" style="margin:10px 20px 0"><div class="sec-title" style="margin:0 0 4px">Площадки</div><div id="e1-places"></div></div>' +
+        '<div style="padding:10px 20px 0"><button class="btn btn-ghost btn-block" data-act="e1-list">Список площадок</button></div>' +
+        '<div style="height:16px;margin:0 20px"></div></div>';
+    },
+    mount(host) {
+      mountMap(host, '#mv-e1', (el, g) => {
+        const pins = pinsFromGeo(g, GEO);
+        const bay = pins.find(p => p.id === 'pin_bay');
+        const world = MAP.worldSVG(g, GEO);
+        el.style.height = Math.round(el.clientWidth * world.H / world.W) + 24 + 'px';
+        const ctl = '<button class="mv-btn" data-act="e1-list" aria-label="Список площадок"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8.5 6h12M8.5 12h12M8.5 18h12"/><circle cx="4.2" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.2" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.2" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg></button>';
+        const api = MAP.mount(el, {
+          onPin: id => { const p = pins.find(x => x.id === id); if (p) pointSheet(p); },
+          pins: pins.map(p => { const q = world.P(p.coords[0], p.coords[1]); return { id: p.id, num: p.num, label: p.label, x: q[0], y: q[1] }; }),
+          youAre: bay ? (() => { const q = world.P(bay.coords[0], bay.coords[1]); return { x: q[0], y: q[1] }; })() : null,
+          pad: 12,
+          avoidPin: 'pin_bay',
+          decluster: true,
+          ctl: ctl
+        });
+        api._setP(world.P);
+        api.build(world);
+        el._map = api;
+        const pl = host.querySelector('#e1-places');
+        if (pl) pl.innerHTML = pins.map(p =>
+          '<button class="row clickable" data-act="e1-pin" data-arg="' + p.id + '"><div class="grow"><div class="r-title" style="font-size:14px;display:flex;align-items:center;gap:10px"><span class="e1-pn">' + p.num + '</span>' + esc(p.label || p.id) + '</div></div>' + icon('chevR') + '</button>').join('');
+        /* чипы слоёв лежат под картой — вешаем переключение здесь */
+        host.querySelectorAll('.mv-layers [data-layer]').forEach(c => {
+          c.addEventListener('click', () => {
+            const gEl = el.querySelector('.mv-l[data-layer="' + c.dataset.layer + '"]');
+            const on = gEl.getAttribute('data-off') !== '1';
+            gEl.setAttribute('data-off', on ? '1' : '0');
+            gEl.style.display = on ? 'none' : '';
+            c.classList.toggle('on', !on);
+          });
+        });
+      });
     }
   });
-  D.action('e4-alt', () => D.toast('Альтернативный вход построен: +2 минуты'));
+  D.action('e1-list', () => {
+    MAP.load().then(({ g }) => {
+      const pins = pinsFromGeo(g, GEO);
+      D.openSheet('<div class="sheet-title">Площадки курорта</div>' +
+        '<input class="input" type="search" id="e1-q" placeholder="Найти площадку" aria-label="Поиск площадки" style="margin:0 0 8px">' +
+        '<div id="e1-pinlist">' +
+        pins.map(p => '<button class="row clickable" data-act="e1-pin" data-arg="' + p.id + '"><div class="grow"><div class="r-title" style="font-size:14px">' + (p.num) + '. ' + esc(p.label || p.id) + '</div></div>' + icon('chevR') + '</button>').join('') +
+        '</div>');
+      const q = document.getElementById('e1-q');
+      if (q) q.addEventListener('input', () => {
+        const v = q.value.trim().toLowerCase();
+        document.querySelectorAll('#e1-pinlist [data-act="e1-pin"]').forEach(b => {
+          b.style.display = !v || b.textContent.toLowerCase().includes(v) ? '' : 'none';
+        });
+      });
+    });
+  });
+  D.action('e1-pin', el => {
+    MAP.load().then(({ g }) => {
+      const pins = pinsFromGeo(g, GEO);
+      const p = pins.find(x => x.id === el.dataset.arg);
+      D.closeSheet();
+      if (p) pointSheet(p);
+    });
+  });
+
+  /* ---------- E6 Бухта ---------- */
+  D.register('E6', {
+    tab: 'E1',
+    meta: {
+      title: 'E6 · Бухта',
+      role: 'Гость, карта',
+      fr: [], ac: [],
+      what: [
+        'Крупный фрагмент главной бухты: обводы зданий и проверенные точки курорта.',
+        'Метки — по подтверждённым координатам; объекты без координат — только в списке с пометкой.',
+        'Схема; планы корпусов будут позже.'
+      ],
+      rules: [
+        'Названия и привязка корпусов — по материалам проекта, курортом не подтверждены.',
+        'Звёздность Бревис на сайте курорта не найдена.',
+        'Слои «залы / питание / сервисы / стенды» появятся с планами площадки.'
+      ],
+      depends: ['O-06']
+    },
+    html() {
+      return '<div class="scr">' +
+        D.head({eyebrow:'Карта · ' + esc(F.NOW.dateLong), title:'Бухта', sub:'Главная бухта · здания и точки', paren:paren('схема; планы корпусов будут позже')}) +
+        segMap('E6') +
+        '<div class="mapview" id="mv-e6"><div class="mv-loading">Загружаю карту…</div></div>' +
+        '<div class="cap" style="margin:8px 20px 0">© OpenStreetMap contributors (ODbL) · тап по метке — карточка точки</div>' +
+        '<div class="card" style="margin:12px 20px 0"><div class="sec-title" style="margin:0 0 4px">Точки бухты</div><div id="e6-list"></div></div>' +
+        '<div style="height:16px;margin:0 20px"></div></div>';
+    },
+    mount(host) {
+      mountMap(host, '#mv-e6', (el, g, l) => {
+        const lwLabels = (l && l.labels) || [];
+        const lwById = {}; lwLabels.forEach(x => lwById[x.id] = x);
+        /* окно вида — по габариту подтверждённых точек бухты + ~200 м */
+        const anchorIds = ['radisson', 'residences', 'ryabina', 'erbelia', 'aquapark', 'yacht_main'];
+        const anchors = [];
+        g.features.forEach(f => {
+          const p = f.properties || {};
+          if (f.geometry.type === 'Point' && !p.kind && anchorIds.includes(p.id)) {
+            const c = (p.official_coords || p.osm_coords);
+            if (c) anchors.push([c[1], c[0]]);
+          }
+        });
+        const win = bayWindowFrom(anchors);
+        const world = MAP.worldSVG(g, win);
+        el.style.height = Math.round(el.clientWidth * world.H / world.W) + 24 + 'px';
+        /* метки: только объекты labels_winter.json с подтверждёнными координатами */
+        const coordOf = {};
+        g.features.forEach(f => {
+          const p = f.properties || {};
+          if (f.geometry.type === 'Point' && !p.kind) {
+            const c = p.official_coords || p.osm_coords;
+            if (c) coordOf[p.id] = [c[1], c[0]];
+          }
+        });
+        coordOf['marina'] = coordOf['yacht_main']; /* «Набережная и яхт-клуб» -> точка яхт-клуба */
+        const placed = [], noCoord = [];
+        lwLabels.forEach(x => {
+          const c = coordOf[x.id];
+          if (c) placed.push({ id: x.id, num: x.num, label: x.legend_title || x.text, title: x.text, x: 0, y: 0, coords: c });
+          else noCoord.push({ id: x.id, num: x.num, name: x.text });
+        });
+        placed.forEach(p => { const q = world.P(p.coords[0], p.coords[1]); p.x = q[0]; p.y = q[1]; });
+        const fitPts = placed.map(p => [p.x, p.y]);
+        let leaders = null, plaques = [];
+        const api = MAP.mount(el, {
+          onPin: id => baySheet(id),
+          pins: placed.map(p => { const q = world.P(p.coords[0], p.coords[1]); return { id: p.id, num: p.num, label: p.label, x: q[0], y: q[1] }; }),
+          fit: { points: fitPts, pad: 56, kMax: 5 },
+          decluster: true,
+          ctl: '<button class="mv-btn" data-act="e6-list" aria-label="Список точек"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8.5 6h12M8.5 12h12M8.5 18h12"/><circle cx="4.2" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.2" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.2" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg></button>',
+          onView: () => layoutPlaques()
+        });
+        api._setP(world.P);
+        api.build(world);
+        /* плашки с названиями поверх карты */
+        plaques = placed.map(p => {
+          const d = document.createElement('button');
+          d.className = 'mv-plaque'; d.dataset.act = 'e6-point'; d.dataset.arg = p.id;
+          d.innerHTML = '<b>' + p.num + '</b><span>' + esc(p.label) + '</span>';
+          el.appendChild(d);
+          return { id: p.id, wx: p.x, wy: p.y, el: d };
+        });
+        leaders = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        leaders.setAttribute('class', 'mv-leaders');
+        el.appendChild(leaders);
+        function layoutPlaques() {
+          if (!leaders || !plaques.length) return;
+          const M = 10; /* отступ плашек от краёв контейнера (проверка требует >=8) */
+          const r = el.getBoundingClientRect();
+          const view = api.view();
+          const k = view.k, tx = view.tx, ty = view.ty;
+          const dirs = [];
+          for (let ring = 0; ring < 9; ring++) for (let a = 0; a < 8; a++) {
+            const ang = a * Math.PI / 4, d = ring * 14 + (ring ? 8 : 0);
+            dirs.push([Math.round(Math.cos(ang) * d), Math.round(Math.sin(ang) * d)]);
+          }
+          const obstacles = [];
+          el.querySelectorAll('.mv-pin').forEach(pn => {
+            const b = pn.getBoundingClientRect();
+            if (b.width) obstacles.push({ x: b.left - r.left, y: b.top - r.top, w: b.width, h: b.height });
+          });
+          const placedRects = [];
+          let paths = '';
+          plaques.forEach(pl => {
+            const ax = pl.wx * k + tx, ay = pl.wy * k + ty;
+            const w = pl.el.offsetWidth, h = pl.el.offsetHeight;
+            let best = null;
+            outer: for (const [dx, dy] of dirs) {
+              const x = Math.max(M, Math.min(r.width - w - M, ax + dx - w / 2));
+              const y = Math.max(M, Math.min(r.height - h - M, ay + dy - h / 2));
+              const rect = { x, y, w, h };
+              for (const o of obstacles.concat(placedRects)) {
+                if (!(rect.x + rect.w < o.x || rect.x > o.x + o.w || rect.y + rect.h < o.y || rect.y > o.y + o.h)) continue outer;
+              }
+              best = rect; break;
+            }
+            if (!best) best = { x: Math.max(M, Math.min(r.width - w - M, ax - w / 2)), y: Math.max(M, Math.min(r.height - h - M, ay + h + 12)) };
+            pl.el.style.left = best.x + 'px'; pl.el.style.top = best.y + 'px';
+            placedRects.push(best);
+            const cx = best.x + w / 2, cy = best.y + h / 2;
+            const vx = ax - cx, vy = ay - cy;
+            const txd = vx ? (w / 2) / Math.abs(vx) : 1e9, tyd = vy ? (h / 2) / Math.abs(vy) : 1e9;
+            const t = Math.min(txd, tyd, 1);
+            const ex = cx + vx * t, ey = cy + vy * t;
+            paths += '<path d="M' + ax.toFixed(1) + ' ' + ay.toFixed(1) + 'L' + ex.toFixed(1) + ' ' + ey.toFixed(1) + '"/>';
+          });
+          leaders.setAttribute('viewBox', '0 0 ' + r.width + ' ' + r.height);
+          leaders.innerHTML = paths;
+        }
+        api.fit();
+        el._map = api;
+        /* список: все labels_winter.json; без координат — «положение уточняется» */
+        const listEl = host.querySelector('#e6-list');
+        if (listEl) {
+          listEl.innerHTML =
+            lwLabels.map(x => {
+              const c = coordOf[x.id];
+              const sub = c ? 'положение подтверждено' : 'положение уточняется';
+              return '<button class="row clickable" data-act="e6-point" data-arg="' + x.id + '"><div class="grow"><div class="r-title" style="font-size:14px">' + esc(x.text) + '</div><div class="r-sub">' + (c ? '<b>' + x.num + '</b> · ' : '') + sub + '</div></div>' + icon('chevR') + '</button>';
+            }).join('') +
+            '<div class="cap" style="margin-top:8px">Названия корпусов и звёздность — по материалам проекта; курортом не подтверждены. Бревис 3*: звёздность на сайте курорта не найдена.</div>';
+        }
+      });
+    }
+  });
+
+  /* окно бухты по габариту якорных точек + отступ ~200 м (в градусах) */
+  function bayWindowFrom(anchors) {
+    if (!anchors.length) return BAY_WIN;
+    let w = 1e9, s = 1e9, e = -1e9, n = -1e9;
+    anchors.forEach(c => { w = Math.min(w, c[0]); e = Math.max(e, c[0]); s = Math.min(s, c[1]); n = Math.max(n, c[1]); });
+    const pad = 0.0018; /* ~200 м */
+    return { w: w - pad, e: e + pad, s: s - pad, n: n + pad };
+  }
+
+  function baySheet(id) {
+    MAP.load().then(({ lw: ll }) => {
+      const lab = (((ll || {}).labels) || []).find(x => x.id === id);
+      const label = lab ? lab.text : id;
+      const noCoord = !['radisson', 'residences', 'ryabina', 'erbelia', 'aquapark', 'marina', 'yacht_main'].includes(id);
+      /* карточка точки: залы/столы этого места из фикстур */
+      const hallFor = { radisson: ['ballroomB', 'ballroomS'], congress: ['congress', 'doybitsa', 'sobol'], erbelia: ['edelveis'], brevis: ['magnolia'], ryabina: ['edelveis'] };
+      const hIds = hallFor[id] || [];
+      const halls = hIds.map(x => F.hall(x)).filter(Boolean);
+      const rows = F.sessionsOf('27.02').filter(s => hIds.includes(s.hall)).slice(0, 8);
+      D.openSheet(
+        '<div class="sheet-title">' + esc(label) + '</div>' +
+        '<div class="cap" style="margin:4px 0 10px">' + (noCoord ? 'Положение уточняется. ' : '') + (halls.length ? 'На точке — залы программы фестиваля:' : 'В программе фестиваля залы не привязаны — активности и сервисы курорта.') + '</div>' +
+        halls.map(h => '<button class="row clickable" data-go="E3/' + h.id + '"><div class="grow"><div class="r-title" style="font-size:14px">' + esc(h.name) + '</div><div class="r-sub">' + esc(h.place) + '</div></div>' + icon('chevR') + '</button>').join('') +
+        (rows.length ? '<div class="cap" style="margin-top:8px">Сегодня:</div>' + rows.map(s => '<div class="r-sub">' + esc(s.time) + ' · ' + esc(s.title) + '</div>').join('') : '') +
+        '<div style="display:flex;gap:8px;margin-top:14px"><button class="btn btn-primary" style="flex:1" data-go="E6">На карте бухты</button></div>');
+    });
+  }
+  D.action('e6-point', el => { D.closeSheet && D.closeSheet(); baySheet(el.dataset.arg); });
+
+  /* ---------- E7 Вид сверху (только внутреняя сборка) ---------- */
+  if (!PUBLIC) D.register('E7', {
+    tab: 'E1',
+    meta: {
+      title: 'E7 · Вид сверху',
+      role: 'Гость, карта',
+      fr: [], ac: [],
+      what: [
+        'Аэрофотоснимок курорта с подписями объектов (зима/лето).',
+        'Подпись: «фото: Завидово, права на публикацию не подтверждены».'
+      ],
+      rules: ['Только внутреняя сборка; в публичной E7 отсутствует.'],
+      depends: []
+    },
+    html(ctx) {
+      const st = ctx.state;
+      st.season = st.season || 'winter';
+      const chips = [['winter', 'Зима'], ['summer', 'Лето']].map(s =>
+        '<button class="chip' + (st.season === s[0] ? ' on' : '') + '" data-act="e7-season" data-arg="' + s[0] + '">' + s[1] + '</button>').join('');
+      return '<div class="scr">' +
+        D.head({eyebrow:'Карта · ' + esc(F.NOW.dateLong), title:'Вид сверху', sub:'Аэрофото курорта · ' + (st.season === 'winter' ? 'зима' : 'лето'), paren:paren('фото: Завидово, права на публикацию не подтверждены')}) +
+        segMap('E7') +
+        '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
+        '<div class="chips">' + chips + '</div>' +
+        '<div class="e7-scroll" id="e7-scroll"><div class="e7-stage" id="e7-stage"><img src="assets/map/final_' + st.season + '_1200.webp" alt="Аэрофото Завидово, ' + st.season + '"><svg class="e7-leaders" id="e7-leaders" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg><div id="e7-dots"></div></div></div>' +
+        '<div class="card" style="padding:2px 16px"><div class="list" id="e7-list"></div></div>' +
+        '<div class="cap">Аэрофото: материалы курорта, права на публикацию не подтверждены. Подписи — по положению на снимке.</div>' +
+        '<div style="height:16px;margin:0 20px"></div></div></div>';
+    },
+    mount(host) {
+      MAP.load().then(({ lw, ls }) => {
+        const season = D.st('E7').season || 'winter';
+        const labels = (((season === 'summer' ? ls : lw) || lw || {}).labels) || [];
+        const dots = host.querySelector('#e7-dots');
+        const list = host.querySelector('#e7-list');
+        const leaders = host.querySelector('#e7-leaders');
+        const paths = [];
+        labels.forEach(x => {
+          const a = x.anchor || { x: x.x, y: x.y };
+          const d = document.createElement('button');
+          d.className = 'e7-tag e7-dot'; d.style.left = x.x + '%'; d.style.top = x.y + '%';
+          d.dataset.pin = x.id;
+          d.setAttribute('data-act', 'e7-tag');
+          d.setAttribute('data-arg', x.id);
+          d.innerHTML = '<i>' + x.num + '</i><span>' + esc(x.text) + '</span>';
+          dots.appendChild(d);
+          paths.push('<path d="M' + a.x + ' ' + a.y + 'L' + x.x + ' ' + x.y + '"/>');
+          const row = document.createElement('button');
+          row.className = 'row clickable';
+          row.setAttribute('data-act', 'e7-row');
+          row.setAttribute('data-arg', String(labels.indexOf(x)));
+          row.innerHTML = '<div class="grow"><div class="r-title" style="font-size:14px">' + x.num + '. ' + esc(x.text) + '</div></div>' + icon('chevR');
+          list.appendChild(row);
+        });
+        if (leaders) leaders.innerHTML = paths.join('');
+        window.__e7labels = labels;
+        /* старт — по центру на метке 1 */
+        const sc = host.querySelector('#e7-scroll');
+        const first = labels.find(z => z.num === 1) || labels[0];
+        if (sc && first) {
+          const px = (first.x / 100) * 760;
+          sc.scrollLeft = Math.max(0, px - sc.clientWidth / 2);
+        }
+      });
+    }
+  });
+  D.action('e7-season', el => { D.st('E7').season = el.dataset.arg; D.rerender(); });
+  D.action('e7-row', el => { const x = (window.__e7labels || [])[+el.dataset.arg]; if (x) e7Sheet(x); });
+  D.action('e7-tag', el => { const x = (window.__e7labels || []).find(z => z.id === el.dataset.arg); if (x) e7Sheet(x); });
+  function e7Sheet(x) {
+    const hallFor = { congress: ['congress', 'doybitsa', 'sobol'], radisson: ['ballroomB', 'ballroomS'], erbelia: ['edelveis'], brevis: ['magnolia'], ryabina: ['magnolia'] };
+    const hIds = hallFor[x.id] || [];
+    const halls = hIds.map(i => F.hall(i)).filter(Boolean);
+    D.openSheet(
+      '<div class="sheet-title">' + esc(x.text) + '</div>' +
+      '<div class="cap" style="margin:4px 0 10px">' + (halls.length ? 'Залы программы фестиваля на точке:' : 'В программе фестиваля залы не привязаны — активности и сервисы курорта.') + '</div>' +
+      halls.map(h => '<button class="row clickable" data-go="E3/' + h.id + '"><div class="grow"><div class="r-title" style="font-size:14px">' + esc(h.name) + '</div><div class="r-sub">' + esc(h.place) + '</div></div>' + icon('chevR') + '</button>').join(''));
+  }
 
   /* ---------- E2 План этажа ---------- */
   D.register('E2', {
@@ -164,14 +455,12 @@
       fr: ['FR-MAP-01'],
       ac: ['AC-MAP-01'],
       what: [
-        'План Конгресс-центра с переключателем этажей: 1 этаж — сцена на 500 и выставка, 2 этаж — Соболь, Дойбица, Шоша.',
-        'Комнаты рисуются схемой с подписями и вместимостью.',
-        'Подсветка показывает, где идёт ваша следующая сессия.'
+        'Демонстрационная схема Конгресс-центра с переключателем этажей: 1-й этаж — сцена и выставка, 2-й — Дойбица, Соболь, КипяTALK.',
+        'Подпись: «схема демонстрационная, планы корпусов будут позже».'
       ],
       rules: [
         'Схема демонстрационная: точные размеры и расположение уточняются по плану площадки.',
-        'Этаж 2 занимает экспо-зону; переход между этажами — по лестницам и лифту фойе.',
-        'Подсветка строится по программе дня и вашей записи.'
+        'Переход между этажами — по лестницам.'
       ],
       depends: ['план площадки', 'программа']
     },
@@ -181,23 +470,52 @@
       const fl = F.CONGRESS_FLOORS.find(f => f.id === st.fl);
       const chips = F.CONGRESS_FLOORS.map(f =>
         '<button class="chip' + (f.id === st.fl ? ' on' : '') + '" data-act="e2-floor" data-arg="' + f.id + '">' + esc(f.label) + '</button>').join('');
-      const rooms = fl.rooms.map(r =>
-        '<g class="floor-room' + (r.id === 'sobol' ? ' lit' : '') + '" data-go="' + (r.id === 'sobol' ? 'C3/s2707' : 'E1') + '" style="cursor:pointer">' +
+      /* переходы из схемы и списка: залы -> E3, Выставка -> H1, КипяTALK -> H5 */
+      const ROOM_LINK = { stage: 'E3/congress', expo: 'H1', kiptalk: 'H5', doybitsa: 'E3/doybitsa', sobol: 'E3/sobol' };
+      const rooms = fl.rooms.map(r => {
+        const link = ROOM_LINK[r.id];
+        const cx = r.x + r.w / 2, cy = r.y + r.h / 2;
+        return '<g class="floor-room' + (link ? ' clickable' : '') + '"' + (link ? ' data-go="' + link + '" style="cursor:pointer"' : '') + '>' +
         '<rect x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '" rx="10"/>' +
-        '<text x="' + (r.x + r.w / 2) + '" y="' + (r.y + r.h / 2 - 2) + '" text-anchor="middle">' + esc(r.name) + '</text>' +
-        '<text class="fr-note" x="' + (r.x + r.w / 2) + '" y="' + (r.y + r.h / 2 + 12) + '" text-anchor="middle">' + esc(r.note) + '</text></g>').join('');
+        '<text class="fm-name" x="' + cx + '" y="' + (cy - 4) + '" text-anchor="middle">' + esc(r.name) + '</text>' +
+        '<text class="fm-note" x="' + cx + '" y="' + (cy + 14) + '" text-anchor="middle">' + esc(r.note) + '</text></g>';
+      }).join('');
+      const marks = (fl.marks || []).map(m => {
+        if (m.kind === 'entry') {
+          const my = m.y + m.h / 2;
+          return '<g class="fm-entry"><rect class="fm-mark" x="' + m.x + '" y="' + m.y + '" width="' + m.w + '" height="' + m.h + '" rx="10"/>' +
+          '<path class="fm-door" d="M' + m.x + ' ' + (my - 8) + 'v16 M' + m.x + ' ' + (my - 8) + 'a8 8 0 0 1 8 8"/>' +
+          '<text class="fm-lab" x="' + (m.x + 18) + '" y="' + (m.y + 20) + '">Вход</text>' +
+          '<circle class="fm-ya" cx="' + (m.x + 24) + '" cy="' + (m.y + m.h - 15) + '" r="5"/>' +
+          '<text class="fm-ya-t" x="' + (m.x + 34) + '" y="' + (m.y + m.h - 11) + '">Вы здесь</text></g>';
+        }
+        if (m.kind === 'stairs') {
+          let steps = '';
+          for (let i = 0; i < 5; i++) {
+            steps += '<line class="fm-step" x1="' + (m.x + 22 + i * 15) + '" y1="' + (m.y + m.h - 12 - i * 5) + '" x2="' + (m.x + 38 + i * 15) + '" y2="' + (m.y + m.h - 12 - i * 5) + '"/>';
+          }
+          return '<g class="fm-stairs"><rect class="fm-mark" x="' + m.x + '" y="' + m.y + '" width="' + m.w + '" height="' + m.h + '" rx="10"/>' +
+          steps +
+          '<text class="fm-lab" x="' + (m.x + m.w / 2) + '" y="' + (m.y + m.h / 2 + 4) + '" text-anchor="middle">Лестница</text></g>';
+        }
+        return '';
+      }).join('');
+      const rows = fl.rooms.map(r => {
+        const link = ROOM_LINK[r.id];
+        const inner = '<div class="grow"><div class="r-title" style="font-size:14px">' + esc(r.name) + '</div><div class="r-sub">' + esc(r.note) + '</div></div>' + icon('chevR');
+        return link ? '<button class="row clickable" data-go="' + link + '">' + inner + '</button>'
+                    : '<div class="row">' + inner + '</div>';
+      }).join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="E1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Карта · Конгресс-центр</div><h1>План этажа</h1>' +
-        '<div class="sub">' + esc(fl.label) + ' · схема демонстрационная</div></div></div>' +
-        '</div>' +
-        paren('нажмите на зал, чтобы открыть сессию') +
+        D.head({back:'E1', eyebrow:'Карта · Конгресс-центр', title:'План этажа', sub:esc(fl.label) + ' · схема демонстрационная', paren:paren('схема демонстрационная, планы корпусов будут позже')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
         '<div class="chips">' + chips + '</div>' +
-        '<div class="floor-map"><svg viewBox="0 0 460 250">' + rooms + '</svg></div>' +
-        '<div class="banner">' + icon('info') + '<div class="cap">' + esc(fl.label) + ': ' + fl.rooms.map(r => r.name).join(', ') + '. Подсвечен зал вашей записи.</div></div>' +
-        '<div style="height:16px"></div></div></div>';
+        '<div class="floor-map"><svg viewBox="0 0 330 ' + fl.h + '">' +
+        '<rect class="fm-shell" x="6" y="6" width="318" height="' + (fl.h - 12) + '" rx="12"/>' +
+        rooms + marks + '</svg></div>' +
+        '<div class="card" style="padding:2px 16px"><div class="list" style="padding:0">' + rows + '</div></div>' +
+        '<div class="banner">' + icon('info') + '<div class="cap">' + esc(fl.label) + ': ' + fl.rooms.map(r => r.name).join(', ') + '. Тап по строке — карточка зала или раздел.</div></div>' +
+        '<div style="height:16px;margin:0 20px"></div></div></div>';
     }
   });
   D.action('e2-floor', el => { D.st('E2').fl = el.dataset.arg; D.rerender(); });
@@ -211,86 +529,140 @@
       fr: ['FR-MAP-03'],
       ac: ['AC-MAP-03'],
       what: [
-        'Карточка точки: зал Магнолия, этаж, вместимость, режим дня.',
-        'Сегодняшние сессии в этом зале и «ближайшие» сверху.',
-        'Кнопка «Маршрут» строит путь от текущей точки до зала.'
+        'Карточка зала: название, где на карте, вместимость, расписание на сегодня.',
+        'Кнопки «Маршрут» и «На карте».'
       ],
       rules: [
-        'Ближайшие сессии считаются от текущего времени демо-дня.',
-        'Менторская гостиная в Магнолии работает по окнам — запись через G2.',
-        'Маршрут использует матрицу переездов и текущую точку пользователя.'
+        'Расписание — из программы дня; пустой зал честно показывает «сессий нет».',
+        'Метке зала соответствует точка на карте бухты по pinId.'
       ],
-      depends: ['матрица переездов', 'программа']
+      depends: ['программа', 'карта']
     },
     html(ctx) {
-      const p = F.POINT_MAGNOLIA;
-      const sess = F.sessionsOf('27.02').filter(s => s.hall === 'magnolia');
-      const rows = p.today.concat(sess.slice(0, 3).map(s => s.title + ' · ' + s.time)).map(t =>
-        '<div class="row"><div class="grow"><div class="r-sub">' + esc(t) + '</div></div>' + icon('chevR') + '</div>').join('');
+      const hid = ctx.param && F.hall(ctx.param) ? ctx.param : 'magnolia';
+      const h = F.hall(hid);
+      const sess = F.sessionsOf('27.02').filter(s => s.hall === h.id).sort((a, b) => a.time.localeCompare(b.time));
+      const rows = sess.map(s =>
+        '<button class="row clickable" data-go="C3/' + s.id + '"><div class="grow"><div class="r-sub">' + esc(s.time) + ' · ' + esc(s.title) + '</div></div>' + icon('chevR') + '</button>').join('');
+      const next = sess.find(s => s.time >= '11:10');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="E1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Точка · Основной отель</div><h1>' + esc(p.name) + '</h1>' +
-        '<div class="sub">' + esc(p.place) + ' · до ' + p.cap + ' мест</div></div></div>' +
-        '</div>' +
-        paren('сегодня в этом зале — ' + p.today.length + ' события') +
+        D.head({back:'E1', eyebrow:'Точка · ' + esc(h.place.split(',')[0]), title:esc(h.name), sub:esc(h.place) + ' · до ' + h.cap + ' ' + D.plural(h.cap, ['места', 'мест', 'мест']), paren:paren('сегодня в этом зале — ' + sess.length + ' ' + D.plural(sess.length, ['событие', 'события', 'событий']))}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card accent-edge"><div class="card-head"><div><div class="cap">Сейчас и дальше</div>' +
-        '<div class="card-title" style="margin-top:2px">Ближайшее — через 25 минут</div></div>' +
-        tag('9 этаж', 'accent') + '</div>' +
-        '<div class="r-sub" style="margin-top:6px">' + esc(p.note) + '</div></div>' +
+        '<div class="card-title" style="margin-top:2px">' + (next ? 'Ближайшее — ' + esc(next.time) + ' ' + esc(next.title) : 'Сессий на сейчас нет') + '</div></div></div>' +
+        (h.note ? '<div class="r-sub" style="margin-top:6px">' + esc(h.note) + '</div>' : '') +
+        '<div class="r-sub" style="margin-top:4px">На карте: метка бухты · ' + esc(h.mapNote || 'точка подтверждена') + '</div></div>' +
         '<div class="card"><div class="sec-title" style="margin:0 0 4px">Сегодня в зале</div>' +
-        '<div class="list" style="padding:0">' + rows + '</div></div>' +
-        '<button class="btn btn-primary btn-block" data-go="E4">' + icon('route') + 'Маршрут до зала</button>' +
-        '<div style="height:16px"></div></div></div>';
+        '<div class="list" style="padding:0">' + (rows || '<div class="cap">сессий нет — зал свободен по программе</div>') + '</div></div>' +
+        '<div style="display:flex;gap:8px">' +
+        '<button class="btn btn-primary" style="flex:1" data-go="E4/' + h.id + '">' + icon('route') + 'Маршрут</button>' +
+        '<button class="btn btn-ghost" style="flex:1" data-go="E6">На карте</button></div>' +
+        '<div style="height:16px;margin:0 20px"></div></div></div>';
     }
   });
 
-  /* ---------- E5 Мой маршрут ---------- */
+  /* ---------- E4 Маршрут / E5 Мой маршрут ---------- */
+  function routeScreen(kind, ctx) {
+    const isMine = kind === 'E5';
+    /* точки маршрута: [имя, [lon,lat], подпись] */
+    let pts = [];
+    if (isMine) {
+      const seen = {};
+      F.MY_BOOKINGS.forEach(b => {
+        const s = F.session(b.session || b.id || b);
+        if (s && s.hall && !seen[s.hall]) { seen[s.hall] = 1; pts.push({ name: F.hall(s.hall).short || F.hall(s.hall).name, coords: F.hall(s.hall).geo, sub: s.time + ' · ' + s.title }); }
+      });
+      pts.unshift({ name: 'Вы здесь', coords: [36.520199, 56.590251], sub: 'главная бухта' });
+      if (!pts.length) pts = [{ name: 'Вы здесь', coords: [36.520199, 56.590251], sub: 'главная бухта' }];
+    } else {
+      const hid = ctx.param && F.hall(ctx.param) ? ctx.param : 'magnolia';
+      const h = F.hall(hid);
+      pts = [
+        { name: 'Вы здесь', coords: [36.520199, 56.590251], sub: 'главная бухта' },
+        { name: h.short || h.name, coords: h.geo, sub: h.place, hall: h.id }
+      ];
+    }
+    /* длина и время — демо-расчёт по прямым между точками, 4,5 км/ч */
+    let km = 0;
+    const legs = [];
+    for (let i = 1; i < pts.length; i++) {
+      const d = MAP.distKm(pts[i - 1].coords, pts[i].coords);
+      km += d; legs.push(MAP.walkMin(d));
+    }
+    const mins = MAP.walkMin(km);
+    const coords = pts.map(p => p.coords);
+    return { pts, km, mins, legs, coords, isMine };
+  }
+
+  function routeHTML(R, title, sub) {
+    const steps = R.pts.map((p, i) => {
+      const leg = i > 0 && R.legs && R.legs[i - 1] ? ' · пешком ~' + R.legs[i - 1] + ' ' + D.plural(R.legs[i - 1], ['минута', 'минуты', 'минут']) : '';
+      return '<div class="row"><div class="grow"><div class="r-title" style="font-size:14px">' + (i + 1) + '. ' + esc(p.name) + '</div>' +
+      '<div class="r-sub">' + esc(p.sub || '') + esc(leg) + '</div></div></div>';
+    }).join('');
+    return '<div class="scr">' +
+      D.head({back:'E1', eyebrow:esc(F.NOW.dateLong), title:title, sub:sub, paren:paren('время пешком — демо-расчёт по расстоянию, 4,5 км/ч')}) +
+      '<div class="mapview" id="mv-route"><div class="mv-loading">Загружаю карту…</div></div>' +
+      '<div class="card" style="margin:12px 20px 0"><div class="card-title" style="font-size:15px">' + esc(R.pts.map(p => p.name).join(' › ')) + '</div>' +
+      '<div class="cap">пешком около ' + R.mins + ' ' + D.plural(R.mins, ['минута', 'минуты', 'минут']) + ' · ' + R.km.toFixed(1) + ' км по прямым · демо-расчёт</div>' +
+      '<div style="margin-top:8px">' + steps + '</div>' +
+      '<div class="cap" style="margin-top:8px">Запас на переход между точками — по матрице переездов; линия маршрута приблизительная (по прямым между точками).</div></div>' +
+      '<div style="height:16px;margin:0 20px"></div></div>';
+  }
+  function mountRoute(host, R) {
+    MAP.load().then(({ g }) => {
+      const el = host.querySelector('#mv-route');
+      if (!el) return;
+      const world = MAP.worldSVG(g, GEO, { route: R.coords });
+      el.style.height = Math.round(el.clientWidth * world.H / world.W) + 24 + 'px';
+      const stopPts = R.pts.map(p => { const q = world.P(p.coords[0], p.coords[1]); return [q[0], q[1]]; });
+      const api = MAP.mount(el, {
+        fit: { points: stopPts, pad: 40, kMax: 4, minDist: 26 }
+      });
+      api._setP(world.P);
+      api.build(world);
+      R.pts.forEach((p, i) => {
+        const q = world.P(p.coords[0], p.coords[1]);
+        const b = document.createElement('button');
+        b.className = 'mv-pin mv-pin-stop'; b.dataset.x = q[0]; b.dataset.y = q[1];
+        b.innerHTML = '<span class="mv-pin-n">' + (i + 1) + '</span>';
+        if (p.hall) b.dataset.go = 'E3/' + p.hall;
+        el.appendChild(b);
+      });
+      api.fit();
+      el._map = api;
+    });
+  }
+
+  D.register('E4', {
+    tab: 'E1',
+    meta: {
+      title: 'E4 · Маршрут', role: 'Гость / участник', fr: ['FR-MAP-04'], ac: ['AC-MAP-02'],
+      what: ['Маршрут от текущей точки до зала по карте: линия, остановки, время пешком.', 'Лист шагов с расстоянием и демо-расчётом.'],
+      rules: ['Линия приблизительная — по прямым между известными точками; точное время — после графа дорожек.'],
+      depends: []
+    },
+    html(ctx) {
+      const R = routeScreen('E4', ctx);
+      ctx.state._rt = R;
+      return routeHTML(R, 'Маршрут', esc(R.pts[0].name) + ' › ' + esc(R.pts[R.pts.length - 1].name));
+    },
+    mount(host, ctx) { if (ctx.state._rt) mountRoute(host, ctx.state._rt); }
+  });
+
   D.register('E5', {
     tab: 'E1',
     meta: {
-      title: 'E5 · Мой маршрут',
-      role: 'Гость, карта площадки',
-      fr: ['FR-MAP-05'],
-      ac: ['AC-MAP-05'],
-      what: [
-        'Порядок дня подряд: стенд, сессия, встреча — с временем и местом.',
-        'Запас времени на переход между точками по матрице.',
-        'Список и мини-план; каждую точку можно открыть.'
-      ],
-      rules: [
-        'Порядок строится по времени; при конфликте показывается предупреждение.',
-        'Запас на переход берётся из матрицы переездов издания.',
-        'Встречи учитываются с местом пространства (стенд, комната сделок).'
-      ],
-      depends: ['матрица переездов', 'записи', 'встречи']
+      title: 'E5 · Мой маршрут', role: 'Гость / участник', fr: ['FR-MAP-05'], ac: ['AC-MAP-05'],
+      what: ['Точки вашей программы и списка на карте с порядком и временем пешком.', 'Запас на переход между залами.'],
+      rules: ['Точки без координат на карте не наносятся — только залы с geo.'],
+      depends: []
     },
     html(ctx) {
-      const pts = [
-        { t: '12:30', kind: 'сессия', title: 'Практикум: переговоры о цене', place: 'Шоша, Экспо 2 этаж', src: 'C3/s2712' },
-        { t: '14:00', kind: 'встреча', title: 'ТехноСклад · Ольга Рябова', place: 'Стенд А-12, Зона 1', src: 'G4' },
-        { t: '16:30', kind: 'сессия', title: 'Практикум: продажи через партнёров', place: 'Соболь, Экспо 2 этаж', src: 'C3/s2705' }
-      ];
-      const rows = pts.map((p, i) =>
-        '<button class="row clickable" data-go="' + p.src + '"><div class="grow">' +
-        '<div class="r-title">' + esc(p.title) + '</div>' +
-        '<div class="r-sub">' + esc(p.t) + ' · ' + esc(p.place) + '</div></div>' +
-        '<span class="sess-time">' + (i + 1) + '</span>' + icon('chevR') + '</button>').join('');
-      const legs = F.travelMin('shosha', 'sobol') ? '<div class="r-sub">Шоша › стенд А-12: ' + (F.travelMin('shosha', 'sobol') || '—') + ' мин · стенд › Соболь: 4 мин</div>' : '';
-      return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="E1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Карта · Завидово</div><h1>Мой маршрут</h1>' +
-        '<div class="sub">' + esc(F.NOW.dateLong) + ' · ' + pts.length + ' точки</div></div></div>' +
-        '</div>' +
-        paren('запас на переход посчитан по матрице') +
-        '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
-        '<div class="map-plate" style="min-height:150px"><div class="ic">' + icon('route') + '</div>' +
-        '<div style="font-size:14px;font-weight:600">Экспо, 2 этаж › Зона 1 › Экспо, 2 этаж</div>' +
-        '<div class="cap" style="margin-top:4px">пешком около 18 минут суммарно · по матрице переездов</div></div>' +
-        '<div class="card" style="padding:2px 16px"><div class="list">' + rows + '</div>' + legs + '</div>' +
-        '<div style="height:16px"></div></div></div>';
-    }
+      const R = routeScreen('E5', ctx);
+      ctx.state._rt = R;
+      return routeHTML(R, 'Мой маршрут', esc(F.NOW.dateLong) + ' · ' + (R.pts.length - 1) + ' ' + D.plural(R.pts.length - 1, ['остановка', 'остановки', 'остановок']) + ' · от «Вы здесь»');
+    },
+    mount(host, ctx) { if (ctx.state._rt) mountRoute(host, ctx.state._rt); }
   });
 })();

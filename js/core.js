@@ -86,6 +86,49 @@
   const avatar = (name, cls) => '<span class="avatar' + (cls ? ' ' + cls : '') + '" aria-hidden="true">' + esc(initials(name)) + '</span>';
 
   const paren = t => '<span class="paren">( ' + esc(t) + ' )</span>';
+  function plural(n, forms) {
+    const a = Math.abs(n) % 100, b = a % 10;
+    if (a > 10 && a < 20) return forms[2];
+    if (b > 1 && b < 5) return forms[1];
+    if (b === 1) return forms[0];
+    return forms[2];
+  }
+
+  /* ---------- общая шапка экрана (решение 16.11) ----------
+     Строка приложения 56 px: слева «назад» на вложенных или знак на корневых;
+     справа аватар кабинета и уведомления. Далее блок заголовка в полях 20 px:
+     надпись-ориентир → заголовок Bebas → поясняющая строка → paren. */
+  function head(o) {
+    o = o || {};
+    const isRoot = o.root || ROOT_SCREENS[CURRENT] || false;
+    const left = o.back
+      ? '<button class="icon-btn" data-go="' + esc(o.back) + '" aria-label="Назад">' + icon('back') + '</button>'
+      : (o.backAct
+        ? '<button class="icon-btn" data-act="' + esc(o.backAct) + '" aria-label="Назад">' + icon('back') + '</button>'
+        : (isRoot ? logoImg('appbar-logo') : '<span class="appbar-gap"></span>'));
+    const rightIcons = (o.right || '') +
+      '<button class="icon-btn" data-go="L0" aria-label="Кабинет">' + icon('user') + '</button>' +
+      (o.noBell ? '' : '<button class="icon-btn" data-go="B3" aria-label="Уведомления">' + icon('bell') + '</button>');
+    let h = '<div class="appbar"><div class="appbar-l">' + left + '</div>' +
+      '<div class="appbar-r">' + rightIcons + '</div></div>';
+    h += '<div class="head-txt">' +
+      (o.eyebrow ? '<div class="eyebrow">' + o.eyebrow + '</div>' : '') +
+      '<h1>' + (o.title || '') + '</h1>' +
+      (o.sub ? '<div class="sub">' + o.sub + '</div>' : '') +
+      '</div>';
+    if (o.paren) h += '<div class="head-paren">' + o.paren + '</div>';
+    if (o.actions) h += '<div class="head-actions">' + o.actions + '</div>';
+    if (o.topo) return '<div class="head-topo topo-host">' + h + topo() + '</div>';
+    return h;
+  }
+  /* переключатель сегментов/видов на всю ширину внутри полей 20 px */
+  function segbar(items, active, attr) {
+    return '<div class="segbar">' + items.map(it =>
+      '<button class="seg' + (it[0] === active ? ' on' : '') + '" ' + (attr || 'data-go') + '="' + esc(it[0]) + '">' + esc(it[1]) + '</button>'
+    ).join('') + '</div>';
+  }
+  /* чип-лента: начинается на поле 20 px и прокручивается вправо */
+  function chipRail(inner) { return '<div class="chip-rail">' + inner + '</div>'; }
 
   /* топографические линии фоном (цвет и прозрачность — из токенов --topo/--topo-alpha) */
   const topo = () => '<div class="topo-bg" aria-hidden="true"></div>';
@@ -140,7 +183,7 @@
 
   function rerender() { route(true); }
 
-  /* ---------- каталог экранов (все 101 из брифа) ---------- */
+  /* ---------- каталог экранов (106 из брифа v2) ---------- */
   /* level: 1/2; phaseA: true для десяти экранов фазы A */
   const BLOCKS = [
     { id: 'A', name: 'Вход и онбординг', items: [
@@ -150,25 +193,26 @@
       ['B1', 'Сегодня', 1, 1], ['B2', 'Лента', 2, 0], ['B3', 'Настройки уведомлений', 1, 1]] },
     { id: 'C', name: 'Программа', items: [
       ['C1', 'Вся программа', 1, 1], ['C2', 'Фильтры', 2, 0], ['C3', 'Карточка сессии', 1, 1],
-      ['C4', 'Моя программа', 1, 1], ['C5', 'Спикер', 2, 0], ['C6', 'Изменение расписания', 2, 0]] },
+      ['C4', 'Моя программа', 1, 1], ['C5', 'Спикер', 2, 0], ['C6', 'Изменение расписания', 2, 0],
+      ['C7', 'Сетка программы', 1, 1]] },
     { id: 'D', name: 'Записи', items: [
-      ['D1', 'Менторская гостиная', 1, 1], ['D2', 'Подтверждение записи', 1, 1], ['D3', 'Лист ожидания', 2, 0],
+      ['D1', 'Менторские', 1, 1], ['D2', 'Подтверждение записи', 1, 1], ['D3', 'Лист ожидания', 2, 0],
       ['D4', 'Недоступно по тарифу', 1, 1], ['D5', 'Мои записи', 2, 0], ['D6', 'Освободилось место', 2, 0]] },
     { id: 'E', name: 'Карта', items: [
       ['E1', 'План Завидово', 1, 1], ['E2', 'План этажа', 2, 0], ['E3', 'Точка', 2, 0],
-      ['E4', 'Маршрут', 1, 1], ['E5', 'Мой маршрут', 2, 0]] },
+      ['E4', 'Маршрут', 1, 1], ['E5', 'Мой маршрут', 2, 0], ['E6', 'Бухта', 2, 0], ['E7', 'Вид сверху', 2, 0]] },
     { id: 'F', name: 'Люди и знакомства', items: [
-      ['F1', 'Каталог', 1, 1], ['F2', 'Карточка человека', 1, 1], ['F3', 'Заявка на знакомство', 1, 1],
+      ['F1', 'Участники', 1, 1], ['F2', 'Карточка человека', 1, 1], ['F3', 'Заявка на знакомство', 1, 1],
       ['F4', 'Входящие заявки', 1, 1], ['F5', 'Исходящие', 2, 0], ['F6', 'НеРэндом кофе', 2, 0],
-      ['F7', 'QR-визитка', 2, 0], ['F8', 'Мои контакты', 2, 0]] },
+      ['F7', 'QR-визитка', 2, 0], ['F8', 'Мои контакты', 2, 0], ['F9', 'Спикеры', 1, 1]] },
     { id: 'G', name: 'Встречи', items: [
       ['G1', 'Хаб', 1, 1], ['G2', 'Выбор окна', 1, 1], ['G3', 'Заявка на встречу', 1, 1],
       ['G4', 'Встреча подтверждена', 1, 1], ['G5', 'Другое время', 2, 0], ['G6', 'Напоминание', 2, 0],
       ['G7', 'Отметка прихода', 2, 0], ['G8', 'Исход встречи', 1, 1], ['G9', 'Договорённость', 1, 1],
       ['G10', 'Hosted Buyer', 1, 1], ['G11', 'Нет окон', 2, 0]] },
     { id: 'H', name: 'Экспо', items: [
-      ['H1', 'Маркетплейс', 1, 1], ['H2', 'Карточка решения', 1, 1], ['H3', 'Мой список «Изучить»', 1, 1],
-      ['H4', 'Маршрут по Экспо', 1, 1], ['H5', 'Экспо-расписание', 2, 0], ['H6', 'Предложения', 2, 0], ['H7', 'Отметка стенда', 2, 0]] },
+      ['H1', 'Решения', 1, 1], ['H2', 'Карточка решения', 1, 1], ['H3', 'Мой список «Изучить»', 1, 1],
+      ['H4', 'Маршрут по Экспо', 1, 1], ['H5', 'КипяTALK', 1, 1], ['H6', 'Предложения', 2, 0], ['H7', 'Отметка стенда', 2, 0]] },
     { id: 'I', name: 'Кабинет экспонента', items: [
       ['I1', 'Главная', 1, 1], ['I2', 'Контакты', 1, 1], ['I3', 'Карточка контакта', 2, 0],
       ['I4', 'Команда и квота', 2, 0], ['I5', 'Доступность', 2, 0], ['I6', 'Воркшоп', 2, 0],
@@ -180,7 +224,7 @@
       ['K1', 'Партнёры по статусам', 2, 0], ['K2', 'Карточка партнёра', 2, 0],
       ['K3', 'Предложение', 2, 0], ['K4', 'Мои предложения', 2, 0]] },
     { id: 'L', name: 'Билет и кабинет', items: [
-      ['L1', 'Билет', 1, 1], ['L2', 'PDF-приглашение', 2, 0], ['L3', 'Оплата', 2, 0],
+      ['L0', 'Кабинет', 1, 1], ['L1', 'Билет', 1, 1], ['L2', 'PDF-приглашение', 2, 0], ['L3', 'Оплата', 2, 0],
       ['L4', 'Проживание', 2, 0], ['L5', 'Семья и команда', 2, 0], ['L6', 'Приватность', 2, 0], ['L7', 'Профиль', 2, 0]] },
     { id: 'M', name: 'Заметки и оценка', items: [
       ['M1', 'Заметки', 2, 0], ['M2', 'Заметка в сессии', 2, 0], ['M3', 'Оцените день', 1, 1], ['M4', 'Мои итоги', 2, 0]] },
@@ -231,29 +275,34 @@
   }
 
   /* ---------- оболочка ---------- */
+  /* Пять разделов нижней панели (решение 16.11): Сегодня · Программа · Экспо · Люди · Карта */
   const TAB_ITEMS = [
-    ['B1', 'Сегодня', 'today'], ['C1', 'Программа', 'program'], ['F1', 'Люди', 'people'],
-    ['H1', 'Экспо', 'expo'], ['MORE', 'Ещё', 'more']
-  ];
-  const MORE_ITEMS = [
-    ['L7', 'Профиль', 'user'], ['L1', 'Билет', 'ticket'], ['M1', 'Заметки', 'file'],
-    ['M4', 'Мои итоги', 'star'], ['B3', 'Уведомления', 'bell'], ['L6', 'Приватность', 'lock'],
-    ['L4', 'Проживание', 'building'], ['E1', 'Карта', 'map']
+    ['B1', 'Сегодня', 'today'], ['C1', 'Программа', 'program'], ['H1', 'Экспо', 'expo'],
+    ['F1', 'Люди', 'people'], ['E1', 'Карта', 'map']
   ];
 
-  /* раздел нижней панели для экрана-заглушки (по блоку) */
-  const SECTION_OF_BLOCK = { B: 'B1', C: 'C1', D: 'C1', E: 'H1', F: 'F1', G: 'H1', H: 'H1', I: 'H1', J: 'H1', K: 'H1', L: 'MORE', M: 'MORE', N: 'MORE', O: 'MORE' };
+  /* раздел нижней панели для экрана без явного tab (по блоку) */
+  const SECTION_OF_BLOCK = {
+    A: 'B1', B: 'B1', C: 'C1', D: 'C1', E: 'E1', F: 'F1', G: 'F1',
+    H: 'H1', I: 'H1', J: 'H1', K: 'H1', L: null, M: null, N: null, O: null, P: null
+  };
+  /* корневые экраны разделов: в строке приложения — знак, на вложенных — «назад» */
+  const ROOT_SCREENS = { B1: 1, C1: 1, H1: 1, F1: 1, E1: 1, L0: 1,
+    F9: 1, G1: 1, H5: 1, K1: 1, H3: 1, C7: 1, C4: 1, D1: 1, E6: 1, E7: 1 };
+  /* раздел приложения для сайдбара и подсветки */
+  const SECTION_OF_SCREEN = {};
+  [['A', 'Вход и онбординг'], ['B', 'Сегодня'], ['C', 'Программа'], ['D', 'Программа'],
+   ['E', 'Карта'], ['F', 'Люди'], ['G', 'Люди'], ['H', 'Экспо'], ['I', 'Экспо'],
+   ['J', 'Экспо'], ['K', 'Экспо'], ['L', 'Кабинет'], ['M', 'Кабинет'], ['N', 'Кабинет'],
+   ['O', 'Консоль и допуск'], ['P', 'Консоль и допуск']].forEach(p => {
+    BLOCKS.forEach(b => { if (b.id === p[0]) b.section = p[1]; });
+  });
 
   function tabbar(activeId) {
-    const items = TAB_ITEMS.map(([id, label, ic]) => {
-      if (id === 'MORE') {
-        return '<button class="tab' + (activeId === 'MORE' ? ' on' : '') + '" data-act="more-menu" aria-label="Ещё">' +
-          icon(ic) + '<span>' + label + '</span></button>';
-      }
-      const aria = id === 'H1' ? 'Экспо и встречи' : label;
-      return '<button class="tab' + (activeId === id ? ' on' : '') + '" data-go="' + id + '" aria-label="' + aria + '">' +
-        icon(ic) + '<span>' + label + '</span></button>';
-    }).join('');
+    const items = TAB_ITEMS.map(([id, label, ic]) =>
+      '<button class="tab' + (activeId === id ? ' on' : '') + '" data-go="' + id + '" aria-label="' + esc(label) + '">' +
+      icon(ic) + '<span>' + label + '</span></button>'
+    ).join('');
     return '<nav class="tabbar" aria-label="Основная навигация">' + items + '</nav>';
   }
 
@@ -262,25 +311,32 @@
       '<span class="sb-icons">' + icon('signal') + icon('wifi') + icon('battery') + '</span></div>';
   }
 
+  /* Боковой список — по разделам приложения, внутри раздела по блокам брифа. */
   function sidebarHTML(currentId) {
-    const info = screenInfo(currentId);
+    const order = ['Вход и онбординг', 'Сегодня', 'Программа', 'Экспо', 'Люди', 'Карта', 'Кабинет', 'Консоль и допуск'];
     let html = '';
-    BLOCKS.forEach(b => {
-      html += '<div class="sb-block"><div class="sb-block-name">' + esc(b.name) + '</div>';
-      b.items.forEach(([id, title, level, phaseA]) => {
-        const on = id === currentId;
-        const soon = !RENDERERS[id];
-        const impl = !!RENDERERS[id];
-        html += '<div class="sb-item' + (on ? ' on' : '') + (soon ? ' soon' : '') + '">' +
-          '<span class="sb-id">' + id + '</span>' +
-          (impl
-            ? '<button class="sb-link" data-go="' + id + '">' + esc(title) + '</button>'
-            : '<span class="sb-title">' + esc(title) + '</span>') +
-          (soon ? '<span class="sb-soon">скоро</span>' : '') +
-          '</div>';
+    order.forEach(sec => {
+      const blocks = BLOCKS.filter(b => b.section === sec);
+      if (!blocks.length) return;
+      html += '<div class="sb-sec"><div class="sb-sec-name">' + esc(sec) + '</div>';
+      blocks.forEach(b => {
+        html += '<div class="sb-sub">' + esc(b.name) + '</div>';
+        b.items.forEach(([id, title, level, phaseA]) => {
+          const on = id === currentId;
+          const soon = !RENDERERS[id];
+          html += '<div class="sb-item' + (on ? ' on' : '') + (soon ? ' soon' : '') + '">' +
+            '<span class="sb-id">' + id + '</span>' +
+            (RENDERERS[id]
+              ? '<button class="sb-link" data-go="' + id + '">' + esc(title) + '</button>'
+              : '<span class="sb-title">' + esc(title) + '</span>') +
+            (soon ? '<span class="sb-soon">скоро</span>' : '') +
+            '</div>';
+        });
       });
       html += '</div>';
     });
+    const impl = ALL_SCREENS.filter(s => RENDERERS[s.id]).length;
+    html += '<div class="sb-count">экранов: ' + impl + ' / ' + ALL_SCREENS.length + '</div>';
     return html;
   }
 
@@ -303,14 +359,14 @@
 
   function stubOut(id) {
     const info = screenInfo(id);
+    const backTo = SECTION_OF_BLOCK[id[0]] || 'B1';
     return {
       html: '<div class="scr stub">' +
-        '<div class="stub-body">' +
-        '<div class="stub-id">' + esc(id) + '</div>' +
-        '<h2 class="stub-title">' + esc(info ? info.title : id) + '</h2>' +
-        '<p class="stub-text">Экран будет в следующей фазе демо.</p>' +
-        (info ? '<p class="stub-sub">Блок «' + esc(info.blockName) + '» · уровень ' + info.level + '</p>' : '') +
-        '</div></div>',
+        head({ back: ROOT_SCREENS[id] ? null : backTo, title: info ? info.title : id,
+          eyebrow: 'скоро', sub: info ? 'Блок «' + info.blockName + '» · уровень ' + info.level : '',
+          paren: paren('экран будет в следующей фазе демо') }) +
+        '<div class="stub-body"><div class="stub-id">' + esc(id) + '</div>' +
+        '<p class="stub-text">Экран будет в следующей фазе демо.</p></div></div>',
       meta: { title: (info ? info.title : id) + ' — скоро', role: info ? info.blockName : '',
         what: [info ? 'Экран «' + info.title + '» блока «' + info.blockName + '», уровень ' + info.level + '.' : 'Экран не найден.'],
         rules: [], depends: [] }
@@ -391,18 +447,12 @@
   /* глобальные действия оболочки */
   ACTSREG['theme-toggle'] = () => setTheme(currentTheme() === 'summer' ? 'winter' : 'summer', true);
   ACTSREG['sheet-close'] = () => closeSheet();
-  ACTSREG['more-menu'] = () => {
-    openSheet('<div class="sheet-title">Ещё</div><div class="menu-list">' +
-      MORE_ITEMS.map(([id, label, ic]) =>
-        '<button class="menu-item" data-go="' + id + '" data-act="sheet-close">' + icon(ic) + '<span>' + esc(label) + '</span>' + icon('chevR') + '</button>'
-      ).join('') + '</div>');
-  };
 
   /* публичное API для экранов */
   window.Demo = {
     icon, esc, avatar, paren, tag, tariffTag, goBtn, act, st, openSheet, closeSheet, toast,
     rerender, route, setTheme, currentTheme, screenInfo, statusBar, tabbar,
-    topo, pict, logoImg,
+    topo, pict, logoImg, head, segbar, chipRail, plural,
     register(id, def) { RENDERERS[id] = def; },
     action(name, fn) { ACTSREG[name] = fn; },
     sheetHTML: openSheet

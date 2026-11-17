@@ -8,7 +8,7 @@
 
   /* ---------- K1 Партнёры по статусам ---------- */
   D.register('K1', {
-    tab: 'MORE',
+    tab: 'H1',
     meta: {
       title: 'K1 · Партнёры',
       role: 'Гость, партнёры фестиваля',
@@ -37,12 +37,8 @@
         return '<div class="sec-title" style="margin-top:6px">' + esc(statusLabel[g]) + ' · ' + F.PARTNERS.filter(p => p.status === g).length + '</div>' + list;
       }).join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="H1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Экспо и встречи</div><h1>Партнёры</h1>' +
-        '<div class="sub">компании, поддерживающие фестиваль</div></div></div>' +
-        '</div>' +
-        paren('логотипы в демо — заглушки') +
+        D.head({eyebrow:'Экспо', title:'Партнёры', sub:'компании, поддерживающие фестиваль', paren:paren('логотипы в демо — заглушки')}) +
+        D.segbar([['H1', 'Решения'], ['H5', 'КипяTALK'], ['K1', 'Партнёры'], ['H3', 'Мой список']], 'K1') +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' + sections +
         '<div style="height:16px"></div></div></div>';
     }
@@ -50,7 +46,7 @@
 
   /* ---------- K2 Карточка партнёра ---------- */
   D.register('K2', {
-    tab: 'MORE',
+    tab: 'H1',
     meta: {
       title: 'K2 · Карточка партнёра',
       role: 'Гость, партнёры',
@@ -73,12 +69,7 @@
       const offers = p.offers.map((o, i) =>
         '<button class="row clickable" data-go="K3/' + p.id + '/' + i + '"><div class="grow"><div class="r-title" style="font-size:14px">' + esc(o) + '</div></div>' + icon('chevR') + '</button>').join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="K1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Партнёр · ' + esc(statusLabel[p.status]) + '</div><h1>' + esc(p.name) + '</h1>' +
-        '<div class="sub">' + esc(p.desc) + '</div></div></div>' +
-        '</div>' +
-        paren('предложения проверены организатором') +
+        D.head({back:'K1', eyebrow:'Партнёр · ' + esc(statusLabel[p.status]), title:esc(p.name), sub:esc(p.desc), paren:paren('предложения проверены организатором')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="logo-ph lg">' + esc(p.name) + '</div>' +
         '<div class="card"><div class="cap" style="margin-bottom:6px">Что предлагает участникам</div>' +
@@ -89,7 +80,7 @@
 
   /* ---------- K3 Предложение ---------- */
   D.register('K3', {
-    tab: 'MORE',
+    tab: 'H1',
     meta: {
       title: 'K3 · Предложение партнёра',
       role: 'Гость, партнёры',
@@ -113,12 +104,7 @@
       const idx = parseInt(parts[1] || '0', 10);
       const offer = p.offers[idx] || p.offers[0];
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="K2/' + p.id + '" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Предложение · ' + esc(p.name) + '</div><h1>' + esc(offer) + '</h1>' +
-        '<div class="sub">' + esc(statusLabel[p.status]) + ' партнёр</div></div></div>' +
-        '</div>' +
-        paren('условия проверены организатором') +
+        D.head({back:'K2/' + p.id, eyebrow:'Предложение · ' + esc(p.name), title:esc(offer), sub:esc(statusLabel[p.status]) + ' партнёр', paren:paren('условия проверены организатором')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card"><div class="cap" style="margin-bottom:6px">Условия</div>' +
         '<div class="r-sub" style="line-height:1.55">Предложение доступно участникам фестиваля ' + esc(F.NOW.dateLong) +
@@ -134,7 +120,7 @@
 
   /* ---------- K4 Мои предложения ---------- */
   D.register('K4', {
-    tab: 'MORE',
+    tab: 'H1',
     meta: {
       title: 'K4 · Мои предложения',
       role: 'Гость, партнёры',
@@ -161,12 +147,7 @@
         '<span class="mc-status ' + (stMap[o.status] || '') + '">' + esc(o.status) + '</span>' +
         '<button class="btn btn-ghost btn-sm" data-go="K1">Партнёры</button></div></div>').join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="K1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Партнёры</div><h1>Мои предложения</h1>' +
-        '<div class="sub">' + F.MY_OFFERS.length + ' активных</div></div></div>' +
-        '</div>' +
-        paren('статус обновляется партнёром') +
+        D.head({back:'K1', eyebrow:'Партнёры', title:'Мои предложения', sub:F.MY_OFFERS.length + ' активных', paren:paren('статус обновляется партнёром')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card" style="padding:2px 16px"><div class="list">' + rows + '</div></div>' +
         '<div class="banner">' + icon('info') + '<div class="cap">Сохранённые предложения не обязывают — забрать можно в любой момент до конца фестиваля.</div></div>' +

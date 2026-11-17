@@ -211,14 +211,14 @@
         '<div class="np-item"><b>' + esc(st.title) + '</b><span>' + esc(st.text) + '</span></div>' +
         '<div class="np-item"><b>Сессия начнётся через час</b><span>«Практикум: юнит-экономика» — Дойбица, 12:30.</span></div>' +
         '<div class="np-app">'+ esc(F.NOW.dateLong) + ' · ' + esc(F.NOW.time) + '</div></div>' +
-        '<div style="margin-top:12px" class="banner">' + icon('clock') + '<div class="cap">Окно отмены — ' + N.cancelWindow + ' минут после отправки.</div></div>' +
+        '<div style="margin-top:12px" class="banner">' + icon('clock') + '<div class="cap">Окно отмены — ' + N.cancelWindow + ' ' + D.plural(N.cancelWindow, ['минута', 'минуты', 'минут']) + ' после отправки.</div></div>' +
         '<div style="margin-top:8px" class="' + (left > 0 ? 'ntf-ok' : 'ntf-lim') + '">' +
         (left > 0 ? 'Лимит: отправлено ' + N.sentToday + ' из ' + N.hourlyLimit + ' за час — осталось ' + left : 'Лимит исчерпан: ' + N.hourlyLimit + ' рассылки в час') + '</div>' +
         '</div></div>' +
         '<div style="margin-top:14px;display:flex;gap:10px">' +
         '<button class="btn btn-primary" data-act="p3-send"' + ((st.title && st.text && left > 0) ? '' : ' disabled') + '>Отправить</button>' +
         '<button class="btn btn-ghost" data-act="p3-reset">Сбросить</button></div>' +
-        (st.sent ? '<div class="banner ok" style="margin-top:12px">' + icon('check') + '<div><div class="b-title">Отправлено</div><div class="cap">Уведомление ушло аудитории «' + esc(N.audience[st.aud]) + '». Отмена возможна ' + N.cancelWindow + ' минут.</div></div>' +
+        (st.sent ? '<div class="banner ok" style="margin-top:12px">' + icon('check') + '<div><div class="b-title">Отправлено</div><div class="cap">Уведомление ушло аудитории «' + esc(N.audience[st.aud]) + '». Отмена возможна ' + N.cancelWindow + ' ' + D.plural(N.cancelWindow, ['минута', 'минуты', 'минут']) + '.</div></div>' +
           '<button class="btn btn-ghost btn-sm" data-act="p3-cancel">Отменить рассылку</button></div>' : '') +
         '</div>';
 
@@ -343,7 +343,7 @@
       what: [
         'Параметры системы: квота Оптимума, лимиты, сроки — таблица с владельцем изменения.',
         'Флаги функций: ИИ-подбор, Хроникёр, автоприём, офлайн-режим.',
-        'Значения по умолчанию из ТЗ — видны все 22 параметра.'
+        'Значения по умолчанию из ТЗ — видны все 24 параметра.'
       ],
       rules: [
         'Каждый параметр имеет владельца изменения — кто может его править.',
@@ -363,7 +363,7 @@
         '<div class="sec-title">Параметры и лимиты</div>' +
         '<div class="acc-panel" style="padding:8px 14px;overflow-x:auto"><table class="c-table"><thead><tr><th>Параметр</th><th>Значение</th><th>Меняет</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
       const right = '<div class="sec-title" style="margin-top:0">Примечания</div>' +
-        '<div class="banner">' + icon('info') + '<div class="cap">Значения — по умолчанию из ТЗ, раздел 4. Квота Оптимума = 0: записи на менторские и экспертные окна доступны тарифам Бизнес и Первый класс.</div></div>' +
+        '<div class="banner">' + icon('info') + '<div class="cap">Значения — по умолчанию из ТЗ, раздел 4. Квота Оптимума = 0 — запись закрыта: менторские и экспертные гостиные доступны тарифам Бизнес и Первый класс.</div></div>' +
         '<div class="banner">' + icon('clock') + '<div class="cap">Изменение лимитов применяется к новым заявкам; подтверждённые встречи не пересчитываются.</div></div>';
       return consoleShell('P5', 'Параметры', 'квоты, лимиты, флаги функций · демо-значения', main, right);
     },

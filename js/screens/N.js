@@ -28,12 +28,7 @@
       st.asked = !!st.asked;
       const A = F.AI_FAQ;
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="B1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Помощник</div><h1>Ассистент</h1>' +
-        '<div class="sub">Ответы по программе и площадке</div></div></div>' +
-        '</div>' +
-        paren('ответ учитывает ваш тариф') +
+        D.head({back:'B1', eyebrow:'Помощник', title:'Ассистент', sub:'Ответы по программе и площадке', paren:paren('ответ учитывает ваш тариф')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
         '<div class="card" style="flex-direction:row;gap:10px;background:var(--surface-2)">' +
         '<span class="avatar" style="width:34px;height:34px;border-radius:10px">' + icon('spark') + '</span>' +
@@ -84,12 +79,7 @@
         '<div class="pl-load">' + esc(d.load) + '</div></button>').join('');
       const cur = F.NAV_DAYS.find(d => d.id === st.sel);
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="B1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">' + esc(F.NOW.dateLong) + '</div><h1>Штурман</h1>' +
-        '<div class="sub">Три варианта дня под ваши цели</div></div></div>' +
-        '</div>' +
-        paren('вариант — план, записи делаются отдельно') +
+        D.head({back:'B1', eyebrow:esc(F.NOW.dateLong), title:'Штурман', sub:'Три варианта дня под ваши цели', paren:paren('вариант — план, записи делаются отдельно')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' + cards +
         '<div class="banner">' + icon('info') + '<div class="cap">Выбран «' + esc(cur.title) + '»: ' + esc(cur.desc) + '</div></div>' +
         '<button class="btn ' + (st.added ? 'btn-secondary' : 'btn-primary') + ' btn-block" data-act="n3-add">' +
@@ -132,12 +122,7 @@
       const A = F.SECRETARY_ALT;
       const toMin = t => parseInt(t.slice(0, 2)) * 60 + parseInt(t.slice(3));
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="B1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">Секретарь · ' + esc(F.NOW.dateLong) + '</div><h1>Сессия отменена</h1>' +
-        '<div class="sub">' + esc(A.cancelled) + ' · ' + esc(A.was) + ' · ' + esc(A.hall) + '</div></div></div>' +
-        '</div>' +
-        paren('три варианта с учётом ваших записей') +
+        D.head({back:'B1', eyebrow:'Секретарь · ' + esc(F.NOW.dateLong), title:'Сессия отменена', sub:esc(A.cancelled) + ' · ' + esc(A.was) + ' · ' + esc(A.hall), paren:paren('три варианта с учётом ваших записей')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
         '<div class="banner warn">' + icon('alert') + '<div><div class="b-title">Ваша запись отменена организатором</div>' +
         '<div class="cap">Окно освободилось. Вот три замены — все с запасом на переход.</div></div></div>' +
@@ -192,7 +177,7 @@
           avatar(p.name, 'sm') +
           '<div class="grow" style="min-width:0"><div class="r-title" style="font-size:14.5px">' + esc(p.name) + '</div>' +
           '<div class="r-sub">' + esc(p.company) + ' · ' + esc(p.role) + '</div>' +
-          '<div class="cap" style="margin-top:6px">цель: ' + esc(p.goal) + ' · свободно ' + esc(p.free) + '</div>' +
+          '<div class="cap" style="margin-top:6px">цель: ' + esc(p.goal) + ' · ' + esc(F.freeText(p)) + '</div>' +
           '<div class="cap" style="margin-top:8px;font-weight:600">Почему вам</div>' +
           '<div class="tags-row" style="margin-top:4px">' + why + '</div></div></div>' +
           '<div class="card-foot" style="margin-top:10px"><span class="cap">' + pk.rank + '-й по совпадению</span>' +
@@ -200,12 +185,7 @@
           '<button class="btn btn-ghost btn-sm" data-act="n6-hide" data-arg="' + p.id + '">Скрыть</button></div></div></div>';
       }).join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="B1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">' + esc(F.NOW.dateLong) + '</div><h1>Люди для знакомства</h1>' +
-        '<div class="sub">Подбор по вашим целям и пользе</div></div></div>' +
-        '</div>' +
-        paren('совпадение объясняется причинами, не рейтингом') +
+        D.head({back:'B1', eyebrow:esc(F.NOW.dateLong), title:'Люди для знакомства', sub:'Подбор по вашим целям и пользе', paren:paren('совпадение объясняется причинами, не рейтингом')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
         (cards || '<div class="empty topo-host">' + D.topo() + '<div class="e-title">Подборка пуста</div><div class="e-text">Скрытые люди не показываются. Измените цели в профиле — появятся новые.</div></div>') +
         '<div style="height:16px"></div></div></div>';
@@ -243,12 +223,7 @@
       const st = ctx.state;
       st.q = st.q || '';
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="N3" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">ИИ · Штурман</div><h1>Собрать день</h1>' +
-        '<div class="sub">цели и свободное время — и получите варианты</div></div></div>' +
-        '</div>' +
-        paren('учитывает ваши записи и переезды') +
+        D.head({back:'N3', eyebrow:'ИИ · Штурман', title:'Собрать день', sub:'цели и свободное время — и получите варианты', paren:paren('учитывает ваши записи и переезды')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card"><div class="cap" style="margin-bottom:6px">Что хотите от дня</div>' +
         '<textarea class="textarea" rows="3" placeholder="Например: больше встреч с экспонентами, пропустить утренние кейсы, оставить вечер свободным" data-n2q>' + esc(st.q) + '</textarea></div>' +
@@ -295,12 +270,7 @@
           '<div class="cap" style="margin-top:2px">' + esc(p.why) + '</div></div>' + icon('chevR') + '</button>';
       }).join('');
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="H1" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">ИИ · Подборщик</div><h1>Пять решений</h1>' +
-        '<div class="sub">по вашей задаче и целям</div></div></div>' +
-        '</div>' +
-        paren('каждая причина объяснима') +
+        D.head({back:'H1', eyebrow:'ИИ · Подборщик', title:'Пять решений', sub:'по вашей задаче и целям', paren:paren('каждая причина объяснима')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="banner">' + icon('spark') + '<div style="flex:1"><div class="b-title">Ваша задача</div>' +
         '<div class="cap">' + esc(t.text) + '</div></div></div>' +
@@ -334,12 +304,7 @@
     html(ctx) {
       const c = F.CHRONICLE;
       return '<div class="scr">' +
-        '<div class="scr-head"><div class="head-row"><div>' +
-        '<button class="icon-btn" data-go="G8" aria-label="Назад">' + icon('back') + '</button>' +
-        '</div><div><div class="eyebrow">ИИ · Хроникёр</div><h1>Итог встречи</h1>' +
-        '<div class="sub">' + esc(c.meeting) + '</div></div></div>' +
-        '</div>' +
-        paren('черновик по вашим заметкам — проверьте') +
+        D.head({back:'G8', eyebrow:'ИИ · Хроникёр', title:'Итог встречи', sub:esc(c.meeting), paren:paren('черновик по вашим заметкам — проверьте')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card"><div class="cap" style="margin-bottom:8px">Как прошла</div>' +
         '<div class="chips">' + tag(c.outcome, 'ok') + tag('следующий шаг: ' + c.step, 'accent') + '</div></div>' +
