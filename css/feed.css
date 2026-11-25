@@ -1,0 +1,271 @@
+/* Раздел «Лента и чаты» (блок R), владелец S6. Классы с префиксом fd-; цвета и размеры через токены tokens.css.
+   Поля содержимого 20 px, правая граница не дальше 370 px, касательные цели от 40 px, две темы (summer — тёмная, winter — дневная). */
+
+/* ---------- каркас ---------- */
+.fd-segwrap { padding: 14px 20px 0; flex: none; }
+.fd-segwrap .segbar { margin: 0; }
+.fd-chip { min-height: 40px; }
+.fd-chip .fd-n { font-size: 12px; font-weight: 700; color: var(--accent-text); }
+.fd-chip.on .fd-n { color: var(--accent-ink); }
+.fd-body { padding: 12px 20px 88px; display: flex; flex-direction: column; gap: 12px; flex: none; }
+.fd-body > * { min-width: 0; }
+.fd-body.nofab { padding-bottom: 24px; }
+.fd-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.fd-meta .cap { flex: 1; min-width: 0; }
+.fd-b { min-height: 40px; }
+.fd-sec { margin: 8px 0 -4px; }
+.fd-list { display: flex; flex-direction: column; gap: 12px; }
+.fd-empty { padding: 28px 8px; }
+.fd-empty .btn { margin-top: 6px; }
+.fd-notice { align-items: flex-start; }
+.fd-notice .feed-link { min-height: 40px; }
+
+/* ---------- карточка записи ---------- */
+/* тон вида записи (--fd-tone) задаёт левую линию и подпись типа; цвета только из токенов */
+.fd-card { --fd-tone: var(--ink-dim); gap: 10px; text-align: left; border-left: 4px solid var(--fd-tone); }
+.fd-t-err { --fd-tone: var(--err); }
+.fd-t-ok { --fd-tone: var(--ok); }
+.fd-t-warn { --fd-tone: var(--warn); }
+.fd-t-accent { --fd-tone: var(--accent-text); }
+.fd-t-dim { --fd-tone: var(--ink-dim); }
+.fd-card.fd-t-accent, .fd-card.fd-t-accent.interactive:hover { border-left-color: var(--accent-edge); }
+.fd-ad { background: var(--surface-2); }
+.fd-kind { display: flex; align-items: center; gap: 8px; min-height: 24px; min-width: 0; }
+.fd-kic { flex: none; display: grid; place-items: center; width: 24px; height: 24px; color: var(--fd-tone); }
+.fd-kic .ic { width: 20px; height: 20px; }
+.fd-klabel { font-size: 13px; font-weight: 700; line-height: 1.25; color: var(--fd-tone); white-space: nowrap; }
+.fd-kcap { min-width: 0; font-size: 12.5px; color: var(--ink-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fd-kcap::before { content: '·'; margin-right: 8px; }
+.fd-kind .fd-time { margin-left: auto; padding-top: 0; }
+.fd-hint { margin: 0; }
+/* закреплённые срочные новости над лентой */
+.fd-pinbox { display: flex; flex-direction: column; gap: 8px; }
+.fd-pinhead { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink); }
+.fd-pinhead b { font-weight: 700; }
+.fd-pinhead .ic { width: 16px; height: 16px; flex: none; color: var(--accent-text); }
+.fd-pinned { border-color: var(--fd-tone); border-left-color: var(--fd-tone); }
+.fd-head { display: flex; align-items: flex-start; gap: 10px; }
+.fd-author { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; text-align: left; color: inherit; min-height: 44px; }
+.fd-author .avatar { width: 40px; height: 40px; font-size: 14px; }
+button.fd-author:hover .fd-name { color: var(--accent-text); }
+.fd-who { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.fd-name { font-size: 14.5px; font-weight: 700; line-height: 1.3; overflow-wrap: anywhere; }
+.fd-sub { font-size: 12.5px; line-height: 1.35; color: var(--ink-dim); overflow-wrap: anywhere; }
+.fd-time { flex: none; max-width: 92px; padding-top: 4px; text-align: right; font-size: 12.5px; line-height: 1.3; color: var(--ink-dim); font-variant-numeric: tabular-nums; }
+.fd-tags { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.fd-tags .tag { white-space: nowrap; }
+.fd-lock { display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--ink-dim); }
+.fd-lock .ic { width: 13px; height: 13px; }
+.fd-review { color: var(--warn); border-color: var(--warn); }
+.fd-text { font-size: 14.5px; line-height: 1.5; overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+.fd-text.full { display: block; -webkit-line-clamp: unset; overflow: visible; font-size: 15.5px; line-height: 1.55; }
+.fd-mine { padding: 8px 10px; border: 1px dashed var(--line); border-radius: 10px; }
+
+.fd-file, .fd-ref {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 8px 12px;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); text-align: left; color: var(--ink);
+}
+.fd-file > .ic { color: var(--accent-text); }
+.fd-ref > .ic:last-child { width: 16px; height: 16px; color: var(--ink-dim); margin-left: auto; }
+.fd-ref .avatar { width: 34px; height: 34px; font-size: 12.5px; }
+button.fd-file:hover, .fd-ref:hover { border-color: var(--accent-edge); }
+.fd-file-t, .fd-ref-t { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.fd-file-t b, .fd-ref-t b { font-size: 13.5px; font-weight: 600; overflow-wrap: anywhere; }
+.fd-file-go { flex: none; font-size: 13px; font-weight: 600; color: var(--accent-text); }
+
+.fd-when { display: flex; align-items: flex-start; gap: 8px; font-size: 13.5px; font-weight: 600; line-height: 1.4; }
+.fd-when > span, .fd-chatline > span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.fd-when .ic { width: 17px; height: 17px; margin-top: 1px; color: var(--accent-text); }
+.fd-going { display: flex; align-items: center; gap: 10px; min-height: 34px; }
+.fd-going .avatar-stack .avatar { width: 30px; height: 30px; font-size: 10.5px; margin-left: -6px; }
+.fd-going .avatar-stack .avatar:first-child { margin-left: 0; }
+
+.fd-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 2px; }
+.fd-acts .fd-b { width: 100%; padding: 0 10px; min-width: 0; }
+.fd-acts .wide { grid-column: 1 / -1; }
+.fd-b.in { border-color: var(--accent-edge); color: var(--accent-text); }
+.fd-b .ic { width: 17px; height: 17px; }
+
+.fd-teaser { flex-direction: row; align-items: center; gap: 12px; text-align: left; color: var(--ink); width: 100%; }
+.fd-teaser > .ic:first-child { width: 24px; height: 24px; color: var(--accent-text); }
+.fd-teaser > .ic:last-child { width: 16px; height: 16px; color: var(--ink-dim); }
+.fd-teaser .grow { display: flex; flex-direction: column; gap: 1px; }
+
+/* плавающая «+» (R3): рядом с .scr в .scr-host, правый край на границе содержимого (поле 20 px), конец ленты свободен (отступ .fd-body 88 px) */
+.fd-fab-wrap { position: absolute; right: 20px; bottom: 16px; z-index: 5; }
+.fd-fab {
+  width: 56px; height: 56px; border-radius: 50%;
+  display: grid; place-items: center; background: var(--accent-solid); color: var(--accent-ink);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .32);
+}
+.fd-fab:hover { background: var(--hover); }
+.fd-fab .ic { width: 26px; height: 26px; }
+
+/* ---------- R2: настройка ленты ---------- */
+.fd-box { padding: 2px 16px; gap: 0; }
+.fd-set { min-height: 60px; cursor: pointer; }
+.fd-set-t { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.fd-lockrow { cursor: default; }
+.fd-lockbadge {
+  flex: none; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600;
+  color: var(--ink-dim); border: 1px solid var(--line); border-radius: 999px; padding: 5px 10px;
+}
+.fd-lockbadge .ic { width: 14px; height: 14px; }
+.fd-person { gap: 10px; }
+.fd-plink { flex: 1; min-width: 0; min-height: 44px; display: flex; align-items: center; gap: 10px; text-align: left; color: var(--ink); }
+.fd-plink:hover .fd-name { color: var(--accent-text); }
+.fd-plink > .ic:last-child { width: 16px; height: 16px; flex: none; color: var(--ink-dim); }
+.fd-none { padding: 14px 0; }
+.fd-foot {
+  position: sticky; bottom: 0; margin-top: auto; z-index: 4; flex: none; display: flex; gap: 10px;
+  padding: 12px 20px 14px; background: var(--bg); border-top: 1px solid var(--line);
+}
+.fd-foot .btn { flex: 1 1 0; min-width: 0; padding: 0 10px; }
+
+/* ---------- R3: новая запись ---------- */
+.fd-opts { display: flex; flex-direction: column; gap: 8px; }
+.fd-opt {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 10px 14px; text-align: left;
+  border: 1px solid var(--line); border-radius: 14px; background: var(--card); color: var(--ink);
+}
+.fd-opt:hover { border-color: var(--accent-edge); }
+.fd-opt.on { border-color: var(--accent-solid); background: var(--surface-2); }
+.fd-radio { flex: none; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--ink-dim); position: relative; }
+.fd-opt.on .fd-radio { border-color: var(--accent-solid); }
+.fd-opt.on .fd-radio::after { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: var(--accent-solid); }
+.fd-opt .tr-title { font-size: 14.5px; font-weight: 600; }
+.fd-opt .tr-sub { font-size: 12.5px; color: var(--ink-dim); }
+.fd-rule .feed-link { min-height: 40px; }
+.fd-ta { min-height: 150px; }
+.fd-ta::placeholder, .fd-body .input::placeholder { color: var(--ink-dim); opacity: .8; }
+.fd-fline { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.fd-fline .btn-ghost { color: var(--accent-text); padding: 0 4px; }
+.fd-fline .counter { font-size: 12px; color: var(--ink-dim); font-variant-numeric: tabular-nums; }
+.fd-note { display: flex; align-items: flex-start; gap: 8px; }
+.fd-note .ic { width: 16px; height: 16px; margin-top: 2px; color: var(--accent-text); }
+.fd-preview { gap: 10px; }
+.sheet .fd-preview { margin-top: 4px; }
+.fd-preview .card-title, .fd-preview .r-sub, .fd-preview .fd-text { overflow-wrap: anywhere; min-width: 0; }
+.err-msg[hidden] { display: none; }
+
+/* ---------- R4: карточка записи ---------- */
+.fd-full { cursor: default; }
+.fd-chatline { display: flex; align-items: flex-start; gap: 8px; }
+.fd-chatline .ic, .fd-when .ic { flex: none; }
+.fd-chatline .ic { width: 16px; height: 16px; margin-top: 1px; color: var(--accent-text); }
+.fd-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.fd-tools .fd-b { width: 100%; padding: 0 10px; }
+.fd-tools .fd-b:only-child { grid-column: 1 / -1; }
+.fd-quote { padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); font-size: 13.5px; line-height: 1.45; overflow-wrap: anywhere; }
+.fd-reasons { display: flex; flex-wrap: wrap; gap: 8px; }
+.fd-reasons .chip { min-height: 40px; }
+
+/* ---------- R5: мой чат ---------- */
+.fd-clist.fd-box { padding: 0; overflow: hidden; }
+.fd-crow {
+  display: flex; align-items: flex-start; gap: 12px; width: 100%; min-height: 72px; padding: 14px 16px;
+  text-align: left; color: var(--ink); border-bottom: 1px solid var(--line);
+}
+.fd-crow:last-child { border-bottom: 0; }
+.fd-crow:hover .fd-ctitle { color: var(--accent-text); }
+.fd-cic {
+  flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--surface-2); border: 1px solid var(--line); color: var(--accent-text);
+}
+.fd-ct { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.fd-ctitle { font-size: 14.5px; font-weight: 700; line-height: 1.3; overflow-wrap: anywhere; }
+.fd-cmeta { font-size: 12.5px; color: var(--ink-dim); }
+.fd-clast {
+  margin-top: 2px; font-size: 13px; line-height: 1.4; color: var(--ink); overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.fd-clast b { font-weight: 600; color: var(--ink-dim); }
+.fd-ctags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.fd-ctags:empty { display: none; }
+.fd-ctags .tag { white-space: normal; }
+.fd-cr { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; color: var(--ink-dim); }
+.fd-cr .ic { width: 16px; height: 16px; }
+.fd-ctime { font-size: 12px; font-variant-numeric: tabular-nums; }
+
+/* ---------- R6: чат встречи ---------- */
+.scr.fd-chatscr { overflow: hidden; }
+/* компактная шапка чата: переписке отдана больше половины экрана; название, время и место в одну строку, остальное в меню «…» */
+.fd-chatscr .head-txt h1 { font-size: 28px; line-height: 30px; -webkit-line-clamp: 1; }
+.fd-chatscr .head-txt .sub { margin-top: 2px; -webkit-line-clamp: 1; overflow-wrap: anywhere; }
+.fd-chatscr .head-paren { padding-top: 2px; }
+.fd-chatscr .head-paren .paren { -webkit-line-clamp: 1; overflow-wrap: anywhere; }
+.fd-strip { flex: none; padding: 8px 20px 0; display: flex; flex-direction: column; gap: 8px; }
+.fd-prow { display: flex; align-items: stretch; gap: 8px; }
+.fd-pin {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 12px; text-align: left;
+  border: 1px solid var(--accent-edge); border-radius: 12px; background: var(--surface); color: var(--ink);
+  font-size: 12.5px; line-height: 1.35;
+}
+.fd-pin > .ic:first-child { width: 16px; height: 16px; flex: none; color: var(--accent-text); }
+.fd-pin > span { flex: 1; min-width: 0; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.fd-mem {
+  flex: none; min-width: 92px; min-height: 44px; padding: 4px 10px; text-align: center; font-size: 12.5px; font-weight: 600; line-height: 1.25;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink);
+}
+.fd-mem:hover { border-color: var(--accent-edge); color: var(--accent-text); }
+.fd-sbn { display: block; font-size: 12px; font-weight: 400; color: var(--ink-dim); }
+.fd-pend {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 8px 12px; text-align: left;
+  border: 1px solid var(--accent-edge); border-radius: 12px; background: var(--surface); color: var(--ink); font-size: 12.5px; line-height: 1.35;
+}
+.fd-pend > .ic:first-child { width: 16px; height: 16px; flex: none; color: var(--accent-text); }
+.fd-pend > .ic:last-child { width: 14px; height: 14px; flex: none; color: var(--ink-dim); }
+.fd-pend > span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.fd-msgs { flex: 1; min-height: 0; overflow-y: auto; margin-top: 8px; border-top: 1px solid var(--line); padding: 12px 20px 8px; display: flex; flex-direction: column; gap: 8px; }
+.fd-msgs::-webkit-scrollbar { width: 0; }
+.fd-msgs > * { flex: none; }
+.fd-day { text-align: center; font-size: 12px; color: var(--ink-dim); margin: 4px 0; }
+.fd-day span { padding: 3px 12px; border-radius: 999px; background: var(--surface-2); }
+.fd-m { display: flex; align-items: flex-end; gap: 8px; min-width: 0; }
+.fd-m.me { justify-content: flex-end; }
+.fd-mav { flex: none; width: 40px; height: 40px; margin-left: -3px; display: grid; place-items: center; }
+.fd-bub {
+  display: flex; flex-direction: column; gap: 3px; max-width: 78%; min-width: 0; padding: 8px 12px 6px; text-align: left;
+  border: 1px solid var(--line); border-radius: 16px; background: var(--surface-2); color: var(--ink); font-size: 14px; line-height: 1.4;
+}
+.fd-bub.other { border-bottom-left-radius: 6px; cursor: pointer; }
+.fd-bub.other:hover { border-color: var(--accent-edge); }
+.fd-m.me .fd-bub { background: var(--accent-solid); border-color: var(--accent-solid); color: var(--accent-ink); border-bottom-right-radius: 6px; }
+.fd-bub.mod { border-color: var(--accent-edge); background: var(--surface); }
+.fd-bn { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink); }
+.fd-bn b { font-weight: 700; }
+.fd-own { font-size: 12px; font-weight: 600; color: var(--accent-text); }
+.fd-bt { overflow-wrap: anywhere; }
+.fd-mt { align-self: flex-end; font-size: 12px; color: var(--ink-dim); font-variant-numeric: tabular-nums; }
+.fd-m.me .fd-mt { color: var(--accent-ink); opacity: .82; }
+.fd-hid { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px dashed var(--line); border-radius: 12px; }
+.fd-hid .ic { width: 16px; height: 16px; flex: none; }
+.fd-foot2 { flex: none; padding: 10px 20px 12px; background: var(--bg); border-top: 1px solid var(--line); }
+.fd-compose { display: flex; align-items: center; gap: 10px; }
+.fd-input {
+  flex: 1; min-width: 0; min-height: 44px; padding: 0 16px; border: 1px solid var(--line); border-radius: 22px;
+  background: var(--field-bg); color: var(--ink); font-size: 15px; outline: none;
+}
+.fd-input:focus { border-color: var(--accent-edge); }
+.fd-input::placeholder { color: var(--ink-dim); opacity: .8; }
+.fd-send { flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-solid); color: var(--accent-ink); }
+.fd-send:hover { background: var(--hover); }
+.fd-compose.off { justify-content: center; min-height: 44px; font-size: 13px; color: var(--ink-dim); }
+.fd-compose.off .ic { width: 16px; height: 16px; }
+.fd-cerr { padding: 0 0 8px 4px; }
+.fd-rules-t { margin: 4px 0; font-size: 14.5px; line-height: 1.5; color: var(--ink); overflow-wrap: anywhere; }
+.fd-tgbox { flex-direction: row; align-items: flex-start; gap: 14px; padding: 16px; }
+.fd-tgic { flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-solid); color: var(--accent-ink); }
+.fd-tgt { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+
+/* ---------- R7: создать чат встречи ---------- */
+.fd-step { display: flex; align-items: center; gap: 14px; }
+.fd-stepb { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; border: 1.5px solid var(--accent-edge); color: var(--ink); }
+.fd-stepb:hover { background: var(--surface-2); }
+.fd-stepb:disabled { opacity: .4; pointer-events: none; }
+.fd-stepn { min-width: 48px; text-align: center; font-family: var(--font-display); font-size: 34px; line-height: 1; }
+
+.fd-ctt { color: var(--ink); font-weight: 700; overflow-wrap: anywhere; }
+.fd-wrap { overflow-wrap: anywhere; }
+.fd-pend.off { cursor: default; }

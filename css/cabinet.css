@@ -1,0 +1,345 @@
+/* Раздел «Билет, кабинет, приватность и итоги» (блоки L, M), владелец S7. Префикс классов cab-.
+   Цвета и размеры только через токены tokens.css; без эмодзи, индиго и внешних шрифтов. */
+
+/* ---------- каркас ---------- */
+.cab-body { padding: 0 20px; display: flex; flex-direction: column; gap: 14px; overflow-wrap: anywhere; }
+.cab-body .row .grow, .cab-body .r-title, .cab-body .r-sub, .cab-body .tag { min-width: 0; }
+.cab-body .sec-title { margin: 8px 0 -6px; }
+.cab-body .sec-title .more { font-size: 13px; min-height: 40px; display: inline-flex; align-items: center; }
+.cab-end { height: 16px; flex: none; }
+.cab-gap { margin-top: 12px; }
+.cab-sub1 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }   /* подпись до двух строк: без обрезки на полуслове */
+.cab-sub2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cab-note { font-size: 12.5px; line-height: 1.45; color: var(--ink-dim); }
+.cab-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.cab-chips .chip { min-height: 40px; height: auto; padding: 8px 16px; white-space: normal; text-align: left; line-height: 1.25; }
+.cab-chips .chip[disabled] { opacity: .45; pointer-events: none; }
+.cab-empty { border: 1px dashed var(--line); border-radius: 16px; padding: 14px 16px; font-size: 13px; line-height: 1.45; color: var(--ink-dim); }
+.cab-ic {
+  width: 36px; height: 36px; border-radius: 50%; flex: none; display: grid; place-items: center;
+  background: var(--surface-2); color: var(--accent-text); border: 1px solid var(--line);
+}
+.cab-ic .ic { width: 18px; height: 18px; }
+.cab-link {
+  display: inline-flex; align-items: center; gap: 4px; min-height: 40px; padding: 0; text-align: left;
+  font-size: 13.5px; font-weight: 600; color: var(--accent-text);
+}
+.cab-link .ic { width: 15px; height: 15px; }
+
+/* ---------- L0 ---------- */
+.cab-me {
+  display: flex; flex-direction: column; gap: 14px; width: 100%; text-align: left; cursor: pointer;
+  border-color: var(--accent-edge); color: var(--ink);
+}
+.cab-me:hover { border-color: var(--accent-solid); }
+.cab-me-top { display: flex; align-items: center; gap: 14px; }
+.cab-me-top > .ic { width: 16px; height: 16px; color: var(--ink-dim); flex: none; }
+.cab-me-txt { display: flex; flex-direction: column; min-width: 0; gap: 2px; }
+.cab-me-txt .r-title, .cab-me-txt .r-sub { display: block; }
+.cab-me-txt .r-title { font-size: 16px; }
+.cab-me-meta { display: flex; align-items: center; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
+.cab-fill { display: flex; flex-direction: column; gap: 6px; }
+.cab-fill-t { font-size: 13.5px; font-weight: 600; }
+.cab-fill-t b { font-family: var(--font-display); font-size: 24px; font-weight: 400; letter-spacing: .02em; color: var(--accent-display); }
+.cab-list { padding: 2px 16px; }
+.cab-row { gap: 12px; }
+.cab-row > .ic { width: 16px; height: 16px; color: var(--ink-dim); flex: none; }
+.cab-bn { width: 100%; text-align: left; cursor: pointer; color: var(--ink); }
+.cab-bn > span, .cab-bn > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.cab-bn .b-title { display: block; }
+.cab-bn-btn { margin-top: 10px; align-self: flex-start; }
+.cab-theme { gap: 12px; }
+.cab-seg2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cab-seg2 .chip { justify-content: center; min-height: 44px; }
+
+/* ---------- L5 ---------- */
+.cab-mem {
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--card);
+  padding: 14px 16px; display: flex; flex-direction: column; gap: 12px;
+}
+.cab-mem.dim { opacity: .6; }
+.cab-mem-h { display: flex; align-items: flex-start; gap: 12px; }
+.cab-mem-tag { margin-top: 6px; }
+.cab-mem-act { display: flex; gap: 8px; flex-wrap: wrap; }
+.cab-mem-act .btn { flex: 1 1 auto; min-height: 40px; }
+.cab-cons { padding: 4px 16px; }
+.cab-sheet-list { margin: 8px 0 0; }
+.cab-sl { display: flex; gap: 10px; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14px; line-height: 1.35; }
+.cab-sl:last-child { border-bottom: 0; }
+.cab-sl .ic { width: 18px; height: 18px; flex: none; margin-top: 1px; color: var(--accent-text); }
+.sheet .err-msg:empty { display: none; }
+.sheet .err-msg { margin-top: 8px; }
+
+/* ---------- уровни видимости (L6, L7) ---------- */
+.cab-segwrap { padding: 2px 20px 14px; flex: none; }
+.cab-segwrap .segbar { margin: 0; }
+.cab-vis {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 6px 14px 6px 12px; border-radius: 999px; flex: none;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink-dim); font-size: 13px; font-weight: 600;
+  white-space: normal; text-align: left; line-height: 1.25; max-width: 100%; overflow-wrap: normal;
+}
+.cab-vis .ic { width: 14px; height: 14px; flex: none; }
+.cab-vis:hover { border-color: var(--accent-edge); color: var(--ink); }
+.cab-vis.off { border-style: dashed; }
+.cab-vis.fixed { border-color: transparent; background: transparent; pointer-events: none; }
+.cab-opts { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.cab-opt {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; min-height: 56px; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--ink);
+}
+.cab-opt.on { border-color: var(--accent-solid); background: var(--surface-2); }
+.cab-opt-t { display: block; font-weight: 600; font-size: 14px; }
+.cab-opt-d { display: block; font-size: 12px; line-height: 1.35; color: var(--ink-dim); margin-top: 1px; }
+.cab-opt-ck { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--line); display: grid; place-items: center; flex: none; color: transparent; }
+.cab-opt-ck .ic { width: 13px; height: 13px; }
+.cab-opt.on .cab-opt-ck { background: var(--accent-solid); border-color: var(--accent-solid); color: var(--accent-ink); }
+
+/* L6: что увидят, список полей, уровни */
+.cab-prev { gap: 4px; }
+.cab-pv { display: flex; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; line-height: 1.35; }
+.cab-pv .k { flex: none; width: 112px; color: var(--ink-dim); }
+.cab-pv .v { flex: 1; min-width: 0; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.cab-pv .v .ic { width: 13px; height: 13px; vertical-align: -1px; color: var(--ink-dim); }
+.cab-prev .cab-note { margin-top: 6px; }
+.cab-in { margin: 6px 0 2px; }
+.cab-lrow { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.cab-lrow:last-child { border-bottom: 0; }
+.cab-lmain { width: 100%; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.cab-lmain .r-title { font-size: 14.5px; }
+.cab-lv { font-size: 13px; line-height: 1.4; color: var(--ink-dim); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.cab-lv.unset, .cab-fv.unset { color: var(--ink-dim); font-style: italic; }
+.cab-lrow .cab-vis.fixed { padding-left: 0; }
+.cab-warn { font-size: 11.5px; color: var(--err); margin-top: 2px; }
+.cab-lvl { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.cab-lvl:last-child { border-bottom: 0; }
+.cab-ex { font-size: 12px; line-height: 1.4; color: var(--accent-text); margin-top: 4px; }
+
+/* L6: согласия, подбор, данные */
+.cab-crow { padding: 14px 0; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 6px; }
+.cab-crow:last-child { border-bottom: 0; }
+.cab-crow-h { display: flex; align-items: center; gap: 14px; }
+.cab-crow-s { font-size: 12.5px; line-height: 1.45; color: var(--ink-dim); }
+.cab-crow-m { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; }
+.cab-solo {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 12px 16px; min-height: 56px;
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); color: var(--ink);
+}
+.cab-solo > .ic { width: 16px; height: 16px; color: var(--ink-dim); flex: none; }
+.cab-pad { margin-top: 6px; }
+.cab-lock { display: flex; align-items: center; gap: 8px; margin-top: 4px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); font-size: 13px; font-weight: 600; }
+.cab-lock .ic { width: 16px; height: 16px; flex: none; color: var(--accent-text); }
+.cab-log { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.cab-log:last-child { border-bottom: 0; }
+.cab-danger { border-color: var(--err); }
+.cab-quote { font-size: 13.5px; line-height: 1.55; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
+
+/* L7: поля профиля */
+.cab-pfill { gap: 10px; }
+.cab-pct { font-family: var(--font-display); font-size: 24px; font-weight: 400; letter-spacing: .02em; color: var(--accent-display); }
+.cab-flist { padding: 4px 16px; }
+/* строка поля: слева название и значение (кнопка правки), справа метка уровня */
+.cab-frow { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 6px 0 12px; border-bottom: 1px solid var(--line); }
+.cab-frow:last-child { border-bottom: 0; }
+.cab-fmain { width: 100%; min-width: 0; display: flex; flex-direction: column; gap: 2px; text-align: left; padding: 6px 0; min-height: 44px; justify-content: center; color: var(--ink); }
+.cab-flabel { font-size: 14.5px; font-weight: 600; }
+.cab-fv { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; font-size: 13px; line-height: 1.4; color: var(--ink-dim); }
+.cab-fv.unset.req { color: var(--accent-text); font-style: normal; }
+.cab-tariff { flex-direction: row; align-items: center; gap: 12px; }
+
+.cab-qa[hidden], .cab-noq[hidden], .sheet [hidden] { display: none !important; }
+
+/* ---------- L8 цели и запросы ---------- */
+.cab-goal { border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.cab-goal.main { border-color: var(--accent-edge); }
+.cab-goal-h { display: flex; align-items: flex-start; gap: 12px; }
+.cab-goal-t { font-size: 14px; line-height: 1.4; font-weight: 600; }
+.cab-goal-t.unset, .cab-req-t.unset { color: var(--accent-text); font-weight: 400; }
+.cab-goal-d { font-size: 12px; line-height: 1.4; color: var(--ink-dim); }
+.cab-req-h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cab-req-t { font-size: 14.5px; line-height: 1.45; }
+.cab-hi { padding: 12px 0; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 4px; }
+.cab-hi:last-child { border-bottom: 0; }
+.cab-hi-h { display: flex; justify-content: space-between; align-items: baseline; gap: 4px 10px; flex-wrap: wrap; }
+.cab-hi-c { display: flex; gap: 10px; font-size: 12.5px; line-height: 1.4; color: var(--ink-dim); }
+.cab-hi-c .k { flex: none; width: 42px; color: var(--accent-text); font-weight: 600; }
+
+/* ---------- L9 ролики и тур ---------- */
+.cab-vid { gap: 12px; }
+.cab-poster, .cab-screen {
+  position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; display: grid; place-items: center;
+  background-color: var(--cover); background-image: linear-gradient(135deg, transparent 0%, rgba(253, 80, 0, .2) 100%);
+  border: 1px solid var(--line); color: var(--cover-ink);
+}
+.cab-poster { cursor: pointer; }
+.cab-bigplay { width: 56px; height: 56px; border-radius: 50%; background: var(--accent-solid); color: var(--accent-ink); display: grid; place-items: center; }
+.cab-bigplay .ic { width: 26px; height: 26px; }
+.cab-dur { position: absolute; right: 10px; bottom: 10px; background: rgba(0, 0, 0, .7); color: #fff; border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 600; }
+.cab-mock { position: absolute; left: 12px; top: 10px; font-family: var(--font-accent); font-size: 12px; color: var(--cover-dim); }
+.cab-player { display: flex; flex-direction: column; gap: 10px; }
+.cab-ctl { display: flex; align-items: center; gap: 12px; }
+.cab-time { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cab-vid-h { display: flex; align-items: flex-start; gap: 10px; }
+.cab-chap { display: flex; flex-direction: column; }
+.cab-ch { display: flex; align-items: center; gap: 10px; min-height: 40px; width: 100%; text-align: left; font-size: 13.5px; color: var(--ink); border-bottom: 1px solid var(--line); }
+.cab-ch:last-child { border-bottom: 0; }
+.cab-ch.on { color: var(--accent-text); font-weight: 600; }
+.cab-ch-n { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center; font-size: 11.5px; flex: none; }
+.cab-tour { gap: 12px; }
+.cab-tour-h { display: flex; align-items: center; gap: 14px; }
+.cab-ic.big { width: 52px; height: 52px; }
+.cab-ic.big .ic { width: 24px; height: 24px; }
+.cab-tour-n { font-family: var(--font-accent); font-size: 13px; color: var(--brand); }
+.cab-tour-t { font-family: var(--font-display); font-size: 26px; letter-spacing: .03em; text-transform: uppercase; line-height: 1.1; }
+.cab-tour-x { font-size: 14px; line-height: 1.5; }
+.cab-dots { display: flex; gap: 6px; justify-content: center; }
+.cab-dots i { width: 7px; height: 7px; border-radius: 99px; background: var(--line); }
+.cab-dots i.on { width: 20px; background: var(--accent-solid); }
+
+/* ---------- L10 кодекс ---------- */
+.cab-cx { gap: 12px; }
+.cab-cx-h { display: flex; align-items: center; gap: 12px; }
+.cab-cx-t { font-family: var(--font-display); font-size: 21px; letter-spacing: .04em; text-transform: uppercase; line-height: 1.15; }
+.cab-rules { margin: 0; padding: 0 0 0 20px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.5; }
+.cab-rules li::marker { color: var(--accent-text); font-weight: 700; }
+
+/* ---------- L11 вопросы и ответы ---------- */
+.cab-search { position: relative; }
+.cab-search .ic { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 17px; height: 17px; color: var(--ink-dim); pointer-events: none; }
+.cab-search .input { padding-left: 42px; }
+.cab-qa-list { gap: 8px; padding-top: 12px; }
+.cab-qa { border: 1px solid var(--line); border-radius: 16px; background: var(--card); overflow: hidden; }
+.cab-qa.open { border-color: var(--accent-edge); }
+.cab-q { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 56px; padding: 12px 16px; text-align: left; font-size: 14.5px; font-weight: 600; line-height: 1.35; color: var(--ink); }
+.cab-q .ic { width: 18px; height: 18px; flex: none; color: var(--ink-dim); transition: transform .2s var(--ease); }
+.cab-qa.open .cab-q .ic { transform: rotate(180deg); color: var(--accent-text); }
+.cab-a { display: none; padding: 0 16px 14px; }
+.cab-qa.open .cab-a { display: block; }
+.cab-a-c { font-size: 13.5px; line-height: 1.55; }
+.cab-a-m { margin-top: 10px; }
+
+/* ---------- M1: метки заметок ---------- */
+.cab-ntags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+
+/* ---------- M4 итоги ---------- */
+.cab-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cab-tile {
+  background: transparent; border: 0; border-top: 2px solid var(--line); border-radius: 0; padding: 10px 0 4px;
+  display: flex; flex-direction: column; gap: 2px; min-width: 0;
+}
+.cab-tile .num { font-family: var(--font-display); font-size: 30px; line-height: 1; color: var(--accent-display); }
+.cab-tile .lbl { font-size: 11.5px; color: var(--ink); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+.cab-tile .cap { font-size: 12px; line-height: 1.3; }
+.cab-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.cab-inl { display: inline-flex; align-items: center; min-height: 40px; padding: 0 2px; font: inherit; color: var(--accent-text); font-weight: 600; text-align: left; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; }
+.cab-ag-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0 8px; }
+.cab-chk {
+  width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--ink-dim); background: var(--surface); color: transparent;
+  display: grid; place-items: center; flex: none;
+}
+.cab-chk .ic { width: 18px; height: 18px; }
+.cab-chk:hover { border-color: var(--accent-edge); }
+.cab-chk.on { background: var(--accent-solid); border-color: var(--accent-solid); color: var(--accent-ink); }
+.cab-ag { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.cab-ag:last-child { border-bottom: 0; }
+.cab-ag.done .r-title { color: var(--ink-dim); text-decoration: line-through; }
+.cab-pdf .cab-pdf-l { margin: 14px 0 0; padding: 0 0 0 20px; display: flex; flex-direction: column; gap: 4px; font-size: 13.5px; }
+.cab-pdf .cab-pdf-l li::marker { color: var(--accent-text); font-weight: 700; }
+
+/* ---------- M5 дорожная карта ---------- */
+.cab-range { font-family: var(--font-text); }
+.cab-hint { margin: -4px 0 -4px; font-size: 12.5px; color: var(--ink-dim); }
+.cab-rd { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.cab-rd:last-child { border-bottom: 0; }
+.cab-rd.done .cab-rd-t { color: var(--ink-dim); text-decoration: line-through; }
+.cab-rd-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; text-align: left; min-height: 44px; justify-content: center; color: var(--ink); }
+.cab-rd-t { font-size: 14px; font-weight: 600; line-height: 1.35; }
+.cab-rd-s { font-size: 12px; font-weight: 600; color: var(--accent-text); }
+.cab-rd-w { font-size: 12px; line-height: 1.35; color: var(--ink-dim); }
+.cab-bell {
+  width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink-dim);
+  display: grid; place-items: center; flex: none;
+}
+.cab-bell .ic { width: 18px; height: 18px; }
+.cab-bell.on { color: var(--accent-ink); background: var(--accent-solid); border-color: var(--accent-solid); }
+.cab-tip { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.cab-tip:last-child { border-bottom: 0; }
+.cab-next { gap: 8px; }
+.cab-next-t { font-family: var(--font-display); font-size: 26px; letter-spacing: .03em; text-transform: uppercase; line-height: 1.1; }
+
+/* ---------- M6 контакты после события ---------- */
+.cab-pc { gap: 10px; }
+.cab-pc.done { opacity: .8; }
+.cab-pc-h { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; min-height: 44px; color: var(--ink); }
+.cab-pc-h .grow { display: flex; flex-direction: column; min-width: 0; }
+.cab-pc-h > .ic { width: 16px; height: 16px; color: var(--ink-dim); flex: none; }
+.cab-pc-n { margin: 0; padding: 0 0 0 18px; display: flex; flex-direction: column; gap: 4px; font-size: 13.5px; line-height: 1.45; }
+.cab-pc-n li::marker { color: var(--accent-text); }
+.cab-rem { display: flex; flex-direction: column; gap: 4px; padding: 6px 0 2px; border-top: 1px solid var(--line); }
+.cab-rem-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.cab-rem-t { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 600; min-width: 0; }
+.cab-rem-t .ic { width: 16px; height: 16px; color: var(--accent-text); flex: none; }
+.cab-rem-c { display: flex; align-items: center; gap: 8px; }
+.cab-rem-c .chip { min-height: 40px; padding: 0 8px; flex: 1 1 0; justify-content: center; white-space: nowrap; font-size: 13px; }
+.cab-draft { min-height: 190px; line-height: 1.5; }
+
+/* область касания переключателей: 40 px по высоте при визуальных 28 px */
+.cab-cons .toggle input, .cab-crow .toggle input { top: -6px; bottom: -6px; height: 40px; }
+
+/* ряды чипов и метки на экранах S7: касательная цель 40 px */
+.cab-rail .chip, .cab-m2chips .chip, .cab-m3tags .chip { min-height: 40px; }
+
+/* ---------- цикл исправлений 1 ---------- */
+
+/* L1: теги статуса под QR целиком, подпись справа от QR; значения билета переносятся */
+.ticket-card .qr-band { align-items: flex-start; }
+.ticket-card .qr-band:has(+ .cab-tk-tags) { padding-bottom: 12px; }
+.cab-tk-cap { flex: 1; min-width: 0; align-self: center; }
+.cab-tk-tags { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 22px 22px; }
+.cab-tk-tags .tag { white-space: normal; text-align: left; }
+.ticket-card .tk-row { gap: 12px; }
+.ticket-card .tk-row .k { flex: none; }
+.ticket-card .tk-row span:last-child { min-width: 0; text-align: right; overflow-wrap: anywhere; }
+
+/* L2: QR внутри блока документа (общий .qr 168 px не должен вылезать) */
+.doc-qr .qr { width: 100%; height: 100%; display: block; }
+
+/* L3, L4: «подпись — значение»: подпись не сжимается, значение переносится */
+.cab-kv { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 8px 0; font-size: 13.5px; line-height: 1.4; color: var(--ink-dim); }
+.cab-kv .k { flex: none; }
+.cab-kv .v { min-width: 0; text-align: right; overflow-wrap: anywhere; }
+.cab-kv.strong { color: var(--ink); font-weight: 600; font-size: 15px; }
+
+/* L6: обязательное согласие — отдельный вид без переключателя */
+.cab-crow-req .cab-crow-h { align-items: flex-start; }
+.cab-reqtag { display: inline-flex; align-items: center; gap: 6px; flex: none; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--accent-edge); color: var(--accent-text); font-size: 12.5px; font-weight: 600; }
+.cab-reqtag .ic { width: 14px; height: 14px; }
+.cab-ack .ic { display: none; }
+.cab-ack.on .ic { display: inline-block; }
+.cab-btn-danger { color: var(--err); border-color: var(--err); margin-top: 8px; }
+.cab-btn-danger .ic { color: var(--err); }
+
+/* списки уровней в листах: компактный вид с описанием у выбранного, длинный список прокручивается */
+.cab-opts.compact { gap: 6px; }
+.cab-opts.compact .cab-opt { min-height: 44px; padding: 6px 12px; }
+.cab-opts.compact .cab-opt-d { display: none; }
+.cab-opts.compact .cab-opt.on .cab-opt-d { display: block; }
+.cab-opts.scroll { max-height: 280px; overflow-y: auto; padding-right: 2px; }
+
+/* листы: главные кнопки закреплены внизу, «Отмена» не уходит за край */
+.sheet .cab-sheet-foot { position: sticky; bottom: calc(-1 * (20px + env(safe-area-inset-bottom))); z-index: 2; background: var(--dlg-bg); padding: 2px 0 calc(20px + env(safe-area-inset-bottom)); margin: 10px 0 calc(-1 * (20px + env(safe-area-inset-bottom))); }
+.sheet .cab-sheet-foot .btn-block:first-child { margin-top: 6px; }
+.sheet .cab-sheet-foot .btn-block { margin-top: 10px; }
+
+/* M6: черновик и предложения */
+.cab-draft { min-height: 150px; }
+.cab-offers-t { margin: 14px 0 0; }
+.cab-offers .toggle-row { padding: 8px 0; }
+.cab-offers .toggle input { top: -6px; bottom: -6px; height: 40px; }
+.cab-pc-n li, .cab-pc .cap { overflow-wrap: anywhere; }
+.cab-pc-h .r-title, .cab-pc-h .r-sub { overflow-wrap: anywhere; }
+
+/* M1: метки не вылезают за карточку */
+.cab-ntags .tag { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+
+/* невыбранные чипы читаются наравне с выбранными: текст основного цвета, граница заметнее */
+.cab-chips .chip:not(.on), .cab-rem-c .chip:not(.on), .cab-m2chips .chip:not(.on), .cab-m3tags .chip:not(.on) { color: var(--ink); border-color: var(--ink-dim); }

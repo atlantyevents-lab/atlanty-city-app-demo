@@ -68,7 +68,14 @@
     chevD: '<path d="M6 9.5l6 6 6-6"/>',
     minusCircle: '<circle cx="12" cy="12" r="8.5"/><path d="M8.5 12h7"/>',
     dot: '<circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"/>',
-    heart: '<path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.3 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/>'
+    heart: '<path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.3 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/>',
+    menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+    market: '<path d="M4.5 10.5 6 4.5h12l1.5 6"/><path d="M4.5 10.5 5.7 19a1.2 1.2 0 0 0 1.2 1h10.2a1.2 1.2 0 0 0 1.2-1l1.2-8.5"/><path d="M4.5 10.5h15"/><path d="M9.5 20v-4.5h5V20"/>',
+    feed: '<path d="M3 12h4.2l1.8-5.5 3.6 11 2-7.5 1.4 2H21"/>',
+    mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3M9 21h6"/>',
+    chart: '<path d="M4.5 4v15.5H20"/><path d="M8.5 15.5v-4M12.5 15.5V8M16.5 15.5v-6.5"/>',
+    link: '<path d="M10.5 13.5a3.8 3.8 0 0 0 5.4.4l2.6-2.6a3.8 3.8 0 0 0-5.4-5.4l-1.1 1.1"/><path d="M13.5 10.5a3.8 3.8 0 0 0-5.4-.4l-2.6 2.6a3.8 3.8 0 0 0 5.4 5.4l1.1-1.1"/>',
+    sparkle: '<path d="M12 3.5l1.7 5 5 1.7-5 1.7L12 17.4l-1.7-5.5-5-1.7 5-1.7z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/>'
   };
 
   function icon(name, cls) {
@@ -94,21 +101,26 @@
     return forms[2];
   }
 
-  /* ---------- общая шапка экрана (решение 16.11) ----------
-     Строка приложения 56 px: слева «назад» на вложенных или знак на корневых;
-     справа аватар кабинета и уведомления. Далее блок заголовка в полях 20 px:
+  /* ---------- общая шапка экрана (решение 16.11, оболочка v3) ----------
+     Строка приложения 56 px: на корневых экранах слева кнопка меню, на вложенных —
+     «назад» (data-go, backAct или backHist для карты); справа карта (только корневые),
+     уведомления и аватар кабинета. Далее блок заголовка в полях 20 px:
      надпись-ориентир → заголовок Bebas → поясняющая строка → paren. */
   function head(o) {
     o = o || {};
     const isRoot = o.root || ROOT_SCREENS[CURRENT] || false;
-    const left = o.back
-      ? '<button class="icon-btn" data-go="' + esc(o.back) + '" aria-label="Назад">' + icon('back') + '</button>'
-      : (o.backAct
-        ? '<button class="icon-btn" data-act="' + esc(o.backAct) + '" aria-label="Назад">' + icon('back') + '</button>'
-        : (isRoot ? logoImg('appbar-logo') : '<span class="appbar-gap"></span>'));
+    const backBtn = attr =>
+      '<button class="icon-btn" ' + attr + ' aria-label="Назад">' + icon('back') + '</button>';
+    const left = o.back ? backBtn('data-go="' + esc(o.back) + '"')
+      : o.backAct ? backBtn('data-act="' + esc(o.backAct) + '"')
+      : o.backHist ? backBtn('data-act="nav-back"')
+      : isRoot
+        ? '<button class="icon-btn" data-act="menu-open" aria-label="Меню">' + icon('menu') + '</button>'
+        : '<span class="appbar-gap"></span>';
     const rightIcons = (o.right || '') +
-      '<button class="icon-btn" data-go="L0" aria-label="Кабинет">' + icon('user') + '</button>' +
-      (o.noBell ? '' : '<button class="icon-btn" data-go="B3" aria-label="Уведомления">' + icon('bell') + '</button>');
+      (isRoot ? '<button class="icon-btn" data-go="E1" aria-label="Карта">' + icon('map') + '</button>' : '') +
+      (o.noBell ? '' : '<button class="icon-btn" data-go="B3" aria-label="Уведомления">' + icon('bell') + '</button>') +
+      '<button class="icon-btn" data-go="L0" aria-label="Кабинет">' + icon('user') + '</button>';
     let h = '<div class="appbar"><div class="appbar-l">' + left + '</div>' +
       '<div class="appbar-r">' + rightIcons + '</div></div>';
     h += '<div class="head-txt">' +
@@ -148,6 +160,16 @@
   /* ---------- состояние и действия ---------- */
   const STATE = {};           // STATE[screenId] — эфемерное состояние экрана
   const st = id => STATE[id] || (STATE[id] = {});
+  const IHIST = [];           // внутренний стек hash-маршрутов внутри приложения (для nav-back)
+  const SCR_POS = {};         // hash -> {y, rails:[scrollLeft,...]} — память прокрутки по маршрутам
+  /* Направление перехода по Navigation API: location.hash= и history.back() оба
+     стреляют popstate+hashchange, различить их можно только по индексу записи
+     истории — при возврате назад индекс меньше предыдущего. */
+  const NAV_API = (typeof window !== 'undefined' && window.navigation) ? window.navigation : null;
+  let LAST_NAV_IDX = (NAV_API && NAV_API.currentEntry) ? NAV_API.currentEntry.index : null;
+  let LAST_ACT_EL = null;     // последний кликнутый элемент с data-act/data-go (возврат фокуса из листа)
+  let LAST_ROUTE = null;      // {id, param} — для сохранения прокрутки .scr при перерисовке того же экрана
+  let APPLIED_SCR_Y = 0;      // scrollTop .scr, применённый route() до R.mount — для restoreScroll() экранов
 
   const ACTS = {};            // ACTS[name] = fn(el, ev)
   function act(name, arg, extra) {
@@ -156,6 +178,7 @@
 
   /* ---------- лист (bottom sheet) и тост ---------- */
   function frameEl() { return document.querySelector('.frame'); }
+  let SHEET_RETURN = null;    // элемент, вернувший фокус после закрытия листа
   function openSheet(html, opts) {
     const fr = frameEl(); if (!fr) return;
     closeSheet();
@@ -166,76 +189,149 @@
     fr.appendChild(wrap);
     document.body.classList.add('sheet-open');
     if (opts && opts.mount) opts.mount(wrap);
+    a11yify(wrap);
+    const sheet = wrap.querySelector('.sheet');
+    if (sheet && !sheet.hasAttribute('tabindex')) { sheet.setAttribute('tabindex', '-1'); }
+    SHEET_RETURN = (LAST_ACT_EL && LAST_ACT_EL.isConnected) ? LAST_ACT_EL : document.activeElement;
+    /* ловушка фокуса: Tab/Shift+Tab циклится внутри листа */
+    wrap.addEventListener('keydown', ev => {
+      if (ev.key !== 'Tab' || !sheet) { return; }
+      const f = [...wrap.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+        .filter(e => !e.disabled && e.getClientRects().length);
+      if (!f.length) { ev.preventDefault(); sheet.focus(); return; }
+      const first = f[0], last = f[f.length - 1];
+      if (ev.shiftKey ? document.activeElement === first || !wrap.contains(document.activeElement)
+                      : document.activeElement === last || !wrap.contains(document.activeElement)) {
+        ev.preventDefault();
+        (ev.shiftKey ? last : first).focus();
+      }
+    });
+    setTimeout(() => {
+      if (!wrap.isConnected || !sheet) { return; }
+      if (sheet.contains(document.activeElement)) { return; }  // mount уже поставил фокус
+      const f = wrap.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      (f || sheet).focus();
+    }, 0);
   }
   function closeSheet() {
-    const w = document.querySelector('.sheet-wrap'); if (w) w.remove();
+    const w = document.querySelector('.sheet-wrap'); if (w) { w.remove(); }
     document.body.classList.remove('sheet-open');
+    const r = SHEET_RETURN; SHEET_RETURN = null;
+    if (r && r.isConnected && r !== document.body && r.focus) {
+      try { r.focus({ preventScroll: true }); } catch (e) { try { r.focus(); } catch (e2) { /* noop */ } }
+    }
   }
-  function toast(msg, ms) {
-    const fr = frameEl(); if (!fr) return;
+  /* Хелпер для экранов, которые сами возвращают прокрутку в mount (напр. R7):
+     ставит .scr в позицию, которую route() применил для этого рендера. */
+  function restoreScroll(root) {
+    const sc = root && root.querySelector ? root.querySelector('.scr')
+      : (root && root.classList && root.classList.contains('scr') ? root : document.querySelector('.scr'));
+    if (sc) { sc.scrollTop = APPLIED_SCR_Y; }
+  }
+  window.restoreScroll = restoreScroll;
+
+  /* Последний тост живёт в TOAST и переживает перерисовку #app: route() вызывает paintToast
+     с оставшимся временем. Элемент .toast создаётся заново внутри новой рамки. */
+  let TOAST = null; /* {msg, ms, at} — момент показа, срок и текст */
+  function paintToast(fr) {
+    if (!TOAST || !fr) return;
+    const left = TOAST.ms - (Date.now() - TOAST.at);
+    if (left <= 0) { TOAST = null; return; }
     let t = fr.querySelector('.toast');
-    if (!t) { t = document.createElement('div'); t.className = 'toast'; fr.appendChild(t); }
-    t.innerHTML = icon('check') + '<span>' + esc(msg) + '</span>';
+    if (!t) { t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status'); t.setAttribute('aria-live', 'polite'); fr.appendChild(t); }
+    t.innerHTML = icon('check') + '<span>' + esc(TOAST.msg) + '</span>' +
+      (TOAST.act ? (TOAST.act.go
+        ? '<a class="toast-act" href="#/' + esc(TOAST.act.go) + '">' + esc(TOAST.act.label) + '</a>'
+        : '<button type="button" class="toast-act" data-act="' + esc(TOAST.act.act) + '"' +
+          (TOAST.act.arg != null ? ' data-arg="' + esc(TOAST.act.arg) + '"' : '') +
+          (TOAST.act.id != null ? ' data-id="' + esc(TOAST.act.id) + '"' : '') + '>' + esc(TOAST.act.label) + '</button>') : '');
     t.classList.add('show');
     clearTimeout(t._h);
-    t._h = setTimeout(() => t.classList.remove('show'), ms || 2200);
+    t._h = setTimeout(() => t.classList.remove('show'), left);
+  }
+  function toast(msg, ms, act) {
+    const fr = frameEl(); if (!fr) return;
+    TOAST = { msg: msg, ms: ms || (act ? 6000 : 4000), at: Date.now(), act: act || null };
+    paintToast(fr);
   }
 
   function rerender() { route(true); }
 
-  /* ---------- каталог экранов (106 из брифа v2) ---------- */
-  /* level: 1/2; phaseA: true для десяти экранов фазы A */
+  /* ---------- каталог экранов (144 экрана, инвентарь 04_REBUILD_V3.md, часть 4) ----------
+     level: 1 — основной, 2 — вложенный. Порядок блоков — как в инвентаре (K перед I и J). */
   const BLOCKS = [
     { id: 'A', name: 'Вход и онбординг', items: [
-      ['A1', 'Приветствие', 1, 1], ['A2', 'Контакт', 2, 0], ['A3', 'Код', 2, 0],
-      ['A4', 'Согласия', 1, 1], ['A5', 'Установка на экран', 2, 0], ['A6', 'Цели и польза', 1, 1], ['A7', 'Telegram', 2, 0]] },
-    { id: 'B', name: 'Сегодня', items: [
-      ['B1', 'Сегодня', 1, 1], ['B2', 'Лента', 2, 0], ['B3', 'Настройки уведомлений', 1, 1]] },
+      ['A1', 'Приветствие', 1, 0], ['A2', 'Контакт', 2, 0], ['A3', 'Код', 2, 0],
+      ['A4', 'Согласия', 1, 0], ['A5', 'Установка на экран', 2, 0], ['A6', 'Как работает приложение', 1, 0],
+      ['A7', 'Telegram', 2, 0], ['A8', 'Шаг 1 из 3: кто вы', 1, 0], ['A9', 'Шаг 2 из 3: цель', 1, 0],
+      ['A10', 'Шаг 3 из 3: запрос', 1, 0], ['A11', 'Ваш первый путь', 1, 0], ['A12', 'Усилить путь', 2, 0],
+      ['A13', 'Ваш питч для интро', 2, 0], ['A14', 'Уточняющие вопросы', 2, 0]] },
+    { id: 'Z', name: 'Оболочка', items: [
+      ['Z1', 'Меню', 1, 0], ['Z2', 'Поиск по всему', 2, 0]] },
+    { id: 'B', name: 'Мой путь', items: [
+      ['B1', 'Мой путь', 1, 0], ['B3', 'Настройки уведомлений', 1, 0], ['B4', 'Таймлайн дня', 1, 0],
+      ['B5', 'Версии пути', 1, 0], ['B6', 'Заменить пункт', 2, 0], ['B7', 'Конфликты и переходы', 2, 0],
+      ['B8', 'Дайджест дня', 2, 0]] },
+    { id: 'N', name: 'ИИ-помощники', items: [
+      ['N1', 'Ассистент', 1, 0], ['N2', 'Штурман: запрос', 2, 0], ['N3', 'Штурман: маршруты', 1, 0],
+      ['N4', 'Секретарь', 1, 0], ['N5', 'Подборщик', 2, 0], ['N6', 'Люди для знакомства', 1, 0],
+      ['N7', 'Хроникёр', 2, 0], ['N8', 'Почему это в вашем пути', 2, 0]] },
     { id: 'C', name: 'Программа', items: [
-      ['C1', 'Вся программа', 1, 1], ['C2', 'Фильтры', 2, 0], ['C3', 'Карточка сессии', 1, 1],
-      ['C4', 'Моя программа', 1, 1], ['C5', 'Спикер', 2, 0], ['C6', 'Изменение расписания', 2, 0],
-      ['C7', 'Сетка программы', 1, 1]] },
+      ['C1', 'Вся программа', 1, 0], ['C2', 'Фильтры', 2, 0], ['C3', 'Карточка сессии', 1, 0],
+      ['C4', 'Избранное', 1, 0], ['C5', 'Спикер', 2, 0], ['C6', 'Изменение расписания', 2, 0],
+      ['C7', 'Сетка программы', 1, 0]] },
     { id: 'D', name: 'Записи', items: [
-      ['D1', 'Менторские', 1, 1], ['D2', 'Подтверждение записи', 1, 1], ['D3', 'Лист ожидания', 2, 0],
-      ['D4', 'Недоступно по тарифу', 1, 1], ['D5', 'Мои записи', 2, 0], ['D6', 'Освободилось место', 2, 0]] },
+      ['D1', 'Менторские', 1, 0], ['D2', 'Подтверждение записи', 1, 0], ['D3', 'Лист ожидания', 2, 0],
+      ['D4', 'Недоступно по тарифу', 1, 0], ['D5', 'Мои записи', 2, 0], ['D6', 'Освободилось место', 2, 0]] },
     { id: 'E', name: 'Карта', items: [
-      ['E1', 'План Завидово', 1, 1], ['E2', 'План этажа', 2, 0], ['E3', 'Точка', 2, 0],
-      ['E4', 'Маршрут', 1, 1], ['E5', 'Мой маршрут', 2, 0], ['E6', 'Бухта', 2, 0], ['E7', 'Вид сверху', 2, 0]] },
-    { id: 'F', name: 'Люди и знакомства', items: [
-      ['F1', 'Участники', 1, 1], ['F2', 'Карточка человека', 1, 1], ['F3', 'Заявка на знакомство', 1, 1],
-      ['F4', 'Входящие заявки', 1, 1], ['F5', 'Исходящие', 2, 0], ['F6', 'НеРэндом кофе', 2, 0],
-      ['F7', 'QR-визитка', 2, 0], ['F8', 'Мои контакты', 2, 0], ['F9', 'Спикеры', 1, 1]] },
+      ['E1', 'План Завидово', 1, 0], ['E2', 'План этажа', 2, 0], ['E3', 'Точка', 2, 0],
+      ['E4', 'Маршрут', 1, 0], ['E5', 'Мой маршрут', 2, 0], ['E6', 'Бухта', 2, 0], ['E7', 'Вид сверху', 2, 0]] },
+    { id: 'F', name: 'Участники', items: [
+      ['F1', 'Участники', 1, 0], ['F2', 'Карточка человека', 1, 0], ['F3', 'Заявка на знакомство', 1, 0],
+      ['F4', 'Входящие заявки', 1, 0], ['F5', 'Исходящие', 2, 0], ['F6', 'Предметный кофе', 1, 0],
+      ['F7', 'QR-визитка', 2, 0], ['F8', 'Мои контакты', 2, 0], ['F9', 'Спикеры', 1, 0],
+      ['F10', 'Подборка по запросу', 1, 0], ['F11', 'Хочу встретиться', 2, 0], ['F12', 'Компания участника', 2, 0]] },
     { id: 'G', name: 'Встречи', items: [
-      ['G1', 'Хаб', 1, 1], ['G2', 'Выбор окна', 1, 1], ['G3', 'Заявка на встречу', 1, 1],
-      ['G4', 'Встреча подтверждена', 1, 1], ['G5', 'Другое время', 2, 0], ['G6', 'Напоминание', 2, 0],
-      ['G7', 'Отметка прихода', 2, 0], ['G8', 'Исход встречи', 1, 1], ['G9', 'Договорённость', 1, 1],
-      ['G10', 'Hosted Buyer', 1, 1], ['G11', 'Нет окон', 2, 0]] },
-    { id: 'H', name: 'Экспо', items: [
-      ['H1', 'Решения', 1, 1], ['H2', 'Карточка решения', 1, 1], ['H3', 'Мой список «Изучить»', 1, 1],
-      ['H4', 'Маршрут по Экспо', 1, 1], ['H5', 'КипяTALK', 1, 1], ['H6', 'Предложения', 2, 0], ['H7', 'Отметка стенда', 2, 0]] },
-    { id: 'I', name: 'Кабинет экспонента', items: [
-      ['I1', 'Главная', 1, 1], ['I2', 'Контакты', 1, 1], ['I3', 'Карточка контакта', 2, 0],
-      ['I4', 'Команда и квота', 2, 0], ['I5', 'Доступность', 2, 0], ['I6', 'Воркшоп', 2, 0],
-      ['I7', 'Заявки', 2, 0], ['I8', 'Аналитика', 1, 1], ['I9', 'Карточка решения', 2, 0]] },
-    { id: 'J', name: 'Сканер контактов', items: [
-      ['J1', 'Сканер', 1, 1], ['J2', 'Результат с согласием', 1, 1], ['J3', 'Результат без согласия', 1, 1],
-      ['J4', 'Метки и заметка', 2, 0], ['J5', 'Офлайн-очередь', 2, 0], ['J6', 'Кто меня сканировал', 2, 0]] },
+      ['G1', 'Встречи: хаб', 1, 0], ['G2', 'Выбор окна', 1, 0], ['G3', 'Заявка на встречу', 1, 0],
+      ['G4', 'Встреча подтверждена', 1, 0], ['G5', 'Другое время', 2, 0], ['G6', 'Напоминание', 2, 0],
+      ['G7', 'Отметка прихода', 2, 0], ['G8', 'Исход встречи', 1, 0], ['G9', 'Договорённость', 1, 0],
+      ['G10', 'Hosted Buyer', 1, 0], ['G11', 'Нет окон', 2, 0]] },
+    { id: 'H', name: 'Маркетплейс', items: [
+      ['H1', 'Решения', 1, 0], ['H2', 'Карточка решения', 1, 0], ['H3', 'Мой список «Изучить»', 1, 0],
+      ['H4', 'Маршрут по Экспо', 1, 0], ['H5', 'КипяTALK', 1, 0], ['H6', 'Предложения', 2, 0],
+      ['H7', 'Отметка стенда', 2, 0], ['H8', 'Экспо: стенды и зоны', 1, 0], ['H9', 'Продукты участников', 2, 0],
+      ['H10', 'Продукт участника', 2, 0]] },
     { id: 'K', name: 'Партнёры', items: [
       ['K1', 'Партнёры по статусам', 2, 0], ['K2', 'Карточка партнёра', 2, 0],
       ['K3', 'Предложение', 2, 0], ['K4', 'Мои предложения', 2, 0]] },
+    { id: 'I', name: 'Кабинет экспонента', items: [
+      ['I1', 'Кабинет экспонента: главная', 1, 0], ['I2', 'Контакты', 1, 0], ['I3', 'Карточка контакта', 2, 0],
+      ['I4', 'Команда и квота', 2, 0], ['I5', 'Доступность', 2, 0], ['I6', 'Воркшоп', 2, 0],
+      ['I7', 'Заявки', 2, 0], ['I8', 'Аналитика', 1, 0], ['I9', 'Карточка решения (редактор)', 2, 0],
+      ['I10', 'Мои посты и предложения', 1, 0]] },
+    { id: 'J', name: 'Сканер контактов', items: [
+      ['J1', 'Сканер', 1, 0], ['J2', 'Результат с согласием', 1, 0], ['J3', 'Результат без согласия', 1, 0],
+      ['J4', 'Метки и заметка', 2, 0], ['J5', 'Офлайн-очередь', 2, 0], ['J6', 'Кто меня сканировал', 2, 0]] },
+    { id: 'R', name: 'Лента и чаты', items: [
+      ['R1', 'Лента', 1, 0], ['R2', 'Настройка ленты', 2, 0], ['R3', 'Новая запись', 1, 0],
+      ['R4', 'Карточка записи', 1, 0], ['R5', 'Мой чат', 1, 0], ['R6', 'Чат встречи', 1, 0],
+      ['R7', 'Создать чат встречи', 2, 0]] },
     { id: 'L', name: 'Билет и кабинет', items: [
-      ['L0', 'Кабинет', 1, 1], ['L1', 'Билет', 1, 1], ['L2', 'PDF-приглашение', 2, 0], ['L3', 'Оплата', 2, 0],
-      ['L4', 'Проживание', 2, 0], ['L5', 'Семья и команда', 2, 0], ['L6', 'Приватность', 2, 0], ['L7', 'Профиль', 2, 0]] },
-    { id: 'M', name: 'Заметки и оценка', items: [
-      ['M1', 'Заметки', 2, 0], ['M2', 'Заметка в сессии', 2, 0], ['M3', 'Оцените день', 1, 1], ['M4', 'Мои итоги', 2, 0]] },
-    { id: 'N', name: 'ИИ', items: [
-      ['N1', 'Ассистент', 1, 1], ['N2', 'Штурман: запрос', 2, 0], ['N3', 'Штурман: маршруты', 1, 1],
-      ['N4', 'Секретарь', 1, 1], ['N5', 'Подборщик', 2, 0], ['N6', 'Люди для знакомства', 1, 1], ['N7', 'Хроникёр', 2, 0]] },
+      ['L0', 'Кабинет', 1, 0], ['L1', 'Билет', 1, 0], ['L2', 'PDF-приглашение', 2, 0],
+      ['L3', 'Оплата', 2, 0], ['L4', 'Проживание', 2, 0], ['L5', 'Семья и команда', 2, 0],
+      ['L6', 'Приватность', 1, 0], ['L7', 'Профиль', 1, 0], ['L8', 'Цели и запросы', 1, 0],
+      ['L9', 'Как пользоваться', 2, 0], ['L10', 'Кодекс участника', 2, 0], ['L11', 'Вопросы и ответы', 2, 0]] },
+    { id: 'M', name: 'Заметки и итоги', items: [
+      ['M1', 'Заметки', 2, 0], ['M2', 'Заметка в сессии', 2, 0], ['M3', 'Оцените день', 1, 0],
+      ['M4', 'Мои итоги', 1, 0], ['M5', 'Дорожная карта на полгода', 2, 0], ['M6', 'Контакты после события', 2, 0]] },
     { id: 'O', name: 'Допуск (команда)', items: [
-      ['O1', 'Сканер допуска', 1, 1], ['O2', 'Поиск гостя', 2, 0], ['O3', 'Закрытая сессия', 2, 0], ['O4', 'Статистика допуска', 2, 0]] },
+      ['O1', 'Сканер допуска', 1, 0], ['O2', 'Поиск гостя', 2, 0], ['O3', 'Закрытая сессия', 2, 0],
+      ['O4', 'Статистика допуска', 2, 0], ['O5', 'Сканер зала: вход и выход', 1, 0]] },
     { id: 'P', name: 'Консоль (рабочий стол)', items: [
-      ['P1', 'Табло встреч', 1, 1], ['P2', 'Очередь аккредитации', 1, 1], ['P3', 'Консоль уведомлений', 1, 1],
-      ['P4', 'Дашборд', 1, 1], ['P5', 'Параметры', 2, 0], ['P6', 'Синхронизация программы', 2, 0], ['P7', 'Оценки спикеров', 2, 0]] }
+      ['P1', 'Табло встреч', 1, 0], ['P2', 'Очередь аккредитации', 1, 0], ['P3', 'Консоль уведомлений', 1, 0],
+      ['P4', 'Дашборд', 1, 0], ['P5', 'Параметры', 2, 0], ['P6', 'Синхронизация программы', 2, 0],
+      ['P7', 'Оценки спикеров', 2, 0], ['P8', 'План-факт путей', 2, 0], ['P9', 'Модерация: лента, интро, чаты', 1, 0],
+      ['P10', 'ИИ: режимы, лимиты, бюджет', 2, 0]] }
   ];
 
   const ALL_SCREENS = [];
@@ -256,8 +352,7 @@
     const apply = () => {
       root.setAttribute('data-theme', t);
       try { localStorage.setItem(THEME_KEY, t); } catch (e) {}
-      const b = document.querySelector('.theme-btn');
-      if (b) b.setAttribute('aria-pressed', t === 'winter' ? 'true' : 'false');
+      document.querySelectorAll('.theme-btn').forEach(b => b.setAttribute('aria-pressed', t === 'winter' ? 'true' : 'false'));
       document.querySelectorAll('.theme-ic-sun, .theme-ic-moon').forEach(el => el.style.display = 'none');
       const show = t === 'winter' ? '.theme-ic-moon' : '.theme-ic-sun';
       document.querySelectorAll(show).forEach(el => el.style.display = '');
@@ -275,28 +370,48 @@
   }
 
   /* ---------- оболочка ---------- */
-  /* Пять разделов нижней панели (решение 16.11): Сегодня · Программа · Экспо · Люди · Карта */
+  /* Пять вкладок нижней панели v3 (часть 3.1): Мой путь · Программа · Маркетплейс · Участники · Лента */
   const TAB_ITEMS = [
-    ['B1', 'Сегодня', 'today'], ['C1', 'Программа', 'program'], ['H1', 'Экспо', 'expo'],
-    ['F1', 'Люди', 'people'], ['E1', 'Карта', 'map']
+    ['B1', 'Мой путь', 'route'], ['C1', 'Программа', 'program'], ['H1', 'Маркетплейс', 'market'],
+    ['F1', 'Участники', 'people'], ['R1', 'Лента', 'feed']
   ];
 
-  /* раздел нижней панели для экрана без явного tab (по блоку) */
-  const SECTION_OF_BLOCK = {
-    A: 'B1', B: 'B1', C: 'C1', D: 'C1', E: 'E1', F: 'F1', G: 'F1',
-    H: 'H1', I: 'H1', J: 'H1', K: 'H1', L: null, M: null, N: null, O: null, P: null
+  /* Подсветка вкладки по блоку экрана (часть 3.1): схема ядра побеждает старые значения
+     tab в регистрациях, кроме явных null (панель скрыта) и '-' (панель без активной).
+     L, M, O, P в схеме нет — для них панель по настройке экрана, как в v2. */
+  const TAB_OF_BLOCK = {
+    A: null, Z: null, B: 'B1', N: 'B1', C: 'C1', D: 'C1', E: '-',
+    F: 'F1', G: 'F1', K: 'F1', H: 'H1', I: 'H1', J: 'H1', R: 'R1'
   };
-  /* корневые экраны разделов: в строке приложения — знак, на вложенных — «назад» */
-  const ROOT_SCREENS = { B1: 1, C1: 1, H1: 1, F1: 1, E1: 1, L0: 1,
-    F9: 1, G1: 1, H5: 1, K1: 1, H3: 1, C7: 1, C4: 1, D1: 1, E6: 1, E7: 1 };
-  /* раздел приложения для сайдбара и подсветки */
+  const PANEL_BY_SCREEN = new Set(['L', 'M', 'O', 'P']);
+
+  /* экран возврата для заглушек «скоро» по блоку */
+  const SECTION_OF_BLOCK = {
+    A: 'A1', Z: 'Z1', B: 'B1', N: 'N1', C: 'C1', D: 'D1', E: 'E1', F: 'F1',
+    G: 'G1', H: 'H1', I: 'I1', J: 'J1', K: 'K1', R: 'R1', L: 'L0', M: 'M1',
+    O: 'O1', P: 'P1'
+  };
+  /* корневые экраны v3 (часть 3.2): слева меню, справа карта, уведомления и аватар */
+  const ROOT_SCREENS = { B1: 1, C1: 1, C4: 1, C7: 1, D1: 1,
+    H1: 1, H3: 1, H5: 1, H8: 1, H9: 1, F1: 1, F9: 1, G1: 1, K1: 1,
+    R1: 1, R5: 1, L0: 1, Z1: 1 };
+  /* раздел приложения для сайдбара */
   const SECTION_OF_SCREEN = {};
-  [['A', 'Вход и онбординг'], ['B', 'Сегодня'], ['C', 'Программа'], ['D', 'Программа'],
-   ['E', 'Карта'], ['F', 'Люди'], ['G', 'Люди'], ['H', 'Экспо'], ['I', 'Экспо'],
-   ['J', 'Экспо'], ['K', 'Экспо'], ['L', 'Кабинет'], ['M', 'Кабинет'], ['N', 'Кабинет'],
+  [['A', 'Вход и онбординг'], ['Z', 'Оболочка'], ['B', 'Мой путь'], ['N', 'Мой путь'],
+   ['C', 'Программа'], ['D', 'Программа'], ['E', 'Карта'], ['F', 'Участники'],
+   ['G', 'Участники'], ['H', 'Маркетплейс'], ['K', 'Маркетплейс'], ['I', 'Маркетплейс'],
+   ['J', 'Маркетплейс'], ['R', 'Лента'], ['L', 'Кабинет'], ['M', 'Кабинет'],
    ['O', 'Консоль и допуск'], ['P', 'Консоль и допуск']].forEach(p => {
     BLOCKS.forEach(b => { if (b.id === p[0]) b.section = p[1]; });
   });
+
+  /* активная вкладка экрана: явные null/'-' регистрации важнее схемы, дальше — схема по блоку */
+  function tabFor(id, R) {
+    const blk = id[0];
+    if (PANEL_BY_SCREEN.has(blk)) return R && R.tab !== undefined ? R.tab : null;
+    if (R && (R.tab === null || R.tab === '-')) return R.tab;
+    return TAB_OF_BLOCK[blk] !== undefined ? TAB_OF_BLOCK[blk] : null;
+  }
 
   function tabbar(activeId) {
     const items = TAB_ITEMS.map(([id, label, ic]) =>
@@ -313,7 +428,7 @@
 
   /* Боковой список — по разделам приложения, внутри раздела по блокам брифа. */
   function sidebarHTML(currentId) {
-    const order = ['Вход и онбординг', 'Сегодня', 'Программа', 'Экспо', 'Люди', 'Карта', 'Кабинет', 'Консоль и допуск'];
+    const order = ['Вход и онбординг', 'Мой путь', 'Программа', 'Маркетплейс', 'Участники', 'Лента', 'Карта', 'Кабинет', 'Оболочка', 'Консоль и допуск'];
     let html = '';
     order.forEach(sec => {
       const blocks = BLOCKS.filter(b => b.section === sec);
@@ -373,11 +488,29 @@
     };
   }
 
+  /* Карточки и блоки с data-go/data-act, не являющиеся нативно интерактивными,
+     получают tabindex/role и пометку data-a11y (по ней работает Enter/Space в keydown). */
+  function a11yify(root) {
+    if (!root) { return; }
+    root.querySelectorAll('[data-go],[data-act]').forEach(el => {
+      if (el.hasAttribute('data-a11y')) { return; }
+      /* подложки-ловушки клика не фокусируются: им не место в Tab-порядке и в фокусе листа */
+      if ([...el.classList].some(c => c.indexOf('scrim') !== -1)) { return; }
+      const tag = el.tagName;
+      /* нативно интерактивные не помечаем: у них Enter/Space уже работают, двойной вызов недопустим */
+      if (/^(A|BUTTON|INPUT|SELECT|TEXTAREA|SUMMARY|LABEL)$/.test(tag)) { return; }
+      el.setAttribute('data-a11y', '1');
+      if (!el.hasAttribute('tabindex')) { el.setAttribute('tabindex', '0'); }
+      if (!el.hasAttribute('role')) { el.setAttribute('role', el.hasAttribute('data-go') ? 'link' : 'button'); }
+    });
+  }
+
   function route() {
     const hash = location.hash || '#/A1';
     const m = hash.match(/^#\/([A-Z]\d+)(?:\/([A-Za-z0-9_-]+))?/);
     let id = m ? m[1] : 'A1';
     const param = m && m[2] ? m[2] : null;
+    if (id === 'B2') { location.hash = '#/R1' + (param ? '/' + param : ''); return; }
     if (!screenInfo(id)) { location.hash = '#/A1'; return; }
     CURRENT = id;
     const R = RENDERERS[id];
@@ -390,9 +523,40 @@
       htmlStr = s.html; meta = s.meta;
     }
     const isDesktop = id[0] === 'P';
-    const tab = R && R.tab !== undefined ? R.tab : SECTION_OF_BLOCK[id[0]];
+    const tab = tabFor(id, R);
     const th = currentTheme();
 
+    /* Прокрутка .scr и .chip-rail:
+       - перерисовка того же маршрута — текущая позиция;
+       - возврат назад по стеку (nav-back/history.back/кнопка «назад» на уже пройденный маршрут) — сохранённая в SCR_POS;
+       - переход вперёд — верх, как раньше.
+       Позиция применяется ДО R.mount: явная прокрутка в mount (scrollIntoView) побеждает. */
+    const prevScr = document.querySelector('.scr');
+    const prevHash = LAST_ROUTE ? ('#/' + LAST_ROUTE.id + (LAST_ROUTE.param ? '/' + LAST_ROUTE.param : '')) : null;
+    const curHash = '#/' + id + (param ? '/' + param : '');
+    /* возврат назад = переход к записи истории с меньшим индексом;
+       переход вперёд на уже виденный маршрут позицию не восстанавливает */
+    let traversal = false;
+    if (NAV_API && NAV_API.currentEntry && LAST_NAV_IDX != null) {
+      traversal = NAV_API.currentEntry.index < LAST_NAV_IDX;
+    }
+    if (NAV_API && NAV_API.currentEntry) { LAST_NAV_IDX = NAV_API.currentEntry.index; }
+    const sameRoute = !!(LAST_ROUTE && LAST_ROUTE.id === id && LAST_ROUTE.param === param);
+    const hi = IHIST.indexOf(curHash);
+    if (prevScr && prevHash) {
+      SCR_POS[prevHash] = { y: prevScr.scrollTop, rails: [...prevScr.querySelectorAll('.chip-rail')].map(r => r.scrollLeft) };
+    }
+    let restoreY = null, restoreRails = null;
+    if (sameRoute && prevScr) {
+      restoreY = prevScr.scrollTop;
+      restoreRails = [...prevScr.querySelectorAll('.chip-rail')].map(r => r.scrollLeft);
+    } else if (traversal && SCR_POS[curHash]) {
+      restoreY = SCR_POS[curHash].y; restoreRails = SCR_POS[curHash].rails;
+    }
+    LAST_ROUTE = { id: id, param: param };
+    if (hi >= 0) { IHIST.length = hi + 1; } else { IHIST.push(curHash); }
+    /* лист не переживает перерисовку рамки: чистим класс и фокус даже при rerender того же маршрута */
+    if (document.querySelector('.sheet-wrap')) { document.body.classList.remove('sheet-open'); SHEET_RETURN = null; }
     const app = document.getElementById('app');
     app.innerHTML =
       '<header class="topbar">' +
@@ -422,15 +586,39 @@
 
     document.title = (meta && meta.title ? meta.title : (screenInfo(id) || {}).title || id) + ' · демо Атланты Сити';
     window.scrollTo(0, 0);
-    if (R && R.mount) R.mount(document.querySelector('.scr-host'), { F: window.FIX, state: st(id) });
+    const ns = document.querySelector('.scr');
+    if (ns) {
+      if (restoreY != null) { ns.scrollTop = restoreY; }
+      if (restoreRails) {
+        const nr = ns.querySelectorAll('.chip-rail');
+        restoreRails.forEach((v, i) => { if (nr[i] && v) { nr[i].scrollLeft = v; } });
+      }
+      APPLIED_SCR_Y = ns.scrollTop;
+    }
+    if (R && R.mount) R.mount(document.querySelector('.scr-host'), { F: window.FIX, state: st(id), param });
+    /* активный чип в рельсе — дотянуть в видимую область, если он за краем */
+    document.querySelectorAll('.chip-rail').forEach(rail => {
+      const chip = rail.querySelector('.on, .active, [aria-pressed="true"]');
+      if (!chip) { return; }
+      const cr = chip.getBoundingClientRect(), rr = rail.getBoundingClientRect();
+      if (cr.left < rr.left - 1 || cr.right > rr.right + 1) {
+        rail.scrollLeft += cr.left - rr.left - (rr.width - cr.width) / 2;
+      }
+    });
+    a11yify(document.getElementById('app'));
+    paintToast(document.querySelector('.frame'));
   }
 
   /* ---------- события ---------- */
   document.addEventListener('click', ev => {
     const t = ev.target.closest('[data-go],[data-act]');
     if (!t) return;
+    LAST_ACT_EL = t;
     if (t.hasAttribute('data-go')) {
-      const id = t.getAttribute('data-go');
+      /* пункт меню, ведущий на текущий маршрут, не вызывает hashchange — закрываем оверлей явно */
+      if (t.closest('.menu-ov')) { closeMenu(); }
+      let id = t.getAttribute('data-go');
+      if (id === 'B2' || id.indexOf('B2/') === 0) id = 'R1' + id.slice(2);
       const sid = id.split('/')[0];
       if (screenInfo(sid)) { location.hash = '#/' + id; }
       else { toast('Экран не найден: ' + id); }
@@ -440,22 +628,98 @@
     const fn = ACTSREG[actName] || ACTS[actName];
     if (fn) { fn(t, ev); }
   });
-  document.addEventListener('keydown', ev => { if (ev.key === 'Escape') closeSheet(); });
+  document.addEventListener('keydown', ev => {
+    if (ev.key === 'Escape') {
+      if (document.querySelector('.menu-ov')) { closeMenu(); return; }
+      closeSheet(); return;
+    }
+    /* Enter/Space на помеченных data-a11y элементах — то же действие, что клик;
+       defaultPrevented — значит, обработчик экрана уже отработал (например, SVG-стенды H8) */
+    if (ev.defaultPrevented) { return; }
+    const t = ev.target && ev.target.closest ? ev.target.closest('[data-a11y]') : null;
+    if (t && (ev.key === 'Enter' || ev.key === ' ')) {
+      if (ev.key === ' ') { ev.preventDefault(); }
+      t.click();
+    }
+  });
   window.addEventListener('hashchange', () => route());
   window.addEventListener('resize', () => { const f = document.querySelector('.frame.desk'); if (f && window.fitDesk) window.fitDesk(); });
 
   /* глобальные действия оболочки */
   ACTSREG['theme-toggle'] = () => setTheme(currentTheme() === 'summer' ? 'winter' : 'summer', true);
   ACTSREG['sheet-close'] = () => closeSheet();
+  ACTSREG['nav-back'] = () => {
+    /* history.back() в свежем контексте уводит из приложения: считаем только переходы внутри демо */
+    if (IHIST.length > 1) { IHIST.pop(); history.back(); }
+    else location.hash = '#/B1';
+  };
+
+  /* ---------- меню (часть 3.3): экран Z1 и оверлей в рамке телефона ---------- */
+  const MENU_GROUPS = [
+    ['Начало', [['B1', 'Мой путь'], ['R1', 'Лента'], ['L8', 'Цели и запросы'], ['L9', 'Как пользоваться']]],
+    ['Программа', [['C1', 'Вся программа'], ['C7', 'Сетка'], ['D1', 'Менторские'], ['C4', 'Избранное'], ['D5', 'Мои записи']]],
+    ['Маркетплейс', [['H1', 'Решения'], ['H8', 'Экспо: стенды и зоны'], ['H5', 'КипяTALK'], ['H9', 'Продукты участников'], ['H3', 'Мой список'], ['H4', 'Маршрут по Экспо']]],
+    ['Участники', [['F1', 'Участники'], ['F6', 'Предметный кофе'], ['G1', 'Встречи'], ['F9', 'Спикеры'], ['K1', 'Партнёры'], ['F8', 'Мои контакты'], ['F7', 'Моя визитка']]],
+    ['Площадка', [['E1', 'Карта'], ['E4', 'Маршрут'], ['R5', 'Мой чат']]],
+    ['Итоги', [['M1', 'Заметки'], ['M3', 'Оцените день'], ['M4', 'Мои итоги'], ['M5', 'Дорожная карта']]],
+    ['Помощь', [['L11', 'Вопросы и ответы'], ['L10', 'Кодекс участника'], ['L6', 'Приватность'], ['B3', 'Уведомления']]],
+    ['По роли', [['I1', 'Кабинет экспонента'], ['J1', 'Сканер контактов'], ['O1', 'Допуск'], ['P1', 'Консоль']]]
+  ];
+
+  function menuHTML() {
+    const ME = (window.FIX && window.FIX.ME) || {};
+    const th = currentTheme();
+    const groups = MENU_GROUPS.map(g =>
+      '<div class="menu-group"><div class="menu-gname">' + esc(g[0]) + '</div>' +
+      g[1].map(it => '<button class="menu-item" data-go="' + it[0] + '"><span class="mi-t">' + esc(it[1]) + '</span>' + icon('chevR') + '</button>').join('') +
+      '</div>').join('');
+    return '<div class="menu">' +
+      '<button class="menu-card" data-go="L7">' +
+      avatar(ME.name || 'Участник', 'l') +
+      '<span class="mc-grow"><span class="mc-name">' + esc(ME.name || 'Участник') + '</span>' +
+      '<span class="mc-sub">' + esc(ME.company || '') + (ME.tariff ? ' · ' : '') + '</span></span>' +
+      (ME.tariff ? tariffTag(ME.tariff) : '') + icon('chevR') + '</button>' +
+      '<button class="menu-search" data-go="Z2">' + icon('search') +
+      '<span class="ms-ph">Люди, компании, сессии, стенды</span>' + icon('chevR') + '</button>' +
+      groups +
+      (window.__ATL_SERVER ?
+        '<div class="menu-group"><div class="menu-gname">Тест</div>' +
+        '<button class="menu-item" data-act="atl-feedback"><span class="mi-t">Сообщить о проблеме или идее</span>' + icon('chevR') + '</button>' +
+        '<button class="menu-item" data-act="atl-reset"><span class="mi-t">Сбросить мои данные теста</span>' + icon('chevR') + '</button>' +
+        '</div>' : '') +
+      '<div class="menu-foot">' +
+      logoImg('sm') +
+      '<button class="menu-theme theme-btn" data-act="theme-toggle" aria-label="Переключить тему" aria-pressed="' + (th === 'winter') + '">' +
+      '<span class="theme-ic-sun"' + (th === 'winter' ? ' style="display:none"' : '') + '>' + icon('sun') + '</span>' +
+      '<span class="theme-ic-moon"' + (th === 'winter' ? '' : ' style="display:none"') + '>' + icon('moon') + '</span>' +
+      '<span class="mt-label">Тема</span></button>' +
+      '</div></div>';
+  }
+
+  function openMenu() {
+    const fr = frameEl(); if (!fr) return;
+    if (fr.querySelector('.menu-ov')) return;
+    const w = document.createElement('div');
+    w.className = 'menu-ov';
+    w.innerHTML = '<div class="menu-scrim" data-act="menu-close"></div>' +
+      '<div class="menu-panel" role="dialog" aria-modal="true" aria-label="Меню">' + menuHTML() + '</div>';
+    fr.appendChild(w);
+  }
+  function closeMenu() {
+    const m = document.querySelector('.menu-ov');
+    if (m) m.remove();
+  }
+  ACTSREG['menu-open'] = openMenu;
+  ACTSREG['menu-close'] = closeMenu;
 
   /* публичное API для экранов */
   window.Demo = {
     icon, esc, avatar, paren, tag, tariffTag, goBtn, act, st, openSheet, closeSheet, toast,
-    rerender, route, setTheme, currentTheme, screenInfo, statusBar, tabbar,
-    topo, pict, logoImg, head, segbar, chipRail, plural,
+    rerender, route, setTheme, currentTheme, screenInfo, statusBar, tabbar, restoreScroll,
+    topo, pict, logoImg, head, segbar, chipRail, plural, menuHTML, openMenu, closeMenu,
     register(id, def) { RENDERERS[id] = def; },
     action(name, fn) { ACTSREG[name] = fn; },
-    sheetHTML: openSheet
+    sheetHTML: openSheet, states: STATE
   };
 
   /* инициализация */

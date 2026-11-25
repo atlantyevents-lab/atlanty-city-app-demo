@@ -1,0 +1,302 @@
+/* Раздел «Участники и встречи» (блоки F и G), владелец S5. Классы с префиксом ppl-; цвета и размеры через токены tokens.css.
+   Поля содержимого 20 px, правая граница не дальше 370 px, касательные цели от 40 px, две темы (summer — тёмная, winter — дневная). */
+
+/* ---------- каркас экрана ---------- */
+.ppl-body { padding: 14px 20px 24px; display: flex; flex-direction: column; gap: 14px; }
+.ppl-body > * { min-width: 0; }
+.ppl-sec { font-family: var(--font-display); font-size: 20px; letter-spacing: .06em; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 6px 0 -4px; }
+.ppl-sec .more { font-family: var(--font-text); font-size: 13px; font-weight: 600; color: var(--accent-text); text-transform: none; letter-spacing: 0; min-height: 40px; min-width: 48px; display: inline-flex; align-items: center; justify-content: flex-end; padding-left: 12px; }
+.ppl-sec .more:hover { text-decoration: underline; }
+.ppl-note { font-size: 12.5px; line-height: 1.45; color: var(--ink-dim); }
+.ppl-note b { color: var(--ink); font-weight: 600; }
+.ppl-box { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 2px 16px; }
+.ppl-box.pad { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.ppl-box.edge { border-color: var(--accent-edge); }
+
+/* ---------- умная строка ---------- */
+.ppl-smart {
+  display: flex; align-items: flex-start; gap: 8px; min-height: 56px; padding: 6px 6px 6px 14px;
+  border: 1.5px solid var(--accent-edge); border-radius: 18px; background: var(--surface);
+}
+.ppl-smart:focus-within { border-color: var(--accent-solid); }
+.ppl-smart > .ic { width: 20px; height: 20px; color: var(--accent-text); flex: none; margin-top: 15px; }
+.ppl-smart input, .ppl-smart textarea {
+  flex: 1; min-width: 0; min-height: 44px; border: 0; background: transparent; color: var(--ink);
+  font: inherit; font-size: 15px; line-height: 22px; outline: none; resize: none; padding: 11px 0; overflow-y: hidden;
+}
+/* подсказка в поле: цвет из токена (--ink-dim), без полупрозрачности: контраст не ниже 4,5:1 в обеих темах */
+.ppl-smart input::placeholder, .ppl-smart textarea::placeholder { color: var(--ink-dim); opacity: 1; }
+.ppl-search .input::placeholder { color: var(--ink-dim); opacity: 1; }
+.ppl-go {
+  width: 44px; height: 44px; border-radius: 50%; flex: none; display: grid; place-items: center; align-self: flex-end;
+  background: var(--accent-solid); color: var(--accent-ink);
+}
+.ppl-go:hover { background: var(--hover); }
+.ppl-go .ic { width: 20px; height: 20px; }
+.ppl-exs { display: flex; flex-direction: column; gap: 0; margin-top: -4px; }
+.ppl-ex {
+  display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 4px; width: 100%; text-align: left;
+  font-size: 13.5px; color: var(--ink-dim); border-radius: 10px;
+}
+.ppl-ex .ic { width: 15px; height: 15px; color: var(--accent-text); flex: none; }
+.ppl-ex span { flex: 1; min-width: 0; }
+.ppl-ex:hover { color: var(--ink); background: var(--surface-2); }
+.ppl-ex .ppl-ex-q { color: var(--ink); }
+
+/* ---------- ряд чипов под сегментами ---------- */
+.ppl-links { padding-top: 12px; }
+.ppl-links .chip { min-height: 40px; }
+.ppl-links .chip .n { font-weight: 700; color: var(--accent-text); }
+
+/* ---------- строки людей: компактно (аватар, имя и тариф, должность · компания, причина одной строкой, кнопки) ---------- */
+.ppl-list { display: flex; flex-direction: column; }
+.ppl-row { display: flex; flex-direction: column; gap: 4px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.ppl-row:last-child { border-bottom: 0; }
+.ppl-main { display: flex; align-items: flex-start; gap: 12px; width: 100%; text-align: left; color: inherit; min-height: 40px; }
+.ppl-main .avatar { margin-top: 1px; flex: none; }
+.ppl-main .ppl-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.ppl-main .ppl-chev { width: 16px; height: 16px; color: var(--ink-dim); flex: none; margin-top: 9px; display: inline-flex; }
+.ppl-chev .ic { width: 16px; height: 16px; }
+.ppl-main:hover .ppl-name .nm { color: var(--accent-text); }
+.ppl-name { font-size: 15px; font-weight: 700; line-height: 1.3; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; overflow-wrap: anywhere; }
+.ppl-row .ppl-name .tag { font-size: 12px; padding: 2px 8px; }
+.ppl-name .nm { min-width: 0; overflow-wrap: anywhere; }
+.ppl-role { font-size: 13px; line-height: 1.35; color: var(--ink-dim); overflow-wrap: anywhere; }
+.ppl-row .ppl-role, .ppl-cof-row .ppl-role { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ppl-why { margin-top: 2px; }
+/* причина показа — отдельной строкой на всю ширину под именем: помещается больше текста */
+.ppl-row .ppl-main { flex-wrap: wrap; row-gap: 2px; }
+.ppl-row .ppl-main .ppl-t { flex: 1 1 0; }
+.ppl-row .ppl-main > .ppl-why, .ppl-row .ppl-main > .ppl-hit { flex: 0 0 100%; padding-left: 46px; margin-top: 0; min-width: 0; }
+.ppl-why .paren { font-size: 13px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.ppl-hit { display: block; margin-top: 2px; font-size: 12.5px; color: var(--accent-text); font-weight: 600; }
+.ppl-tags { display: flex; flex-wrap: wrap; gap: 6px; padding-left: 46px; }
+.ppl-link {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 6px 14px; border-radius: 20px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 12.5px; line-height: 1.3;
+  text-align: left; max-width: 100%; white-space: normal; overflow-wrap: anywhere;
+}
+.ppl-link .ic { width: 14px; height: 14px; color: var(--accent-text); flex: none; }
+.ppl-link:hover { border-color: var(--accent-edge); }
+.ppl-link.more { color: var(--ink-dim); }
+.ppl-acts { display: flex; flex-wrap: wrap; gap: 8px; padding-left: 46px; }
+.ppl-row > .ppl-acts { padding-left: 0; }
+.ppl-acts .btn { min-height: 40px; }
+.ppl-acts .btn.on { border-color: var(--accent-solid); color: var(--accent-text); }
+/* тихая контурная кнопка: второстепенное действие рядом с главной (заливка оранжевым не больше чем у одной кнопки на экран) */
+.btn.ppl-quiet { border: 1px solid var(--line); color: var(--ink); background: transparent; }
+.btn.ppl-quiet:hover { border-color: var(--accent-edge); background: var(--surface-2); }
+.btn.ppl-quiet.on { border-color: var(--accent-solid); color: var(--accent-text); }
+
+/* ---------- блок «Предметный кофе» на F1 ---------- */
+.ppl-cof-row { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 12px 0; min-height: 56px; border-bottom: 1px solid var(--line); color: inherit; }
+.ppl-cof-row:last-child { border-bottom: 0; }
+.ppl-cof-row .grow { flex: 1; min-width: 0; }
+.ppl-cof-row .ic { width: 16px; height: 16px; color: var(--ink-dim); flex: none; }
+.ppl-cof-row:hover .ppl-name { color: var(--accent-text); }
+.ppl-cof-foot { padding: 10px 0 12px; border-top: 1px solid var(--line); }
+
+/* ---------- фильтры списка ---------- */
+.ppl-search { position: relative; }
+.ppl-search .ic { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--ink-dim); pointer-events: none; }
+.ppl-search .input { padding-left: 42px; min-height: 48px; }
+.ppl-flt { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -20px; padding: 0 20px 2px; flex: none; }
+.ppl-flt::-webkit-scrollbar { display: none; }
+.ppl-flt .chip { min-height: 40px; }
+.ppl-count { font-size: 12.5px; color: var(--ink-dim); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ppl-count button { color: var(--accent-text); font-weight: 600; font-size: 13px; min-height: 40px; padding: 0 4px; }
+.ppl-opt { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 48px; padding: 8px 4px; border-bottom: 1px solid var(--line); text-align: left; font-size: 14.5px; }
+.ppl-opt:last-child { border-bottom: 0; }
+.ppl-opt .ic { width: 18px; height: 18px; color: var(--accent-text); flex: none; }
+.ppl-opt.on { font-weight: 700; color: var(--accent-text); }
+.ppl-opt .n { font-size: 12.5px; color: var(--ink-dim); font-weight: 400; }
+.ppl-opt.zero { opacity: .55; }
+
+/* ---------- чипы распознанных фильтров (F10) ---------- */
+.ppl-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.ppl-chips .chip { flex: 0 1 auto; max-width: 100%; white-space: normal; text-align: left; min-height: 40px; padding: 6px 14px; line-height: 1.3; }
+.ppl-chips .chip.on { gap: 8px; }
+.ppl-chips .chip .ic { width: 14px; height: 14px; }
+.ppl-chips .chip.off { text-decoration: line-through; border-style: dashed; color: var(--ink-dim); background: transparent; }
+.ppl-group { font-family: var(--font-display); font-size: 18px; letter-spacing: .06em; text-transform: uppercase; margin: 6px 0 -2px; }
+.ppl-res { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); }
+.ppl-res .ppl-tags, .ppl-res .ppl-acts { padding-left: 0; }
+.ppl-res .ppl-acts .btn { flex: 1 1 auto; }
+
+/* ---------- карточка человека и компании ---------- */
+.ppl-hero { align-items: center; text-align: center; padding: 20px 16px; gap: 6px; }
+.ppl-hero .ppl-name { justify-content: center; font-size: 19px; }
+.ppl-hero .ppl-meta { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 4px; }
+.ppl-grp { padding: 14px 0; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 4px; }
+.ppl-grp:last-child { border-bottom: 0; }
+.ppl-lvl { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--accent-edge); color: var(--accent-text); font-size: 12px; font-weight: 700; }
+.ppl-lvl .ic { width: 13px; height: 13px; }
+.ppl-because { display: flex; align-items: flex-start; gap: 6px; font-size: 12.5px; line-height: 1.4; color: var(--ink-dim); margin: 2px 0 4px; }
+.ppl-because .ic { width: 14px; height: 14px; color: var(--accent-text); flex: none; margin-top: 2px; }
+.ppl-f { padding: 8px 0; border-top: 1px solid var(--line); }
+.ppl-f:first-of-type { border-top: 0; }
+.ppl-f .k { font-size: 12px; color: var(--ink-dim); margin-bottom: 1px; }
+.ppl-f .v { font-size: 14.5px; font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
+.ppl-lock { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; line-height: 1.4; color: var(--ink-dim); padding: 4px 0; }
+.ppl-lock .ic { width: 15px; height: 15px; flex: none; margin-top: 2px; }
+.ppl-lock b { color: var(--ink); font-weight: 600; }
+.ppl-rowlink { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 10px 0; text-align: left; border-top: 1px solid var(--line); color: inherit; }
+.ppl-rowlink:first-child { border-top: 0; }
+.ppl-rowlink .grow { flex: 1; min-width: 0; }
+.ppl-rowlink .r-title, .ppl-rowlink .r-sub, .ppl-who .r-title, .ppl-who .r-sub, .ppl-agr .tt, .ppl-meet .r-title, .ppl-meet .r-sub { overflow-wrap: anywhere; }
+.ppl-rowlink > .ic { width: 16px; height: 16px; color: var(--ink-dim); flex: none; }
+.ppl-rowlink:hover .r-title { color: var(--accent-text); }
+.ppl-sq { width: 40px; height: 40px; border-radius: 12px; flex: none; display: grid; place-items: center; background: var(--surface-2); color: var(--accent-text); border: 1px solid var(--line); }
+.ppl-sq .ic { width: 20px; height: 20px; }
+.ppl-chain { font-size: 12.5px; color: var(--ink-dim); line-height: 1.4; }
+.ppl-sheet-row { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.ppl-sheet-row:last-of-type { border-bottom: 0; }
+.ppl-sheet-row .ppl-lvl { flex: none; align-self: flex-start; min-width: 0; }
+.ppl-sheet-row .t { font-size: 13.5px; line-height: 1.45; color: var(--ink-dim); }
+
+/* ---------- предложение окна и стола ---------- */
+.ppl-prop { display: flex; flex-direction: column; gap: 6px; padding: 16px; border: 1.5px solid var(--accent-edge); border-radius: var(--radius); background: var(--card); }
+.ppl-prop .lbl { font-size: 12.5px; color: var(--ink-dim); }
+.ppl-prop .big { font-family: var(--font-display); font-size: 42px; line-height: 1; letter-spacing: .03em; color: var(--accent-display); }
+.ppl-prop .sub { font-size: 13.5px; color: var(--ink-dim); line-height: 1.4; }
+.ppl-prop .acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.ppl-prop .acts .btn { min-height: 40px; }
+
+/* ---------- окна, столы, таймер (G2) ---------- */
+.ppl-tbls { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+.ppl-tbl { min-height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font-family: var(--font-display); font-size: 20px; letter-spacing: .04em; color: var(--ink); }
+.ppl-tbl:hover { border-color: var(--accent-edge); }
+.ppl-tbl.on { background: var(--accent-solid); border-color: var(--accent-solid); color: var(--accent-ink); }
+.win-cell.mebusy { opacity: .5; border-style: dashed; cursor: default; }
+.win-cell.off { opacity: .4; cursor: default; }
+.win-cell { min-height: 56px; }
+.ppl-spaces { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -20px; padding: 0 20px 2px; flex: none; }
+.ppl-body .segbar { margin: 0; }
+.ppl-spaces::-webkit-scrollbar { display: none; }
+.ppl-spaces .chip { min-height: 40px; }
+.ppl-hold { display: flex; flex-direction: column; gap: 12px; padding: 16px; border: 1.5px solid var(--accent-edge); border-radius: var(--radius); background: var(--card); }
+
+/* ---------- пространства встреч (G1) ---------- */
+.ppl-space { display: flex; flex-direction: column; gap: 8px; padding: 16px; border: 1px solid var(--accent-edge); border-radius: var(--radius); background: var(--card); text-align: left; width: 100%; color: inherit; }
+.ppl-space:hover { background: var(--surface-2); }
+.ppl-space .h { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.ppl-space .t { font-family: var(--font-display); font-size: 24px; line-height: 1.05; letter-spacing: .04em; text-transform: uppercase; }
+.ppl-space .d { font-size: 13.5px; line-height: 1.45; color: var(--ink-dim); }
+.ppl-space .m { display: flex; flex-wrap: wrap; gap: 6px; }
+.ppl-space .go { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 600; color: var(--accent-text); margin-top: 2px; }
+.ppl-space .go .ic { width: 16px; height: 16px; }
+.ppl-kpis { display: flex; gap: 8px; }
+.ppl-kpis .kpi-cell { padding: 12px; }
+.ppl-meet { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 64px; padding: 10px 0; text-align: left; border-bottom: 1px solid var(--line); color: inherit; }
+.ppl-meet:last-child { border-bottom: 0; }
+.ppl-meet .tm { width: 52px; flex: none; font-family: var(--font-display); font-size: 22px; line-height: 1; letter-spacing: .04em; }
+.ppl-meet .tm small { display: block; font-family: var(--font-text); font-size: 12px; letter-spacing: 0; color: var(--ink-dim); margin-top: 3px; }
+.ppl-meet .grow { flex: 1; min-width: 0; }
+.ppl-meet > .ic { width: 16px; height: 16px; color: var(--ink-dim); flex: none; }
+.ppl-meet:hover .r-title { color: var(--accent-text); }
+.ppl-st { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-dim); white-space: nowrap; }
+.ppl-st.ok { color: var(--ok); }
+.ppl-st.wait { color: var(--warn); }
+.ppl-st.off { color: var(--err); }
+.ppl-quick { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.ppl-quick > * { min-width: 0; }
+.ppl-q { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; text-align: left; min-height: 84px; padding: 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--card); color: inherit; }
+.ppl-q:hover { border-color: var(--accent-edge); }
+.ppl-q b { font-size: 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; line-height: 1.25; overflow-wrap: normal; word-break: normal; hyphens: none; }
+.ppl-q span { overflow-wrap: normal; hyphens: none; }
+.ppl-q b .ic { width: 18px; height: 18px; color: var(--accent-text); flex: none; }
+.ppl-q span { font-size: 12.5px; color: var(--ink-dim); line-height: 1.35; }
+
+/* ---------- встреча, итог, договорённости ---------- */
+.ppl-who { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--card); width: 100%; text-align: left; color: inherit; }
+.ppl-who:hover { border-color: var(--accent-edge); }
+.ppl-who .grow { flex: 1; min-width: 0; }
+.ppl-who > .ic { width: 16px; height: 16px; color: var(--ink-dim); flex: none; }
+.ppl-big { font-family: var(--font-display); font-size: 34px; line-height: 1.05; letter-spacing: .03em; }
+.ppl-dl { display: flex; flex-direction: column; }
+.ppl-dl > div { display: flex; justify-content: space-between; gap: 14px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 13.5px; }
+.ppl-dl > div:first-child { border-top: 0; }
+.ppl-dl .k { color: var(--ink-dim); flex: none; }
+.ppl-dl .v { font-weight: 600; text-align: right; overflow-wrap: anywhere; }
+.ppl-steps { display: flex; flex-direction: column; gap: 8px; }
+.ppl-step { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--card); width: 100%; text-align: left; font-size: 14.5px; font-weight: 600; color: inherit; }
+.ppl-step:hover { border-color: var(--accent-edge); }
+.ppl-step .ic { width: 16px; height: 16px; color: var(--ink-dim); flex: none; }
+.ppl-agr { display: flex; flex-direction: column; gap: 8px; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); }
+.ppl-agr .tt { font-size: 15px; font-weight: 700; line-height: 1.35; }
+.ppl-agr .ft { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.ppl-prog { display: flex; align-items: center; gap: 12px; }
+.ppl-prog .progress { flex: 1; }
+.ppl-prog b { font-family: var(--font-display); font-size: 22px; letter-spacing: .04em; }
+
+/* ---------- прочее ---------- */
+.ppl-textarea-wrap { display: flex; flex-direction: column; gap: 6px; }
+.ppl-textarea-wrap .textarea { min-height: 120px; max-height: 240px; overflow-y: auto; }
+.ppl-sheet-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.ppl-sheet-actions .btn { margin-top: 0; }
+.ppl-sheet-sum { padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-2); font-size: 13.5px; line-height: 1.5; margin: 6px 0; }
+.ppl-sheet-sum b { font-weight: 700; }
+.ppl-hb { display: inline-flex; font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent-ink); background: var(--accent-solid); border-radius: 6px; padding: 2px 7px; }
+.ppl-empty { align-items: center; text-align: center; padding: 28px 16px; gap: 8px; }
+.ppl-empty .e-title { font-family: var(--font-display); font-size: 22px; letter-spacing: .05em; text-transform: uppercase; }
+.ppl-empty .e-text { font-size: 13.5px; color: var(--ink-dim); max-width: 280px; line-height: 1.45; }
+.ppl-empty .btn { margin-top: 6px; }
+
+/* ---------- дополнения под реальную разметку F.js и G.js ---------- */
+.ppl-field { display: flex; flex-direction: column; gap: 8px; }
+.ppl-wrap { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.ppl-wrap > * { min-width: 0; }
+.ppl-opts { display: flex; flex-direction: column; }
+.ppl-actions { display: flex; flex-direction: column; gap: 10px; }
+.ppl-actions .btn { min-height: 44px; }
+.ppl-text { font-size: 14.5px; line-height: 1.55; overflow-wrap: anywhere; }
+.ppl-quote { font-size: 14px; line-height: 1.5; color: var(--ink); overflow-wrap: anywhere; }
+.ppl-between { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.ppl-main-row { display: block; }
+.ppl-inline {
+  display: flex; align-items: center; gap: 6px; width: fit-content; max-width: 100%; min-height: 40px; padding: 0;
+  font-size: 13px; font-weight: 600; color: var(--accent-text); text-align: left; overflow-wrap: anywhere;
+}
+.ppl-inline .ic { width: 15px; height: 15px; flex: none; }
+.ppl-inline:hover { text-decoration: underline; }
+.banner .ppl-inline, .cap .ppl-inline { margin-top: 2px; }
+.ppl-tbl:disabled { opacity: .3; cursor: default; border-style: dashed; }
+.ppl-meet .ppl-st { display: block; margin-top: 3px; }
+.ppl-name .tag, .ppl-name .ppl-hb { flex: none; }
+.ppl-hero .ppl-role { text-align: center; }
+.ppl-box .ppl-rowlink:first-child { border-top: 0; }
+.ppl-box > .ppl-list > .ppl-row { padding-left: 0; padding-right: 0; }
+.ppl-search .input { width: 100%; }
+.ppl-kpis .kpi-cell .k { line-height: 1.25; }
+.ppl-sheet-sum .ppl-dl > div { padding: 7px 0; }
+.sheet .ppl-opt .n { font-weight: 400; }
+.sheet select.input { width: 100%; min-height: 44px; }
+.sheet .ppl-opts .ppl-opt span { flex: 1; min-width: 0; }
+.ppl-chips .chip { cursor: pointer; }
+
+.ppl-who .grow > span, .ppl-rowlink .grow > span, .ppl-meet .grow > span, .ppl-cof-row .grow > span { display: block; }
+.ppl-ex .ppl-ex-q { color: var(--ink); }
+.ppl-hero { gap: 10px; padding: 18px 16px; }
+
+/* ---------- цикл исправлений 1: закреплённая панель действий, дни, G5, сканер ---------- */
+/* F2: главное действие всегда на экране (панель закреплена над нижней навигацией) */
+.ppl-dock { position: sticky; bottom: 0; margin-top: auto; z-index: 5; flex: none; display: flex; gap: 10px; padding: 10px 20px 12px; background: var(--bg); border-top: 1px solid var(--line); }
+.ppl-dock .btn { flex: 1 1 0; min-width: 0; min-height: 44px; padding: 0 10px; font-size: 14px; white-space: normal; line-height: 1.2; text-align: center; }
+.ppl-dock .btn:first-child { flex: 1.25 1 0; }
+.ppl-dock .btn .ic { flex: none; }
+/* G5: карточка варианта, шеврон у правого края на всех карточках */
+.ppl-body .card-row { justify-content: space-between; flex-wrap: nowrap; }
+.ppl-body .card-row > div:first-child { flex: 1; min-width: 0; }
+.ppl-body .card-row > .ic { flex: none; width: 16px; height: 16px; color: var(--ink-dim); }
+/* G2: выбор дня */
+.ppl-days .seg { font-size: 13px; padding: 0 6px; }
+.win-cell .s { overflow-wrap: anywhere; }
+/* G7: рамка наведения ближе к квадрату, подпись не касается рамки */
+.ppl-scan { min-height: 300px; }
+.ppl-scan .scan-frame { inset: 36px 60px 64px; }
+.ppl-scan .scan-hint { position: absolute; left: 0; right: 0; bottom: 18px; }
+.ppl-scan .scan-line { left: 62px; right: 62px; }
+/* F8: метка и напоминание различимы */
+.ppl-tags .tag { min-height: 40px; display: inline-flex; align-items: center; }
+/* F9: строки спикеров как на F1 (аватар слева) */
+.ppl-wrap .row.clickable .avatar { flex: none; }

@@ -8,26 +8,42 @@
   const GEO = { w: 36.48777, s: 56.5775, e: 36.56723, n: 56.6125 };
   const BAY_WIN = { w: 36.511, s: 56.5835, e: 36.529, n: 56.5995 };
 
+  /* Переключатель видов карты. Карта больше не вкладка: вход из шапки и из переходов Программы
+     и Маркетплейса, «назад» в шапке E1/E6/E7 ведёт по истории (backHist). Чтобы переключение
+     видов не засоряло историю, оно заменяет текущую запись (location.replace). */
   function segMap(active) {
     const segs = [['E1', 'Курорт'], ['E6', 'Бухта']];
     if (!PUBLIC) segs.push(['E7', 'Вид сверху']);
-    return D.segbar(segs, active);
+    return '<div class="segbar">' + segs.map(it =>
+      '<button class="seg' + (it[0] === active ? ' on' : '') + '" data-act="map-seg" data-arg="' + it[0] + '">' + esc(it[1]) + '</button>').join('') + '</div>';
   }
+  D.action('map-seg', el => {
+    const id = el.dataset.arg;
+    if (location.hash === '#/' + id) return;
+    location.replace(location.pathname + location.search + '#/' + id);
+  });
 
   /* метки точек для листа: id метки -> что здесь и какие залы программы рядом */
   const PIN_INFO = {
-    pin_bay: { what: 'Главная бухта: набережная, яхт-клуб и основной отель. Здесь Конгресс-центр, Рэдиссон и зал основного отеля — программа фестиваля.', halls: ['congress', 'ballroomB', 'ballroomS', 'doybitsa', 'sobol', 'edelveis', 'magnolia'] },
+    pin_bay: { what: 'Главная бухта: набережная, яхт-клуб, Эрбелия (основной отель) и Рэдиссон. По решению заказчика: Эрбелия = залы Эдельвейс и Магнолия; Рэдиссон = Баллрум (Б) и (С); Конгресс-центр = КипяTALK, Дойбица, Соболь и Шоша.', halls: ['congress', 'doybitsa', 'sobol', 'shosha', 'ballroomB', 'ballroomS', 'edelveis', 'magnolia'] },
     pin_yacht: { what: 'Яхт-клуб и причалы. В программе фестиваля залы не привязаны — активности и сервисы курорта.', halls: [] },
-    pin_park: { what: 'Семейный парк. В программе фестиваля залы не привязаны — активности и сервисы курорта.', halls: [] },
+    pin_family: { what: 'Семейный парк. В программе фестиваля залы не привязаны — активности и сервисы курорта.', halls: [] },
     pin_banya: { what: 'Бани и причал. В программе фестиваля залы не привязаны — активности и сервисы курорта.', halls: [] },
     pin_yamskaya: { what: 'Ямская слобода — историческая зона курорта. В программе фестиваля залы не привязаны.', halls: [] },
-    pin_aqua: { what: 'Мультиспорт «Акватория лета». В программе фестиваля залы не привязаны — активности и сервисы курорта.', halls: [] },
+    pin_akvatoriya: { what: 'Мультиспорт «Акватория лета». В программе фестиваля залы не привязаны — активности и сервисы курорта.', halls: [] },
     pin_ski: { what: 'Горка — зимняя трасса. В программе фестиваля залы не привязаны — активности и сервисы курорта.', halls: [] },
     pin_river: { what: 'Речной вокзал (строится). В программе фестиваля залы не привязаны.', halls: [] },
     pin_golf: { what: 'Гольф-клуб. В программе фестиваля залы не привязаны — активности и сервисы курорта.', halls: [] },
     pin_yamles: { what: 'Ямской лес. В программе фестиваля залы не привязаны — активности и сервисы курорта.', halls: [] }
   };
 
+  const PIN_GEO = {
+    pin_bay: ['Главная бухта', [36.520199, 56.590251]], pin_yacht: ['Яхт-клуб, причалы, пляж', [36.52123, 56.59289]],
+    pin_family: ['Семейный парк', [36.52534, 56.594968]], pin_banya: ['Бани и причал', [36.513973, 56.600297]],
+    pin_yamskaya: ['Ямская слобода', [36.537111, 56.595516]], pin_akvatoriya: ['Мультиспорт «Акватория лета»', [36.51153, 56.59816]],
+    pin_ski: ['Горка (зимняя трасса)', [36.50199, 56.59549]], pin_river: ['Речной вокзал (строится)', [36.52497, 56.60469]],
+    pin_golf: ['Гольф-клуб', [36.55342, 56.58044]], pin_yamles: ['Ямской лес', [36.54742, 56.59711]]
+  };
   function todayHallsHtml(hallIds) {
     if (!hallIds.length) return '';
     const rows = F.sessionsOf('27.02').filter(s => hallIds.includes(s.hall));
@@ -50,13 +66,14 @@
       (halls.length ? '<div class="cap" style="margin-bottom:4px">Залы программы:</div>' +
         halls.map(h => '<button class="row clickable" data-go="E3/' + h.id + '"><div class="grow"><div class="r-title" style="font-size:14px">' + esc(h.name) + '</div><div class="r-sub">' + esc(h.place) + '</div></div>' + icon('chevR') + '</button>').join('') : '') +
       todayHallsHtml(info.halls || []) +
-      '<div class="cap" style="margin-top:10px">Пешком от «Вы здесь»: около ' + mins + ' ' + D.plural(mins, ['минуты', 'минут', 'минут']) + ' · демо-расчёт по расстоянию (4,5 км/ч)</div>' +
+      '<div class="cap" style="margin-top:10px">Пешком от «Вы здесь»: ~' + mins + ' ' + D.plural(mins, ['минута', 'минуты', 'минут']) + ' · демо-расчёт по расстоянию (4,5 км/ч)</div>' +
       '<div style="display:flex;gap:8px;margin-top:14px">' +
       '<button class="btn btn-primary" style="flex:1" data-act="e-route-to" data-arg="' + esc(pin.id) + '">' + icon('route') + 'Маршрут</button>' +
       (halls.length ? '<button class="btn btn-ghost" style="flex:1" data-go="C1">В программу</button>' : '') +
       '</div>');
   }
   D.action('e-route-to', el => { location.hash = '#/E4/' + el.dataset.arg; });
+  D.action('e6-list', () => { const el = document.getElementById('e6-list'); if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' }); });
 
   /* Общий монтаж карты: html() отдаёт контейнер, mount() догружает данные */
   function mountMap(host, sel, build) {
@@ -99,7 +116,7 @@
 
   /* ---------- E1 Курорт ---------- */
   D.register('E1', {
-    tab: 'E1',
+    tab: '-',
     meta: {
       title: 'E1 · Карта',
       role: 'Гость / участник',
@@ -113,13 +130,14 @@
       rules: [
         'Данные карты — OpenStreetMap (ODbL), атрибуция на экране.',
         'Положения меток — по данным проекта; расстояния «пешком» — демо-расчёт 4,5 км/ч.',
-        'Планы корпусов (O-06) будут позже — это карта территории, не план зданий.'
+        'Планы корпусов (O-06) будут позже — это карта территории, не план зданий.',
+        'Карта не вкладка (D-36): вход из значка в шапке и из переходов Программы и Маркетплейса; «назад» в шапке E1, E6, E7 ведёт по истории; панель вкладок видна без активной вкладки.'
       ],
-      depends: ['O-06']
+      depends: ['O-06', 'D-36']
     },
     html(ctx) {
       return '<div class="scr">' +
-        D.head({eyebrow:'Карта · ' + esc(F.NOW.dateLong), title:'Карта', sub:'Курорт Завидово · векторная карта', paren:paren('данные OpenStreetMap · демо-расчёт расстояний')}) +
+        D.head({backHist:true, eyebrow:'Карта · ' + esc(F.NOW.dateLong), title:'Карта', sub:'Курорт Завидово · векторная карта', paren:paren('данные OpenStreetMap · демо-расчёт расстояний')}) +
         segMap('E1') +
         '<div class="mapview" id="mv-e1"><div class="mv-loading">Загружаю карту…</div></div>' +
         '<div class="mv-layers chip-rail">' +
@@ -194,7 +212,7 @@
 
   /* ---------- E6 Бухта ---------- */
   D.register('E6', {
-    tab: 'E1',
+    tab: '-',
     meta: {
       title: 'E6 · Бухта',
       role: 'Гость, карта',
@@ -213,7 +231,7 @@
     },
     html() {
       return '<div class="scr">' +
-        D.head({eyebrow:'Карта · ' + esc(F.NOW.dateLong), title:'Бухта', sub:'Главная бухта · здания и точки', paren:paren('схема; планы корпусов будут позже')}) +
+        D.head({backHist:true, eyebrow:'Карта · ' + esc(F.NOW.dateLong), title:'Бухта', sub:'Главная бухта · здания и точки', paren:paren('схема; планы корпусов будут позже')}) +
         segMap('E6') +
         '<div class="mapview" id="mv-e6"><div class="mv-loading">Загружаю карту…</div></div>' +
         '<div class="cap" style="margin:8px 20px 0">© OpenStreetMap contributors (ODbL) · тап по метке — карточка точки</div>' +
@@ -352,8 +370,9 @@
       const lab = (((ll || {}).labels) || []).find(x => x.id === id);
       const label = lab ? lab.text : id;
       const noCoord = !['radisson', 'residences', 'ryabina', 'erbelia', 'aquapark', 'marina', 'yacht_main'].includes(id);
-      /* карточка точки: залы/столы этого места из фикстур */
-      const hallFor = { radisson: ['ballroomB', 'ballroomS'], congress: ['congress', 'doybitsa', 'sobol'], erbelia: ['edelveis'], brevis: ['magnolia'], ryabina: ['edelveis'] };
+      /* карточка точки: соответствие отель ↔ залы по решению заказчика (Эрбелия = Эдельвейс + Магнолия,
+         Рэдиссон = Баллрумы, Конгресс-центр = КипяTALK + Дойбица + Соболь + Шоша; Бревис и Рябина без залов) */
+      const hallFor = { radisson: ['ballroomB', 'ballroomS'], congress: ['congress', 'doybitsa', 'sobol', 'shosha'], erbelia: ['edelveis', 'magnolia'], brevis: [], ryabina: [] };
       const hIds = hallFor[id] || [];
       const halls = hIds.map(x => F.hall(x)).filter(Boolean);
       const rows = F.sessionsOf('27.02').filter(s => hIds.includes(s.hall)).slice(0, 8);
@@ -367,9 +386,9 @@
   }
   D.action('e6-point', el => { D.closeSheet && D.closeSheet(); baySheet(el.dataset.arg); });
 
-  /* ---------- E7 Вид сверху (только внутреняя сборка) ---------- */
+  /* ---------- E7 Вид сверху (только внутренняя сборка) ---------- */
   if (!PUBLIC) D.register('E7', {
-    tab: 'E1',
+    tab: '-',
     meta: {
       title: 'E7 · Вид сверху',
       role: 'Гость, карта',
@@ -378,7 +397,7 @@
         'Аэрофотоснимок курорта с подписями объектов (зима/лето).',
         'Подпись: «фото: Завидово, права на публикацию не подтверждены».'
       ],
-      rules: ['Только внутреняя сборка; в публичной E7 отсутствует.'],
+      rules: ['Только внутренняя сборка; в публичной E7 отсутствует.'],
       depends: []
     },
     html(ctx) {
@@ -387,7 +406,7 @@
       const chips = [['winter', 'Зима'], ['summer', 'Лето']].map(s =>
         '<button class="chip' + (st.season === s[0] ? ' on' : '') + '" data-act="e7-season" data-arg="' + s[0] + '">' + s[1] + '</button>').join('');
       return '<div class="scr">' +
-        D.head({eyebrow:'Карта · ' + esc(F.NOW.dateLong), title:'Вид сверху', sub:'Аэрофото курорта · ' + (st.season === 'winter' ? 'зима' : 'лето'), paren:paren('фото: Завидово, права на публикацию не подтверждены')}) +
+        D.head({backHist:true, eyebrow:'Карта · ' + esc(F.NOW.dateLong), title:'Вид сверху', sub:'Аэрофото курорта · ' + (st.season === 'winter' ? 'зима' : 'лето'), paren:paren('фото: Завидово, права на публикацию не подтверждены')}) +
         segMap('E7') +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
         '<div class="chips">' + chips + '</div>' +
@@ -437,7 +456,7 @@
   D.action('e7-row', el => { const x = (window.__e7labels || [])[+el.dataset.arg]; if (x) e7Sheet(x); });
   D.action('e7-tag', el => { const x = (window.__e7labels || []).find(z => z.id === el.dataset.arg); if (x) e7Sheet(x); });
   function e7Sheet(x) {
-    const hallFor = { congress: ['congress', 'doybitsa', 'sobol'], radisson: ['ballroomB', 'ballroomS'], erbelia: ['edelveis'], brevis: ['magnolia'], ryabina: ['magnolia'] };
+    const hallFor = { congress: ['congress', 'doybitsa', 'sobol', 'shosha'], radisson: ['ballroomB', 'ballroomS'], erbelia: ['edelveis', 'magnolia'], brevis: [], ryabina: [] };
     const hIds = hallFor[x.id] || [];
     const halls = hIds.map(i => F.hall(i)).filter(Boolean);
     D.openSheet(
@@ -448,14 +467,14 @@
 
   /* ---------- E2 План этажа ---------- */
   D.register('E2', {
-    tab: 'E1',
+    tab: '-',
     meta: {
       title: 'E2 · План этажа',
       role: 'Гость, карта площадки',
       fr: ['FR-MAP-01'],
       ac: ['AC-MAP-01'],
       what: [
-        'Демонстрационная схема Конгресс-центра с переключателем этажей: 1-й этаж — сцена и выставка, 2-й — Дойбица, Соболь, КипяTALK.',
+        'Демонстрационная схема Конгресс-центра с переключателем этажей: 1-й этаж — КипяTALK и выставка, 2-й — Дойбица, Соболь, Шоша.',
         'Подпись: «схема демонстрационная, планы корпусов будут позже».'
       ],
       rules: [
@@ -471,14 +490,14 @@
       const chips = F.CONGRESS_FLOORS.map(f =>
         '<button class="chip' + (f.id === st.fl ? ' on' : '') + '" data-act="e2-floor" data-arg="' + f.id + '">' + esc(f.label) + '</button>').join('');
       /* переходы из схемы и списка: залы -> E3, Выставка -> H1, КипяTALK -> H5 */
-      const ROOM_LINK = { stage: 'E3/congress', expo: 'H1', kiptalk: 'H5', doybitsa: 'E3/doybitsa', sobol: 'E3/sobol' };
+      const ROOM_LINK = { stage: 'E3/congress', expo: 'H1', kiptalk: 'H5', doybitsa: 'E3/doybitsa', sobol: 'E3/sobol', shosha: 'E3/shosha' };
       const rooms = fl.rooms.map(r => {
         const link = ROOM_LINK[r.id];
         const cx = r.x + r.w / 2, cy = r.y + r.h / 2;
         return '<g class="floor-room' + (link ? ' clickable' : '') + '"' + (link ? ' data-go="' + link + '" style="cursor:pointer"' : '') + '>' +
         '<rect x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '" rx="10"/>' +
-        '<text class="fm-name" x="' + cx + '" y="' + (cy - 4) + '" text-anchor="middle">' + esc(r.name) + '</text>' +
-        '<text class="fm-note" x="' + cx + '" y="' + (cy + 14) + '" text-anchor="middle">' + esc(r.note) + '</text></g>';
+        '<text class="fr-name" x="' + cx + '" y="' + (cy - 4) + '" text-anchor="middle">' + esc(r.name) + '</text>' +
+        '<text class="fr-note" x="' + cx + '" y="' + (cy + 14) + '" text-anchor="middle">' + esc(r.note) + '</text></g>';
       }).join('');
       const marks = (fl.marks || []).map(m => {
         if (m.kind === 'entry') {
@@ -507,7 +526,7 @@
                     : '<div class="row">' + inner + '</div>';
       }).join('');
       return '<div class="scr">' +
-        D.head({back:'E1', eyebrow:'Карта · Конгресс-центр', title:'План этажа', sub:esc(fl.label) + ' · схема демонстрационная', paren:paren('схема демонстрационная, планы корпусов будут позже')}) +
+        D.head({backHist:true, eyebrow:'Карта · Конгресс-центр', title:'План этажа', sub:esc(fl.label) + ' · схема демонстрационная', paren:paren('схема демонстрационная, планы корпусов будут позже')}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:12px">' +
         '<div class="chips">' + chips + '</div>' +
         '<div class="floor-map"><svg viewBox="0 0 330 ' + fl.h + '">' +
@@ -522,7 +541,7 @@
 
   /* ---------- E3 Точка ---------- */
   D.register('E3', {
-    tab: 'E1',
+    tab: '-',
     meta: {
       title: 'E3 · Точка',
       role: 'Гость, карта площадки',
@@ -539,17 +558,31 @@
       depends: ['программа', 'карта']
     },
     html(ctx) {
-      const hid = ctx.param && F.hall(ctx.param) ? ctx.param : 'magnolia';
+      if (ctx.param && !F.hall(ctx.param)) {
+        return '<div class="scr">' +
+          D.head({backHist:true, eyebrow:'Точка', title:'Зал не найден', sub:'Такого зала нет в программе фестиваля.'}) +
+          '<div style="padding:0 20px"><button class="btn btn-ghost btn-block" data-go="E1">К карте</button></div></div>';
+      }
+      const hid = ctx.param || 'magnolia';
       const h = F.hall(hid);
       const sess = F.sessionsOf('27.02').filter(s => s.hall === h.id).sort((a, b) => a.time.localeCompare(b.time));
       const rows = sess.map(s =>
         '<button class="row clickable" data-go="C3/' + s.id + '"><div class="grow"><div class="r-sub">' + esc(s.time) + ' · ' + esc(s.title) + '</div></div>' + icon('chevR') + '</button>').join('');
-      const next = sess.find(s => s.time >= '11:10');
+      const t2mE = t => { const m = /(\d+):(\d+)/.exec(String(t || '')); return m ? (+m[1]) * 60 + (+m[2]) : -1; };
+      const nowM = t2mE(F.NOW && F.NOW.time);
+      const cur = sess.find(s => t2mE(s.time) <= nowM && nowM < t2mE(s.time) + (s.dur || 0));
+      const next = sess.find(s => t2mE(s.time) > nowM);
+      const nowTxt = cur
+        ? 'Сейчас — ' + esc(cur.time) + ' ' + esc(cur.title) + ' (до ' + esc(String(Math.floor((t2mE(cur.time) + cur.dur) / 60)).padStart(2, '0') + ':' + String((t2mE(cur.time) + cur.dur) % 60).padStart(2, '0')) + ')' +
+          (next ? ' · далее ' + esc(next.time) + ' ' + esc(next.title) : '')
+        : next ? 'Ближайшее — ' + esc(next.time) + ' ' + esc(next.title)
+        : 'Сессий на сейчас нет';
+      const capTxt = h.cap == null ? (h.capNote || 'по записи') : 'до ' + h.cap + ' ' + D.plural(h.cap, ['места', 'мест', 'мест']);
       return '<div class="scr">' +
-        D.head({back:'E1', eyebrow:'Точка · ' + esc(h.place.split(',')[0]), title:esc(h.name), sub:esc(h.place) + ' · до ' + h.cap + ' ' + D.plural(h.cap, ['места', 'мест', 'мест']), paren:paren('сегодня в этом зале — ' + sess.length + ' ' + D.plural(sess.length, ['событие', 'события', 'событий']))}) +
+        D.head({backHist:true, eyebrow:'Точка · ' + esc(h.place.split(',')[0]), title:esc(h.name), sub:esc(h.place) + ' · ' + esc(capTxt), paren:paren('сегодня в этом зале — ' + sess.length + ' ' + D.plural(sess.length, ['событие', 'события', 'событий']))}) +
         '<div style="padding:0 20px;display:flex;flex-direction:column;gap:14px">' +
         '<div class="card accent-edge"><div class="card-head"><div><div class="cap">Сейчас и дальше</div>' +
-        '<div class="card-title" style="margin-top:2px">' + (next ? 'Ближайшее — ' + esc(next.time) + ' ' + esc(next.title) : 'Сессий на сейчас нет') + '</div></div></div>' +
+        '<div class="card-title" style="margin-top:2px">' + nowTxt + '</div></div></div>' +
         (h.note ? '<div class="r-sub" style="margin-top:6px">' + esc(h.note) + '</div>' : '') +
         '<div class="r-sub" style="margin-top:4px">На карте: метка бухты · ' + esc(h.mapNote || 'точка подтверждена') + '</div></div>' +
         '<div class="card"><div class="sec-title" style="margin:0 0 4px">Сегодня в зале</div>' +
@@ -575,11 +608,13 @@
       pts.unshift({ name: 'Вы здесь', coords: [36.520199, 56.590251], sub: 'главная бухта' });
       if (!pts.length) pts = [{ name: 'Вы здесь', coords: [36.520199, 56.590251], sub: 'главная бухта' }];
     } else {
-      const hid = ctx.param && F.hall(ctx.param) ? ctx.param : 'magnolia';
-      const h = F.hall(hid);
+      const pg = ctx.param && PIN_GEO[ctx.param];
+      const ph = ctx.param && F.hall(ctx.param);
+      if (ctx.param && !pg && !ph) return { nf: true };
+      const h = ph || F.hall('magnolia');
       pts = [
         { name: 'Вы здесь', coords: [36.520199, 56.590251], sub: 'главная бухта' },
-        { name: h.short || h.name, coords: h.geo, sub: h.place, hall: h.id }
+        pg ? { name: pg[0], coords: pg[1], sub: 'точка курорта на карте' } : { name: h.short || h.name, coords: h.geo, sub: h.place, hall: h.id }
       ];
     }
     /* длина и время — демо-расчёт по прямым между точками, 4,5 км/ч */
@@ -601,10 +636,10 @@
       '<div class="r-sub">' + esc(p.sub || '') + esc(leg) + '</div></div></div>';
     }).join('');
     return '<div class="scr">' +
-      D.head({back:'E1', eyebrow:esc(F.NOW.dateLong), title:title, sub:sub, paren:paren('время пешком — демо-расчёт по расстоянию, 4,5 км/ч')}) +
+      D.head({backHist:true, eyebrow:esc(F.NOW.dateLong), title:title, sub:sub, paren:paren('время пешком — демо-расчёт по расстоянию, 4,5 км/ч')}) +
       '<div class="mapview" id="mv-route"><div class="mv-loading">Загружаю карту…</div></div>' +
       '<div class="card" style="margin:12px 20px 0"><div class="card-title" style="font-size:15px">' + esc(R.pts.map(p => p.name).join(' › ')) + '</div>' +
-      '<div class="cap">пешком около ' + R.mins + ' ' + D.plural(R.mins, ['минута', 'минуты', 'минут']) + ' · ' + R.km.toFixed(1) + ' км по прямым · демо-расчёт</div>' +
+      '<div class="cap">пешком ~' + R.mins + ' ' + D.plural(R.mins, ['минута', 'минуты', 'минут']) + ' · ' + R.km.toFixed(1).replace('.', ',') + ' км по прямым · демо-расчёт</div>' +
       '<div style="margin-top:8px">' + steps + '</div>' +
       '<div class="cap" style="margin-top:8px">Запас на переход между точками — по матрице переездов; линия маршрута приблизительная (по прямым между точками).</div></div>' +
       '<div style="height:16px;margin:0 20px"></div></div>';
@@ -635,7 +670,7 @@
   }
 
   D.register('E4', {
-    tab: 'E1',
+    tab: '-',
     meta: {
       title: 'E4 · Маршрут', role: 'Гость / участник', fr: ['FR-MAP-04'], ac: ['AC-MAP-02'],
       what: ['Маршрут от текущей точки до зала по карте: линия, остановки, время пешком.', 'Лист шагов с расстоянием и демо-расчётом.'],
@@ -644,6 +679,11 @@
     },
     html(ctx) {
       const R = routeScreen('E4', ctx);
+      if (R.nf) {
+        return '<div class="scr">' +
+          D.head({backHist:true, eyebrow:'Карта', title:'Точка не найдена', sub:'Такой точки или зала нет на карте.'}) +
+          '<div style="padding:0 20px"><button class="btn btn-ghost btn-block" data-go="E1">К карте</button></div></div>';
+      }
       ctx.state._rt = R;
       return routeHTML(R, 'Маршрут', esc(R.pts[0].name) + ' › ' + esc(R.pts[R.pts.length - 1].name));
     },
@@ -651,7 +691,7 @@
   });
 
   D.register('E5', {
-    tab: 'E1',
+    tab: '-',
     meta: {
       title: 'E5 · Мой маршрут', role: 'Гость / участник', fr: ['FR-MAP-05'], ac: ['AC-MAP-05'],
       what: ['Точки вашей программы и списка на карте с порядком и временем пешком.', 'Запас на переход между залами.'],

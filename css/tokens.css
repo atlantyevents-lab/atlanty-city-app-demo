@@ -78,7 +78,7 @@
   --topo: var(--raw-orange-500);
   --topo-alpha: .3;
   --pict-mul: 1.6;
-  --hover: var(--raw-orange-deep-3);
+  --hover: var(--raw-orange-400);        /* наведение .btn-primary: светлее основного, контраст к чёрному тексту 7,3:1 */
   --focus: var(--raw-ink-900);
   --band: var(--raw-orange-500);
   --band-ink: var(--raw-ink-900);
@@ -119,6 +119,9 @@
   --logo-url: url('../assets/svg/logo-full-black.svg');
   --field-bg: var(--raw-paper-000);
   --err: #b3261e;
+  --ok: #177245;                            /* успех/«готово» — ≥4,5:1 на светлом фоне */
+  --warn: #8a5200;                           /* предупреждение — ≥4,5:1 на светлом фоне */
+  --toggle-off-line: #8d7f75;                /* граница выключенного переключателя: 3,8:1 к белой карточке (WCAG 1.4.11) */
   --particle: var(--raw-spark);
   --accent-on-dark: #ff7a3d;               /* оранжевый на тёмных поверхностях (затемнение фото, крышка боли), 6,6:1 на #1B1512 */
   /* цвета внутри градиентных карточек тарифов: БИЗНЕС (оранжевая) и ПЕРВЫЙ КЛАСС (тёмно-оранжевая) */
@@ -193,6 +196,9 @@
   --logo-url: url('../assets/svg/logo-full-white.svg');
   --field-bg: var(--raw-ember-900);
   --err: #ff8f8f;
+  --ok: #8fd694;                            /* успех/«готово» — ≥4,5:1 на тёмном фоне */
+  --warn: #f2b45c;                           /* предупреждение — ≥4,5:1 на тёмном фоне */
+  --toggle-off-line: #8a6f5c;                /* граница выключенного переключателя: 4,1:1 к тёмной карточке (WCAG 1.4.11) */
   --accent-on-dark: var(--raw-orange-500);
   --biz-price: var(--raw-orange-500); --biz-dim: var(--raw-sand-300); --biz-star: var(--raw-orange-500); --biz-btn-bg: var(--raw-orange-500); --biz-btn-ink: var(--raw-black-000); --biz-line: var(--line);
   --fc-price: var(--raw-orange-500); --fc-dim: var(--raw-sand-300); --fc-star: var(--raw-orange-500); --fc-btn-bg: var(--raw-orange-500); --fc-btn-ink: var(--raw-black-000); --fc-line: var(--line);

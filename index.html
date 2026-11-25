@@ -3,16 +3,63 @@
 <head>
 <meta name=\"robots\" content=\"noindex,nofollow\">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="atl-server" content="pub">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<meta name="theme-color" content="#fd5000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Атланты">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Демо экранов · Атланты Сити. Зима 2027</title>
+<script>
+/* Режим установленного приложения (app-native): standalone-режим PWA,
+   сервер (atl-server=1) или публичная сборка Pages (atl-server=pub) —
+   в них узкое окно даёт app-native. На статике checks.py (0) не меняется. */
+(function () {
+  var st = document.querySelector('meta[name="atl-server"]');
+  var on = !!(st && (st.content === '1' || st.content === 'pub'));
+  function upd() {
+    var standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+    var narrow = on && window.innerWidth <= 520;
+    document.documentElement.classList.toggle('app-native', standalone || narrow);
+  }
+  upd();
+  window.addEventListener('resize', upd);
+  window.addEventListener('orientationchange', function () { setTimeout(upd, 50); });
+  try {
+    var mq = window.matchMedia('(display-mode: standalone)');
+    if (mq.addEventListener) mq.addEventListener('change', upd);
+  } catch (e) {}
+})();
+</script>
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/shell.css">
+<link rel="stylesheet" href="css/onboarding.css">
+<link rel="stylesheet" href="css/path.css">
+<link rel="stylesheet" href="css/program.css">
+<link rel="stylesheet" href="css/market.css">
+<link rel="stylesheet" href="css/exhibitor.css">
+<link rel="stylesheet" href="css/people.css">
+<link rel="stylesheet" href="css/feed.css">
+<link rel="stylesheet" href="css/cabinet.css">
+<link rel="stylesheet" href="css/console.css">
 </head>
 <body>
 <div id="app"></div>
 <script>window.DEMO_PUBLIC = true;</script>
 <script src="data/fixtures.js"></script>
+<script src="data/fx_shared.js"></script>
+<script src="data/fx_path.js"></script>
+<script src="data/fx_feed.js"></script>
+<script src="data/fx_program.js"></script>
+<script src="data/fx_market.js"></script>
+<script src="data/fx_people.js"></script>
+<script src="data/fx_profile.js"></script>
+<script src="data/fx_ops.js"></script>
 <script src="js/core.js"></script>
+<script src="js/sync.js"></script>
 <script src="js/map.js"></script>
 <script src="js/screens/A.js"></script>
 <script src="js/screens/B.js"></script>
@@ -30,6 +77,8 @@
 <script src="js/screens/N.js"></script>
 <script src="js/screens/O.js"></script>
 <script src="js/screens/P.js"></script>
+<script src="js/screens/R.js"></script>
+<script src="js/screens/Z.js"></script>
 <script>
   /* подгонка рамки рабочего стола под доступное место */
   function fitDesk() {

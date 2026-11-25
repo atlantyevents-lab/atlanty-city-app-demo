@@ -79,7 +79,7 @@ window.MAP = (function () {
     let st = { tx: 0, ty: 0, k: 1 };
     let world = null;
     const ptrs = new Map();
-    let pinch = null, moved = 0, downAt = 0;
+    let pinch = null, moved = 0, downAt = 0, pendingPin = null;
 
     function size() {
       const r = el.getBoundingClientRect();
@@ -283,14 +283,19 @@ window.MAP = (function () {
       if (!ptrs.has(ev.pointerId)) return;
       ptrs.delete(ev.pointerId);
       if (ptrs.size < 2) pinch = null;
-      if (ptrs.size === 0 && moved < 6 && Date.now() - downAt < 400) {
+      pendingPin = null;
+      if (ev.type === 'pointerup' && ptrs.size === 0 && moved < 6 && Date.now() - downAt < 400) {
         const el2 = document.elementFromPoint(ev.clientX, ev.clientY);
         const pin = el2 && el2.closest ? el2.closest('.mv-pin') : null;
-        if (pin && opts.onPin) opts.onPin(pin.dataset.pin);
+        if (pin) pendingPin = pin.dataset.pin;
       }
     }
     el.addEventListener('pointerup', up);
     el.addEventListener('pointercancel', up);
+    el.addEventListener('click', () => {
+      const id = pendingPin; pendingPin = null;
+      if (id && opts.onPin) opts.onPin(id);
+    });
     el.addEventListener('wheel', ev => {
       ev.preventDefault();
       zoomAt(ev.clientX, ev.clientY, ev.deltaY < 0 ? 1.18 : 1 / 1.18);

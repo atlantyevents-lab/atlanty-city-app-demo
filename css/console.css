@@ -1,0 +1,236 @@
+/* Раздел «Допуск и консоль» (блоки O, P), владелец S8. Префикс классов con-. Цвета и размеры только через токены tokens.css.
+   Экраны O — рамка телефона 390 px (поля 20 px, правая граница содержимого 370 px). Экраны P — рабочий стол 1440×900. */
+
+/* ================= общие элементы ================= */
+
+/* переключатель: кнопка с aria-pressed; зона касания шире видимой дорожки */
+.con-sw {
+  position: relative; display: inline-block; width: 46px; height: 28px; flex: none; padding: 0;
+  border-radius: 99px; background: var(--surface-2); border: 1px solid var(--line); transition: background .2s, border-color .2s;
+}
+.con-sw::before { content: ''; position: absolute; inset: -8px 0; } /* зона касания 46×44; по горизонтали не выходит за строку (иначе переполнение toggle-row на 3 px) */
+.con-sw::after {
+  content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--ink-dim); transition: transform .2s var(--spring), background .2s;
+}
+.con-sw[aria-pressed="true"], .con-sw.is-on { background: var(--accent-solid); border-color: var(--accent-solid); }
+.con-sw[aria-pressed="true"]::after, .con-sw.is-on::after { transform: translateX(18px); background: var(--accent-ink); }
+.con-sw[disabled], .con-sw.is-locked { opacity: .5; cursor: not-allowed; }
+.con-sw:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+/* строка «подпись + переключатель» в консоли: подпись переносится, переключатель не сжимается и не выходит за рамку */
+.console .toggle-row { min-width: 0; }
+.console .toggle-row > :first-child { min-width: 0; flex: 1 1 0; overflow-wrap: anywhere; }
+.console .toggle-row > .con-sw, .console .toggle-row > .toggle { flex: none; }
+.console .toggle-row .con-v { flex: none; min-width: 0; max-width: 55%; white-space: normal; text-align: right; overflow-wrap: anywhere; }
+
+/* лист на рабочем столе: диалог по центру, а не снизу на всю ширину */
+.frame.desk .sheet {
+  left: 50%; right: auto; top: 50%; bottom: auto; width: 560px; max-width: calc(100% - 48px); max-height: 82%;
+  border-radius: 22px; border: 1px solid var(--line); padding: 24px 26px 24px;
+  transform: translate(-50%, -50%); animation: con-pop .22s var(--ease);
+}
+.frame.desk .sheet-grip { display: none; }
+@keyframes con-pop { from { opacity: .4; transform: translate(-50%, -46%); } to { opacity: 1; transform: translate(-50%, -50%); } }
+.con-sheet-lead { font-size: 14px; line-height: 1.5; color: var(--ink); margin-bottom: 12px; }
+.con-sheet-note { font-size: 12.5px; line-height: 1.45; color: var(--ink-dim); margin-top: 10px; }
+.con-sheet-btns { display: flex; gap: 10px; margin-top: 18px; }
+.con-sheet-btns .btn { flex: 1; }
+.con-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.con-field label { font-size: 13px; font-weight: 600; }
+.con-field .con-hint { font-size: 12px; color: var(--ink-dim); }
+.con-field .con-err { font-size: 12px; color: var(--err); min-height: 0; }
+.con-reasons { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.con-reasons .chip { min-height: 40px; }
+
+/* ================= O5 · сканер зала (рамка телефона) ================= */
+
+.con-o5 { padding: 0 20px; display: flex; flex-direction: column; gap: 14px; }
+.con-vol { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); }
+.con-vol .cv-main { flex: 1; min-width: 0; }
+.con-vol .cv-name { font-weight: 700; font-size: 14.5px; }
+.con-vol .cv-sub { font-size: 12.5px; line-height: 1.4; color: var(--ink-dim); margin-top: 1px; overflow-wrap: anywhere; }
+.con-halls { position: relative; display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 6px; scrollbar-width: none; -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); }
+.con-halls::-webkit-scrollbar { display: none; }
+.con-halls .chip { min-height: 40px; white-space: nowrap; }
+.con-halls .chip.is-lock { border-style: dashed; }
+.con-halls .chip.is-lock.on { background: var(--surface-2); color: var(--ink-dim); border-color: var(--line); }
+.con-halls .chip .ic { width: 14px; height: 14px; }
+.con-mode { margin: 0; }
+.con-mode .seg { min-height: 44px; }
+.con-count { display: flex; align-items: center; gap: 16px; padding: 14px 16px; border: 1px solid var(--accent-edge); border-radius: var(--radius); background: var(--card); }
+.con-count .cc-n { font-family: var(--font-display); font-size: 56px; line-height: 1; color: var(--accent-display); min-width: 78px; font-variant-numeric: tabular-nums; }
+.con-count .cc-body { flex: 1; min-width: 0; }
+.con-count .cc-lbl { font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-dim); }
+.con-count .cc-eq { font-size: 14px; font-weight: 600; margin-top: 2px; }
+.con-count .cc-sess { font-size: 12.5px; line-height: 1.4; color: var(--ink-dim); margin-top: 4px; overflow-wrap: anywhere; }
+.con-count .cc-sess b { color: var(--ink); font-weight: 600; }
+.con-deny { display: flex; flex-direction: column; gap: 10px; padding: 16px; border: 1.5px solid var(--err); border-radius: var(--radius); background: var(--card); }
+.con-deny .cd-head { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; }
+.con-deny .cd-head .ic { color: var(--err); flex: none; }
+.con-stage { min-height: 150px; }
+.con-stage .scan-frame { inset: 16px 90px 52px; }
+.con-stage .scan-hint { position: absolute; left: 0; right: 0; bottom: 10px; padding: 0 24px; z-index: 1; }
+.con-stage-out .scan-frame { border-color: rgba(255, 200, 120, .55); }
+.con-sub { font-family: var(--font-display); font-size: 17px; letter-spacing: .05em; text-transform: uppercase; margin: 2px 0 -4px; }
+.con-guests { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.con-guest {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; min-height: 56px; min-width: 0;
+  padding: 8px 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); color: var(--ink);
+}
+.con-guest:hover { border-color: var(--accent-edge); }
+.con-guest:active { transform: scale(.985); }
+.con-guest .cg-name { font-size: 13.5px; font-weight: 600; line-height: 1.25; overflow-wrap: anywhere; }
+.con-guest .cg-sub { font-size: 11.5px; line-height: 1.3; color: var(--ink-dim); }
+.con-guest.is-in .cg-sub b { color: var(--ok); font-weight: 600; }
+.con-res { display: flex; flex-direction: column; gap: 6px; }
+.con-res .cr-head { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.con-res.scan-ok .cr-head { color: var(--ok); }
+.con-res.scan-warn .cr-head { color: var(--warn); }
+.con-res.scan-err .cr-head { color: var(--err); }
+.con-res .cr-name { font-size: 16px; font-weight: 700; }
+.con-res .cr-text { font-size: 13.5px; line-height: 1.45; color: var(--ink); overflow-wrap: anywhere; }
+.con-res .cr-meta { font-size: 12.5px; color: var(--ink-dim); }
+.con-res-empty { display: flex; gap: 10px; align-items: flex-start; padding: 14px; border: 1px dashed var(--line); border-radius: var(--radius); font-size: 13px; color: var(--ink-dim); }
+.con-offline { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); text-align: left; color: var(--ink); }
+.con-offline.is-on { border-color: var(--warn); }
+.con-offline .co-main { flex: 1; min-width: 0; }
+.con-offline .co-t { font-size: 14px; font-weight: 600; }
+.con-offline .co-s { font-size: 12.5px; line-height: 1.4; color: var(--ink-dim); margin-top: 1px; }
+.con-queue { display: flex; flex-direction: column; gap: 8px; padding: 14px; border: 1px solid var(--warn); border-radius: var(--radius); background: var(--card); }
+.con-queue .cq-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-weight: 700; font-size: 14.5px; }
+.con-log { display: flex; flex-direction: column; }
+.con-log .cl-row { display: flex; gap: 10px; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.con-log .cl-row:last-child { border-bottom: 0; }
+.con-log .cl-t { flex: none; width: 42px; color: var(--ink-dim); font-variant-numeric: tabular-nums; }
+.con-log .cl-main { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.con-log .cl-main b { font-weight: 600; }
+.con-log .cl-st { display: block; font-size: 12px; color: var(--ink-dim); margin-top: 1px; }
+.con-log .cl-st.ok { color: var(--ok); }
+.con-log .cl-st.warn { color: var(--warn); }
+.con-log .cl-st.err { color: var(--err); }
+.con-link { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); text-align: left; color: var(--ink); }
+.con-link:hover { border-color: var(--accent-edge); }
+.con-link .cl-main { flex: 1; min-width: 0; }
+.con-link .cl-t { font-size: 14px; font-weight: 600; }
+.con-link .cl-s { font-size: 12.5px; line-height: 1.4; color: var(--ink-dim); margin-top: 1px; }
+.con-link > .ic:last-child { color: var(--ink-dim); flex: none; }
+
+/* ================= P · консоль (рабочий стол 1440×900) ================= */
+
+.con-nav-sec { margin: 14px 10px 4px; font-family: var(--font-accent); font-size: 12px; color: var(--ink-dim); }
+.con-chips40 .chip { min-height: 40px; }
+.con-lnk { display: inline-flex; align-items: center; min-height: 40px; padding: 4px 0; color: var(--accent-text); font-weight: 600; font-size: 13px; text-align: left; line-height: 1.35; }
+.con-lnk:hover { text-decoration: underline; }
+.con-unset { color: var(--ink-dim); font-size: 13px; }
+.con-v { font-weight: 600; font-size: 14px; white-space: normal; overflow-wrap: anywhere; min-width: 0; }
+.con-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+.con-ph { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+.con-danger { border-color: var(--err); color: var(--err); }
+.con-danger:hover { background: var(--surface-2); }
+
+/* таблицы консоли */
+.c-table td.num, .c-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.c-table td.r { text-align: right; white-space: nowrap; }
+.c-table .t-name { font-weight: 600; }
+.c-table td .chk { margin-top: 2px; line-height: 1.4; }
+.con-ptbl th:nth-child(2), .con-ptbl td:nth-child(2) { width: 150px; }
+.con-ptbl th:nth-child(3), .con-ptbl td:nth-child(3) { width: 200px; }
+.con-ptbl th:nth-child(4), .con-ptbl td:nth-child(4) { width: 110px; }
+.con-ptbl .btn-sm { min-height: 40px; }
+
+.con-halltbl td:first-child, .con-halltbl th:first-child { white-space: nowrap; width: 140px; }
+
+/* полоса значения и загрузка залов */
+.con-bar { flex: 1; height: 10px; min-width: 40px; border-radius: 99px; background: var(--surface-2); overflow: hidden; display: block; }
+.con-bar > i { display: block; height: 100%; background: var(--accent-solid); border-radius: 99px; }
+.con-load { display: flex; align-items: center; gap: 10px; min-width: 190px; }
+.con-load-v { flex: none; width: 92px; font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
+.con-load-v small { font-weight: 400; color: var(--ink-dim); font-size: 12px; margin-left: 2px; }
+
+/* план-факт: сегментная полоса и легенда */
+.con-stack { display: flex; height: 14px; border-radius: 99px; overflow: hidden; background: var(--surface-2); }
+.con-stack > i { display: block; height: 100%; }
+.st-done { background: var(--accent-solid); }
+.st-rep { background: var(--warn); }
+.st-skip { background: var(--err); }
+.st-ahead { background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); }
+.legend-dot.st-ahead { border: 1px solid var(--line); box-shadow: none; }
+.con-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; font-size: 12.5px; color: var(--ink-dim); }
+.con-legend b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.con-pf-big { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+.con-pf-big .num { font-family: var(--font-display); font-size: 40px; line-height: 1; color: var(--accent-display); font-variant-numeric: tabular-nums; }
+
+/* воронка входа */
+.con-fn { display: grid; grid-template-columns: 190px 1fr 56px 44px; gap: 10px; align-items: center; padding: 6px 0; font-size: 12.5px; }
+.con-fn .fn-l { color: var(--ink); line-height: 1.3; }
+.con-fn .fn-l small { display: block; color: var(--ink-dim); font-size: 11.5px; margin-top: 1px; }
+.con-fn .fn-v { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+.con-fn .fn-p { text-align: right; color: var(--ink-dim); font-variant-numeric: tabular-nums; }
+.con-fn-sep { margin: 8px 0 2px; padding-top: 8px; border-top: 1px solid var(--line); font-family: var(--font-accent); font-size: 12px; color: var(--ink-dim); }
+
+/* плитки в ряд из пяти */
+.con-tiles5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.con-tiles5 .stat-tile .sub { font-size: 12px; color: var(--ink-dim); }
+
+/* ячейка назначения волонтёров */
+.con-voltbl td { vertical-align: middle; padding: 6px 8px; }
+.con-cell {
+  display: flex; flex-direction: column; gap: 2px; width: 100%; min-height: 48px; padding: 6px 10px; text-align: left;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--surface); font-size: 12.5px; color: var(--ink);
+}
+.con-cell:hover { border-color: var(--accent-edge); }
+.con-cell.is-me { border-color: var(--accent-edge); background: var(--surface-2); font-weight: 600; }
+
+/* ---- P8 · план-факт ---- */
+.con-seg { margin: 0; max-width: 520px; }
+.con-seg .seg { min-height: 40px; }
+.con-pftbl th, .con-pftbl td { padding: 9px 6px; }
+.con-pftbl th { font-size: 10.5px; letter-spacing: .04em; }
+.con-pftbl .con-load { min-width: 0; gap: 8px; }
+.con-pftbl .con-bar { min-width: 24px; }
+.con-pftbl td:first-child, .con-pftbl th:first-child { white-space: nowrap; }
+.c-right .btn-block { white-space: normal; line-height: 1.25; padding-top: 8px; padding-bottom: 8px; text-align: center; }
+.con-pftbl tr.on td { background: color-mix(in srgb, var(--accent-solid) 10%, transparent); }
+.con-pftbl tr.con-hidden td { color: var(--ink-dim); }
+.con-pf-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+.con-smp { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--ink-dim); }
+.con-smp b { color: var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* ---- P9 · модерация ---- */
+.con-modtbl td { vertical-align: top; }
+.con-modtbl th:nth-child(1), .con-modtbl td:nth-child(1) { width: 52px; }
+.con-modtbl th:nth-child(2), .con-modtbl td:nth-child(2) { width: 150px; }
+.con-modtbl th:nth-child(3), .con-modtbl td:nth-child(3) { width: 150px; }
+.con-modtbl th:nth-child(5), .con-modtbl td:nth-child(5) { width: 130px; }
+.con-clip { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-size: 12.5px; line-height: 1.45; }
+.con-empty { display: flex; gap: 12px; align-items: flex-start; padding: 22px 18px; }
+.con-empty .ic { color: var(--accent-text); flex: none; margin-top: 1px; }
+.con-quote { font-size: 13.5px; line-height: 1.5; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow-wrap: anywhere; }
+
+/* ---- P10 · режимы ИИ ---- */
+.console.con-wide { grid-template-columns: 220px 1fr; }
+.con-ai { border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); overflow: hidden; }
+.con-ai-row {
+  display: grid; grid-template-columns: minmax(150px, 1.1fr) minmax(140px, 1.2fr) 100px 140px 140px 160px 70px 70px; gap: 10px;
+  align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 13px; cursor: pointer; min-height: 56px;
+}
+.con-ai-row:last-child { border-bottom: 0; }
+.con-ai-row:hover { background: var(--surface); }
+.con-ai-row.on { background: color-mix(in srgb, var(--accent-solid) 10%, transparent); }
+.con-ai-head { cursor: default; min-height: 40px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--ink-dim); background: var(--surface); }
+.con-ai-head:hover { background: var(--surface); }
+.con-ai-row .ai-n b { display: block; font-size: 14px; }
+.con-ai-row .ai-n span { font-size: 11.5px; color: var(--ink-dim); }
+.con-ai-row .ai-fb { font-size: 12.5px; line-height: 1.35; color: var(--ink-dim); }
+.con-ai-row .ai-v { line-height: 1.35; }
+.con-ai-row .ai-v .tag { white-space: normal; border-radius: 14px; line-height: 1.3; }
+.con-ai-row .ai-s { display: flex; justify-content: center; }
+.con-dl { display: grid; grid-template-columns: 120px 1fr; gap: 6px 12px; margin: 10px 0 12px; font-size: 13px; line-height: 1.45; }
+.con-dl dt { color: var(--ink-dim); }
+.con-dl dd { margin: 0; overflow-wrap: anywhere; }
+.con-dl dd .con-lnk { font-size: 13px; }
+
+/* КОНЕЦ файла console.css */
+
+.console .chips { flex-wrap: wrap; overflow-x: visible; }
+.mapview { user-select: none; -webkit-user-select: none; }

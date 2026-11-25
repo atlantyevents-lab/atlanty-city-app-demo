@@ -1,0 +1,237 @@
+/* Кабинет экспонента и сканер контактов (блоки I и J). Владелец S4b. Классы с префиксом exh-.
+   Цвета и размеры только через токены tokens.css; обе темы (summer — тёмная, winter — дневная). */
+
+/* ---------- общее для экранов раздела ---------- */
+.exh .chip { min-height: 40px; }
+.exh .btn-sm { min-height: 40px; }
+.exh .toggle input { inset: -6px 0; }            /* зона касания переключателя от 40 px */
+.exh-body { padding: 14px 20px 0; display: flex; flex-direction: column; gap: 14px; }
+.exh-end { height: 16px; flex: none; }
+.exh-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+.exh-wrap .chip { max-width: 100%; white-space: normal; text-align: left; line-height: 1.25; padding-top: 6px; padding-bottom: 6px; }
+.exh-cap { font-size: 13px; color: var(--ink-dim); line-height: 1.45; }
+.exh-ttl { font-family: var(--font-display); font-size: 20px; letter-spacing: .06em; text-transform: uppercase; margin-top: 4px; display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.exh-ttl .exh-lnk { font-family: var(--font-text); font-size: 13px; letter-spacing: 0; text-transform: none; }
+.exh-ttl .n { font-family: var(--font-text); font-size: 13px; letter-spacing: 0; text-transform: none; color: var(--ink-dim); font-weight: 600; }
+.exh-lnk {
+  display: inline-flex; align-items: center; gap: 4px; min-height: 40px; padding: 8px 0;
+  color: var(--accent-text); font-weight: 600; font-size: 13px; text-align: left;
+}
+.exh-lnk .ic { width: 15px; height: 15px; }
+.exh-lnk:hover { text-decoration: underline; }
+.exh-lnk.exh-danger { color: var(--err); }
+.exh-field-err { font-size: 12px; color: var(--err); margin-top: 4px; }
+.exh .input.err, .exh .textarea.err { border-color: var(--err); }
+
+/* ряды чипов: лента .chip-rail (поле 20 px даёт её собственный padding, прокрутку и подвод активного чипа ведёт оболочка).
+   Вверху экрана лента и подпись «демо» — прямые дети .scr сразу после шапки, как D.chipRail у остальных разделов.
+   Внутри тела экрана (поля 20 px) лента вынесена за поля отрицательным отступом, поэтому первый чип тоже стоит ровно на 20 px
+   (прежние «33 px» были у чипов внутри пунктирной рамки демо-блока: 20 + рамка 1 + внутренний отступ 12). */
+.exh .chip-rail { padding-top: 4px; padding-bottom: 4px; }
+.exh-body > .exh-demo-rail { margin-left: -20px; margin-right: -20px; }
+.exh-demo-rail { display: flex; flex-direction: column; gap: 2px; }
+.exh-demo-rail .t, .exh-demo-t { padding: 0 20px; font-size: 13px; color: var(--ink-dim); display: flex; align-items: center; gap: 8px; }
+.exh-demo-t { padding-top: 14px; flex: none; }
+.exh-demo-seg { padding: 6px 20px 0; flex: none; }
+.exh-demo-seg-in { padding: 4px 20px 0; }
+.exh-demo-tag { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 1px 7px; border-radius: 6px; border: 1px dashed var(--ink-dim); color: var(--ink-dim); flex: none; }
+
+/* строка «аватар + имя» как кнопка перехода в карточку участника */
+.exh-who { display: flex; align-items: center; gap: 10px; min-height: 44px; min-width: 0; flex: 1; text-align: left; color: var(--ink); }
+.exh-who .t { display: flex; flex-direction: column; min-width: 0; overflow-wrap: anywhere; }
+.exh-who .t b { font-size: 14.5px; font-weight: 600; line-height: 1.3; }
+.exh-who .t span { font-size: 13px; color: var(--ink-dim); margin-top: 1px; line-height: 1.35; }
+button.exh-who:hover .t b { color: var(--accent-text); }
+
+/* демо-блок внутри карточки (решение модератора) */
+.exh-demo { border: 1px dashed var(--line); border-radius: 14px; padding: 10px 12px 4px; display: flex; flex-direction: column; gap: 2px; }
+.exh-demo .t { font-size: 13px; color: var(--ink-dim); }
+
+/* показатели и плитки разделов */
+.exh-kpis, .exh-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.exh-kpi {
+  text-align: left; background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px;
+  padding: 12px 14px; min-height: 86px; min-width: 0; display: flex; flex-direction: column; gap: 2px;
+}
+.exh-kpi:hover, .exh-tile:hover { border-color: var(--accent-edge); }
+.exh-kpi .k { font-size: 12.5px; color: var(--ink-dim); }
+.exh-kpi .v { font-family: var(--font-display); font-size: 34px; line-height: 1.05; color: var(--accent-display); }
+.exh-kpi .d { font-size: 12.5px; color: var(--ink-dim); white-space: pre-line; }
+.exh-tile {
+  text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+  padding: 12px 14px; min-height: 92px; min-width: 0; display: flex; flex-direction: column; gap: 3px;
+}
+.exh-tile .ic { color: var(--accent-text); width: 22px; height: 22px; margin-bottom: 2px; }
+.exh-tile .t { font-weight: 700; font-size: 14.5px; line-height: 1.25; }
+.exh-tile .s { font-size: 12.5px; color: var(--ink-dim); line-height: 1.35; }
+/* раздел вне пакета: контраст полный (затемнение opacity не используем), отличие — пунктирная рамка и приглушённый значок */
+.exh-tile.off { border-style: dashed; background: transparent; }
+.exh-tile.off .ic { color: var(--ink-dim); }
+
+/* карточка пакета */
+.exh-pack { border-color: var(--accent-edge); }
+.exh-pack .nm { font-family: var(--font-display); font-size: 30px; line-height: 1; letter-spacing: .03em; text-transform: uppercase; color: var(--accent-display); }
+.exh-pack .lead { font-size: 13px; color: var(--ink-dim); }
+.exh-facts { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ближайшие задачи (I1): название строки — подпись переключателя, нажатие по названию тоже отмечает задачу */
+.exh-task-t { font-weight: 500; font-size: 14.5px; line-height: 1.35; display: block; padding: 2px 0; }
+label.exh-task-t { cursor: pointer; }
+.exh-task-s { font-size: 13px; color: var(--ink-dim); line-height: 1.4; }
+
+/* квота (посты, места) */
+.exh-q { display: flex; flex-direction: column; gap: 6px; }
+.exh-q-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 13.5px; font-weight: 600; }
+.exh-q-n { font-family: var(--font-display); font-size: 24px; letter-spacing: .03em; color: var(--accent-display); white-space: nowrap; }
+.exh-q-n small { font-size: 15px; color: var(--ink-dim); }
+.exh-q .cap { line-height: 1.4; }
+.exh-seatnum { text-align: center; padding: 18px 16px; }
+.exh-seatnum .big { font-family: var(--font-display); font-size: 48px; line-height: 1; color: var(--accent-display); }
+.exh-seatnum .big small { font-size: 22px; color: var(--ink-dim); }
+
+/* статусы модерации и заявок: пилюля всегда в одну строку, пояснение выносится рядом отдельной подписью */
+.exh-st {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; padding: 3px 9px; border-radius: 999px; border: 1px solid currentColor;
+  white-space: nowrap; max-width: 100%; line-height: 1.25; flex: none;
+}
+.exh-st.ok { color: var(--ok); }
+.exh-st.wait { color: var(--warn); }
+.exh-st.err { color: var(--err); }
+.exh-st.dim { color: var(--ink-dim); }
+.exh-st .ic { width: 12px; height: 12px; }
+.exh-st-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 6px; }
+.exh .scan-stage { border: 1px solid var(--line); }
+.exh .heat { font-size: 12px; }
+
+/* посты и предложения */
+.exh-post { gap: 10px; }
+.exh-post-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.exh-post-k { font-size: 13px; font-weight: 700; }
+.exh-post-w { font-size: 12.5px; color: var(--ink-dim); }
+.exh-post-t { font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
+.exh-reason { border: 1px solid var(--err); border-radius: 12px; padding: 10px 12px; font-size: 13px; line-height: 1.45; }
+.exh-reason b { display: block; font-size: 12.5px; color: var(--err); margin-bottom: 2px; }
+.exh-acts { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.exh-pv { border: 1px solid var(--line); border-radius: 16px; background: var(--surface); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.exh-pv-h { display: flex; align-items: center; gap: 10px; }
+.exh-pv-h .who { flex: 1; min-width: 0; }
+.exh-pv-h .who b { display: block; font-size: 14.5px; }
+.exh-pv-h .who span { font-size: 12.5px; color: var(--ink-dim); }
+.exh-pv-h .when { font-size: 12.5px; color: var(--ink-dim); flex: none; align-self: flex-start; }
+.exh-pv-t { font-size: 14px; line-height: 1.55; overflow-wrap: anywhere; }
+.exh-pv-t.ph { color: var(--ink-dim); }
+.exh-pv-f { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.exh-pvbtn { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--accent-edge); font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.exh-offer { border: 1px solid var(--accent-edge); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.exh-offer-t { font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
+.exh-rules { display: flex; flex-direction: column; gap: 0; }
+.exh-rules li { list-style: none; position: relative; padding: 8px 0 8px 18px; font-size: 13.5px; line-height: 1.45; border-bottom: 1px solid var(--line); }
+.exh-rules li:last-child { border-bottom: 0; }
+.exh-rules li::before { content: ''; position: absolute; left: 2px; top: 15px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent-solid); }
+
+/* высокие листы (редактор поста, спецпредложение): кнопки закреплены внизу листа и видны без прокрутки */
+.exh-sheet-foot {
+  position: sticky; bottom: -20px; margin: 10px -20px -20px; padding: 6px 20px 20px;
+  background: var(--dlg-bg); border-top: 1px solid var(--line); z-index: 2;
+}
+.exh-sheet-foot .btn-block:first-child { margin-top: 8px; }
+.exh-sheet-foot .btn-block + .btn-block { margin-top: 6px; }
+
+/* контакты, команда, заявки */
+.exh-contact { text-align: left; width: 100%; padding: 12px 14px; }
+.exh-crow { display: flex; gap: 10px; align-items: flex-start; }
+.exh-crow .grow { min-width: 0; overflow-wrap: anywhere; }
+.exh-crow .heat { flex: none; }
+.exh-req { gap: 10px; }
+.exh-req-h { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 6px 10px; }
+.exh-req-h .exh-who { flex: 1 1 150px; }
+.exh-req-h .grow { overflow-wrap: anywhere; }
+.exh-req-acts { display: flex; gap: 8px; }
+.exh-req-acts .btn { flex: 1 1 0; min-width: 0; padding: 0 6px; font-size: 13px; }
+.exh-req-acts .btn-ghost { border: 1.5px solid var(--line); }
+.exh-member { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.exh-member:last-child { border-bottom: 0; }
+.exh-member .grow { min-width: 0; overflow-wrap: anywhere; }
+/* строка сверх квоты: полный контраст текста, отличие — пунктирная левая черта и приглушённое имя */
+.exh-member.over { box-shadow: inset 3px 0 0 var(--err); padding-left: 10px; border-radius: 2px; }
+.exh-member.over .r-title { color: var(--ink-dim); }
+
+/* окна встреч стенда (I5) */
+.exh-wins { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.exh-win {
+  border: 1.5px solid var(--accent-edge); border-radius: 14px; background: var(--card); color: var(--ink);
+  min-height: 62px; padding: 8px 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+}
+.exh-win .t { font-family: var(--font-display); font-size: 20px; letter-spacing: .05em; line-height: 1.1; }
+.exh-win .s { font-size: 12px; color: var(--ink-dim); }
+.exh-win.taken { background: var(--accent-solid); border-color: var(--accent-solid); color: var(--accent-ink); }
+.exh-win.taken .s { color: var(--accent-ink); font-weight: 600; }
+.exh-win.pend { border-style: dashed; border-color: var(--warn); }
+.exh-win.pend .s { color: var(--warn); font-weight: 600; }
+.exh-win.closed, .exh-win.lunch { border-color: var(--line); background: var(--surface-2); }
+.exh-win.closed .t, .exh-win.lunch .t { color: var(--ink-dim); text-decoration: line-through; }
+.exh-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--ink-dim); }
+.exh-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; border: 1.5px solid var(--accent-edge); }
+.exh-legend i.taken { background: var(--accent-solid); border-color: var(--accent-solid); }
+.exh-legend i.pend { border-style: dashed; border-color: var(--warn); }
+.exh-legend i.closed { border-color: var(--line); background: var(--surface-2); }
+
+/* воронка и сравнение с медианой (I8) */
+.exh-fn { display: flex; flex-direction: column; gap: 4px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.exh-fn:last-child { border-bottom: 0; }
+.exh-fn-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 13.5px; }
+.exh-fn-top .n { font-family: var(--font-display); font-size: 24px; letter-spacing: .03em; color: var(--accent-display); }
+.exh-fn-c { font-size: 12.5px; color: var(--ink-dim); }
+/* дорожка: явные ширина и высота (в колонке flex:1 обнуляла высоту), заполнение задаётся в процентах от первого этапа */
+.exh-track { height: 10px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--line); overflow: hidden; flex: 1; min-width: 0; }
+.exh-fn .exh-track { flex: none; width: 100%; height: 12px; }
+.exh-track i { display: block; height: 100%; background: var(--accent-solid); border-radius: 99px; }
+.exh-track i.m { background: var(--ink-dim); opacity: .55; }
+.exh-cmp { display: flex; flex-direction: column; gap: 6px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.exh-cmp:last-child { border-bottom: 0; }
+.exh-cmp-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 13.5px; font-weight: 600; }
+.exh-cmp-d { font-weight: 700; font-size: 13px; color: var(--ok); }
+.exh-cmp-d.neg { color: var(--err); }
+.exh-cmp-d.eq { color: var(--ink-dim); }
+.exh-cmp-b { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink-dim); }
+.exh-cmp-b .k { width: 62px; flex: none; }
+.exh-cmp-b .n { width: 52px; flex: none; text-align: right; font-variant-numeric: lining-nums tabular-nums; color: var(--ink); }
+/* график по часам: подписи не мельче 11 px в отрисованном виде (масштаб viewBox 1:1 внутри карточки) */
+.exh .chart .lbl { font-size: 12px; }
+.exh .chart .val { font-size: 15px; }
+
+/* история контакта */
+.exh-hist .feed-text { font-size: 13.5px; }
+
+/* сканер: результат (J2, J3) и закреплённая панель действий */
+.exh-fl { display: flex; flex-direction: column; }
+.exh-f { padding: 10px 0; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 2px; }
+.exh-f:last-child { border-bottom: 0; }
+.exh-f .k { font-size: 12.5px; color: var(--ink-dim); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 8px; }
+.exh-f .v { font-size: 14.5px; font-weight: 600; overflow-wrap: anywhere; line-height: 1.4; }
+.exh-lvl { font-size: 12px; font-weight: 600; color: var(--accent-text); }
+.exh-hidden { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--ink-dim); line-height: 1.45; }
+.exh-hidden .ic { width: 16px; height: 16px; margin-top: 2px; color: var(--accent-text); flex: none; }
+.exh-hidden b { color: var(--ink); font-weight: 600; }
+.exh-cam-tap { position: absolute; inset: 0; z-index: 2; }
+.exh-stage-note { position: absolute; left: 0; right: 0; bottom: 14px; text-align: center; font-size: 12.5px; color: var(--cover-dim); padding: 0 24px; }
+.exh-netseg { display: flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.exh-netseg .seg { flex: 1; min-height: 40px; border-radius: 10px; font-size: 13px; font-weight: 600; color: var(--ink-dim); display: flex; align-items: center; justify-content: center; gap: 6px; }
+.exh-netseg .seg.on { background: var(--accent-solid); color: var(--accent-ink); }
+.exh-netseg .seg .ic { width: 16px; height: 16px; }
+/* закреплённая панель главного действия: прилипает к нижнему краю прокручиваемой области, кнопка видна без прокрутки */
+.exh-pin {
+  position: sticky; bottom: 0; z-index: 5; margin: 0 -20px; padding: 10px 20px 12px;
+  background: var(--bg); border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px;
+}
+.exh-body.exh-pinned { flex: 1 0 auto; }
+.exh-pinned > .exh-pin { margin-top: auto; }
+.exh-pin-row { display: flex; gap: 8px; }
+.exh-pin-row:empty { display: none; }
+.exh-pin-row .btn { flex: 1 1 0; min-width: 0; padding: 0 8px; font-size: 13.5px; }
+.exh-pin .btn-primary { width: 100%; }
+.exh-saved { display: flex; align-items: flex-start; gap: 10px; }
+.exh-saved .ic { width: 18px; height: 18px; flex: none; margin-top: 2px; color: var(--ok); }
+.exh-person { display: flex; gap: 12px; align-items: center; }
+.exh-person .grow { min-width: 0; overflow-wrap: anywhere; }
